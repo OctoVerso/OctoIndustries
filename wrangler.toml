@@ -1,9 +1,0 @@
-name = "octo-industries-hub"
-compatibility_date = "2025-03-08"
-pages_build_output_dir = ".cloudflare-dist"
-
-[[d1_databases]]
-binding = "ADMIN_DB"
-database_name = "octo-industries-admin"
-database_id = "30379fff-1967-4f33-85d3-7df2627fe833"
-migrations_dir = "migrations"
