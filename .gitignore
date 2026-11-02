@@ -1,5 +1,12 @@
 *.zip
 Zips/
-.cloudflare-dist/
 .octo-data/
 node_modules/
+.env
+.env.*
+!.env.example
+dist/
+admin_state.json
+feedback.json
+d1-backup.sql
+tables.json

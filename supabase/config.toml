@@ -1,0 +1,21 @@
+project_id = "octo-industries"
+
+# Each function performs its own admin authentication (signed bearer tokens),
+# so the Supabase gateway must not require a user JWT.
+[functions.catalog]
+verify_jwt = false
+
+[functions.feedback]
+verify_jwt = false
+
+[functions.admin]
+verify_jwt = false
+
+[functions.roadmap]
+verify_jwt = false
+
+[functions.jobs]
+verify_jwt = false
+
+[functions.proposals]
+verify_jwt = false

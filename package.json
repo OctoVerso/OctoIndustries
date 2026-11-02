@@ -1,9 +1,10 @@
 {
-  "name": "octo-industries-cloudflare-pages",
+  "name": "octo-industries-github-pages",
   "private": true,
   "type": "module",
   "scripts": {
-    "pages:build": "node scripts/build-cloudflare-site.mjs"
+    "pages:build": "node scripts/build-pages-site.mjs",
+    "test": "node --test \"supabase/functions/_shared/*.test.mjs\""
   },
   "dependencies": {
     "esbuild": "0.28.2",

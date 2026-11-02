@@ -8,17 +8,15 @@
   <meta property="og:title" content="Octo Industries™ | Game Hub">
   <meta property="og:description" content="Your next world is one tap away.">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="/">
-  <meta property="og:image" content="/Octo-Industries/branding/primary-logo.png">
-  <link rel="canonical" href="/">
   <link rel="icon" href="Octo-Industries/branding/favicon.svg" type="image/svg+xml">
   <link rel="icon" href="Octo-Industries/branding/favicon.ico">
   <link rel="apple-touch-icon" href="Octo-Industries/branding/apple-touch-icon.png">
   <link rel="preload" as="image" href="Octo-Industries/branding/primary-logo.png">
   <link rel="stylesheet" href="Octo-Industries/BehindTheScenes/hub/app.css">
   <title>Octo Industries™ | Game Hub</title>
+  <script src="Octo-Industries/BehindTheScenes/hub/config.js"></script>
   <script src="Octo-Industries/BehindTheScenes/hub/catalog.js" defer></script>
-  <script type="module" src="Octo-Industries/BehindTheScenes/hub/app.js" defer></script>
+  <script src="Octo-Industries/BehindTheScenes/hub/app.js" defer></script>
 </head>
 <body>
   <canvas class="ambient" id="ambient" aria-hidden="true"></canvas>
@@ -28,241 +26,91 @@
   </div>
 
   <header class="site-header" id="top">
-    <button class="menu-toggle" id="menu-toggle" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="primary-nav">
-      <span aria-hidden="true">☰</span>
-    </button>
-    <a class="brand" href="/" aria-label="Octo Industries home" data-route="/">
-      <img class="brand-logo" src="Octo-Industries/branding/horizontal-logo.png" alt="Octo Industries">
+    <a class="brand" href="#home" aria-label="Octo Industries home">
+      <img class="brand-logo" src="Octo-Industries/branding/horizontal-logo.png" alt="">
     </a>
+    <button class="menu-toggle" id="menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="primary-nav">
+      <span></span><span></span>
+    </button>
     <nav class="primary-nav" id="primary-nav" aria-label="Main navigation">
-      <a class="nav-link is-active" href="/" data-route="/">🏠 │ Home</a>
-      <a class="nav-link" href="/games" data-route="/games">🎮 │ Games</a>
-      <a class="nav-link" href="/trending" data-route="/trending">🔥 │ Trending</a>
-      <a class="nav-link" href="/recently-added" data-route="/recently-added">🆕 │ Recently Added</a>
-      <a class="nav-link" href="/news" data-route="/news">📰 │ Octo News</a>
-      <a class="nav-link" href="/coming-soon" data-route="/coming-soon">🧪 │ Coming Soon</a>
-      <a class="nav-link" href="/about" data-route="/about">🐙 │ About</a>
-      <a class="nav-link" href="/contact" data-route="/contact">✉️ │ Contact Me</a>
-      <button class="nav-link" id="feedback-open" type="button" data-route="/inquiries">📨 │ Inquiries</button>
-      <a class="nav-link" href="/admin">Admin Dashboard</a>
+      <a class="nav-link is-active" href="#home">Home</a>
+      <a class="nav-link" href="#games">Games</a>
+      <a class="nav-link" href="#categories">Categories</a>
+      <button class="nav-link nav-search" type="button">Search</button>
+      <a class="nav-link" href="#about">About</a>
+      <button class="nav-link" id="feedback-open" type="button">Suggestions / Issues</button>
+      <a class="nav-link" href="Octo-Industries/BehindTheScenes/admin/">Admin sign in</a>
     </nav>
-    <a class="header-cta" href="/games" data-route="/games"><span class="live-dot"></span><span><b id="header-count">06</b> TITLES</span><span class="cta-arrow" aria-hidden="true">↗</span></a>
+    <a class="header-cta" href="#games"><span class="live-dot"></span><span><b id="header-count">06</b> TITLES</span><span class="cta-arrow" aria-hidden="true">↗</span></a>
   </header>
-  <button class="nav-backdrop" id="nav-backdrop" type="button" aria-label="Close navigation" hidden></button>
 
   <main>
-    <section class="home-dashboard content-width page-view" id="home-page" data-page="/" aria-labelledby="welcome-title">
-      <div class="dashboard-row dashboard-row-top">
-        <div class="welcome-panel">
-          <p class="eyebrow"><span class="eyebrow-line"></span> OCTO INDUSTRIES</p>
-          <h1 id="welcome-title">The Octo Archive grows ever deeper. It's secrets await.</h1>
+    <section class="hero content-width" id="home" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="eyebrow-line"></span> THE OCTO INDUSTRIES GAME HUB</p>
+        <h1 id="hero-title">Play beyond<br>the <span>ordinary.</span></h1>
+        <p class="hero-description">One universe. A thousand ways to play. Find the game that pulls you in.</p>
+        <div class="hero-actions">
+          <a class="button button-primary" href="#games"><span>Explore games</span><span class="button-arrow" aria-hidden="true">↗</span></a>
+          <a class="text-link" href="#categories"><span class="play-symbol" aria-hidden="true">▶</span> Find your next game</a>
         </div>
-
-        <aside class="news-panel" id="home-news-panel" aria-labelledby="home-news-heading">
-          <div class="module-header compact-header">
-            <h2 id="home-news-heading">Octo News</h2>
-          </div>
-          <div class="mini-list" id="home-news-preview"></div>
-        </aside>
-
-        <aside class="coming-mini-panel" id="home-coming-panel" aria-labelledby="home-coming-heading">
-          <div class="module-header compact-header">
-            <h2 id="home-coming-heading">Coming Soon</h2>
-          </div>
-          <div class="mini-list" id="home-coming-preview"></div>
-        </aside>
-
-        <div class="overview-panel" aria-label="Platform overview">
-          <div class="overview-tile">
-            <span class="overview-label">Total Games</span>
-            <strong id="overview-total">0</strong>
-          </div>
-          <div class="overview-tile">
-            <span class="overview-label">Categories</span>
-            <strong id="overview-categories">0</strong>
-          </div>
-          <div class="overview-tile">
-            <span class="overview-label">Trending</span>
-            <strong id="overview-trending">0</strong>
-          </div>
-          <div class="overview-tile">
-            <span class="overview-label">Continue Playing</span>
-            <strong id="overview-continue">0</strong>
-          </div>
+        <div class="hero-meta">
+          <span><b class="live-dot"></b><span id="library-status">GAMES READY TO PLAY</span></span>
+          <span class="meta-divider"></span>
+          <span>BUILT FOR YOUR NEXT SESSION</span>
         </div>
       </div>
 
-      <div class="dashboard-row dashboard-row-main">
-        <section class="module-panel editor-panel" aria-label="Editor's pick">
-          <div class="module-header">
-            <span class="module-kicker">Editor's Pick</span>
-            <span class="module-count" id="feature-count">01 <b>/ 03</b></span>
+      <section class="featured" aria-label="Featured games">
+        <div class="featured-frame" id="featured-frame">
+          <div class="featured-wash" aria-hidden="true"></div>
+          <div class="featured-art" id="featured-art" aria-hidden="true"></div>
+          <div class="featured-topline"><span class="feature-tag"><i></i> EDITOR'S PICK</span><span class="feature-count" id="feature-count">01 <b>/ 03</b></span></div>
+          <div class="featured-info">
+            <span class="featured-category" id="featured-category">FEATURED GAME</span>
+            <h2 id="featured-title">Loading the collection</h2>
+            <p id="featured-description">A new world is just around the corner.</p>
+            <a class="featured-play" id="featured-play" href="#games"><span class="play-symbol" aria-hidden="true">▶</span><span>Play featured game</span></a>
           </div>
-
-          <div class="featured-frame" id="featured-frame">
-            <div class="featured-wash" aria-hidden="true"></div>
-            <div class="featured-art" id="featured-art" aria-hidden="true"></div>
-            <div class="featured-info">
-              <span class="featured-category" id="featured-category">FEATURED GAME</span>
-              <h2 id="featured-title">Loading the collection</h2>
-              <p id="featured-description">A new world is just around the corner.</p>
-              <a class="featured-play" id="featured-play" href="/games" data-route="/games"><span class="play-symbol" aria-hidden="true">▶</span><span>Play featured game</span></a>
-            </div>
-            <div class="feature-controls" aria-label="Featured game controls">
-              <button class="feature-arrow" id="feature-previous" type="button" aria-label="Previous featured game">←</button>
-              <span class="feature-progress" id="feature-progress" aria-hidden="true"></span>
-              <button class="feature-arrow" id="feature-next" type="button" aria-label="Next featured game">→</button>
-            </div>
-            <span class="feature-index" id="feature-index" aria-hidden="true">01</span>
+          <div class="feature-controls" aria-label="Featured game controls">
+            <button class="feature-arrow" id="feature-previous" type="button" aria-label="Previous featured game">←</button>
+            <span class="feature-progress" id="feature-progress" aria-hidden="true"></span>
+            <button class="feature-arrow" id="feature-next" type="button" aria-label="Next featured game">→</button>
           </div>
-        </section>
-
-        <section class="module-panel recently-added-panel" id="recently-added" aria-labelledby="dashboard-recently-added-heading">
-          <div class="module-header compact-header">
-            <h2 id="dashboard-recently-added-heading">Recently Added</h2>
-            <button class="mini-link" type="button" data-route="/recently-added">View All</button>
-          </div>
-          <div class="mini-list" id="dashboard-recently-added-list"></div>
-        </section>
-
-        <aside class="module-panel continue-panel" aria-labelledby="continue-heading">
-          <div class="module-header compact-header">
-            <h2 id="continue-heading">Continue Playing</h2>
-          </div>
-          <div class="mini-list" id="continue-list">
-            <p class="empty-mini-state">No recently played games yet.</p>
-            <button class="mini-action" type="button" data-route="/games">Browse Games</button>
-          </div>
-        </aside>
-
-        <aside class="module-panel trending-panel" id="trending" aria-labelledby="dashboard-trending-heading">
-          <div class="module-header compact-header">
-            <h2 id="dashboard-trending-heading">Trending</h2>
-            <button class="mini-link" type="button" data-route="/trending">View All</button>
-          </div>
-          <div class="mini-list" id="trending-list"></div>
-        </aside>
-      </div>
+          <span class="feature-index" id="feature-index" aria-hidden="true">01</span>
+        </div>
+      </section>
+      <div class="hero-footnote" aria-hidden="true"><span>34° 03' N</span><span>PLAY IS A STATE OF MIND</span></div>
     </section>
 
-    <section class="library-section content-width page-view" id="games-page" data-page="/games" aria-labelledby="games-heading" hidden>
+    <section class="recent-section content-width" id="recent-section" aria-labelledby="recent-heading" hidden>
+      <div class="section-heading compact-heading"><div><p class="eyebrow"><span class="eyebrow-line"></span> RIGHT WHERE YOU LEFT OFF</p><h2 id="recent-heading">Recently played</h2></div><a class="small-link" href="#games">Your library <span aria-hidden="true">↗</span></a></div>
+      <div class="recent-list" id="recent-list"></div>
+    </section>
+
+    <section class="library-section content-width" id="games" aria-labelledby="games-heading">
       <div class="section-heading library-heading">
         <div><p class="eyebrow"><span class="eyebrow-line"></span> YOUR NEXT ADVENTURE</p><h2 id="games-heading">The collection<span class="heading-period">.</span></h2></div>
         <p class="section-aside" id="library-count">SELECT YOUR NEXT SESSION <span>↘</span></p>
       </div>
       <div class="library-toolbar" id="categories">
-        <label class="search-box" for="game-search"><span class="search-icon" aria-hidden="true"></span><input id="game-search" type="search" placeholder="Search games, categories, and tags..." autocomplete="off"><button class="search-clear" id="search-clear" type="button" aria-label="Clear search" hidden>×</button></label>
-        <button class="filter-button" id="filter-games" type="button" aria-label="Filter games" aria-expanded="false" aria-controls="filter-panel" title="Filter games">
-          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-            <path d="M3 5.5C3 5.22 3.22 5 3.5 5h17c.28 0 .5.22.5.5v.25c0 .14-.06.27-.17.37l-6.66 6.32v6.11c0 .24-.14.46-.36.56l-2.36 1.18a.63.63 0 0 1-.92-.56v-7.29L3.17 6.12A.53.53 0 0 1 3 5.75V5.5Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          <span class="filter-button-text">Filter by</span>
-        </button>
-        <label class="sort-box" for="game-sort"><span>Sort</span><select id="game-sort"><option value="title">Title A–Z</option><option value="title-desc">Title Z–A</option><option value="category">Category</option><option value="recent">Recently added</option></select></label>
-        <div class="filter-panel" id="filter-panel" hidden>
-          <h3>Filter Games</h3>
-          <div id="filter-category-options"></div>
-          <button type="button" class="filter-clear" id="filter-clear-all">Clear All</button>
-        </div>
+        <div class="category-list" id="category-list" role="group" aria-label="Filter games by category"></div>
+        <label class="search-box" for="game-search"><span class="search-icon" aria-hidden="true"></span><input id="game-search" type="search" placeholder="Search your universe" autocomplete="off"><kbd>⌘ K</kbd><button class="search-clear" id="search-clear" type="button" aria-label="Clear search" hidden>×</button></label>
       </div>
       <p class="results-summary" id="results-summary" aria-live="polite"></p>
       <div class="game-grid" id="game-grid" aria-live="polite" aria-busy="true"></div>
       <div class="empty-state" id="empty-state" hidden><span class="empty-orbit" aria-hidden="true"><img src="Octo-Industries/branding/icon-only.png" alt=""></span><h3>No games in this orbit.</h3><p>Try another title, tag, or category.</p><button class="button button-secondary" id="clear-filters" type="button">Clear all filters</button></div>
     </section>
 
-    <section class="page-view" id="trending-page" data-page="/trending" aria-labelledby="trending-page-heading" hidden>
-      <div class="content-width panel-page">
-        <div class="section-heading">
-          <div><p class="eyebrow"><span class="eyebrow-line"></span> POPULAR NOW</p><h1 id="trending-page-heading">Trending</h1></div>
-        </div>
-        <div class="discovery-grid" id="trending-page-grid"></div>
-      </div>
-    </section>
-
-    <section class="page-view" id="recently-added-page" data-page="/recently-added" aria-labelledby="recently-added-page-heading" hidden>
-      <div class="content-width panel-page">
-        <div class="section-heading">
-          <div><p class="eyebrow"><span class="eyebrow-line"></span> NEWEST RELEASES</p><h1 id="recently-added-page-heading">Recently Added</h1></div>
-        </div>
-        <div class="discovery-grid" id="recently-added-page-grid"></div>
-      </div>
-    </section>
-
-    <section class="page-view" id="news-page" data-page="/news" aria-labelledby="news-page-heading" hidden>
-      <div class="content-width panel-page">
-        <div class="section-heading">
-          <div><p class="eyebrow"><span class="eyebrow-line"></span> PLATFORM UPDATES</p><h1 id="news-page-heading">Octo News</h1></div>
-        </div>
-        <div id="news-page-content" class="news-page-content"></div>
-      </div>
-    </section>
-
-    <section class="coming-section page-view" id="coming-soon-page" data-page="/coming-soon" aria-labelledby="coming-heading" hidden>
-      <div class="coming-inner content-width">
-        <div class="section-heading compact-heading"><div><p class="eyebrow"><span class="eyebrow-line"></span> WHAT'S NEXT</p><h2 id="coming-heading">Coming soon</h2></div><span class="roadmap-live"><i></i> LIVE ROADMAP</span></div>
-        <p class="coming-intro">A look at what we're exploring and building across Octo Industries.</p>
-        <div class="coming-grid" id="coming-grid" aria-live="polite"><p class="muted">Loading roadmap…</p></div>
-      </div>
-    </section>
-
-    <section class="page-view" id="about-page" data-page="/about" aria-labelledby="about-page-heading" hidden>
-      <div class="about-inner content-width">
-        <img class="about-emblem" src="Octo-Industries/branding/icon-only.png" alt="" aria-hidden="true">
-        <div>
-          <p class="eyebrow">A LITTLE MORE HUMAN. A LOT MORE PLAY.</p>
-          <h1 id="about-page-heading">About Octo Industries</h1>
-          <p>I'm Mr. Octo, the solo developer behind Octo Industries, an independent game hub built to make discovering and playing games simple.</p>
-          <p>We build a polished, community-first platform where every release is meant to feel approachable, playful, and instantly discoverable.</p>
-          <p>Questions or partnership inquiries? <a class="text-link" href="mailto:RealMrOcto@Outlook.com">Contact me</a> or use <a class="text-link" href="/inquiries" data-route="/inquiries">Inquiries</a>.</p>
-        </div>
-      </div>
-    </section>
-
-    <section class="page-view" id="contact-page" data-page="/contact" aria-labelledby="contact-page-heading" hidden>
-      <div class="content-width panel-page">
-        <div class="section-heading">
-          <div><p class="eyebrow"><span class="eyebrow-line"></span> SAY HELLO</p><h1 id="contact-page-heading">Contact Me</h1></div>
-        </div>
-        <div class="news-page-content">
-          <p>For general questions, professional introductions, and platform collaboration, email me directly.</p>
-          <p><a class="text-link" href="mailto:RealMrOcto@Outlook.com">RealMrOcto@Outlook.com</a></p>
-          <p>For bug reports, feature ideas, and game requests, use <a class="text-link" href="/inquiries" data-route="/inquiries">Inquiries</a> instead.</p>
-        </div>
-      </div>
-    </section>
-
-    <section class="page-view" id="inquiries-page" data-page="/inquiries" aria-labelledby="inquiries-page-heading" hidden>
-      <div class="content-width panel-page">
-        <div class="section-heading">
-          <div><p class="eyebrow"><span class="eyebrow-line"></span> COMMUNITY FEEDBACK</p><h1 id="inquiries-page-heading">Inquiries</h1></div>
-        </div>
-        <div class="news-page-content">
-          <p>Share suggestions, issues, bug reports, game requests, or collaboration ideas using the same public intake the team already uses.</p>
-          <button class="button button-primary" id="inquiries-open" type="button">Open Inquiries Form</button>
-        </div>
-        <section class="ticket-portal" aria-labelledby="my-tickets-heading">
-          <div class="section-heading">
-            <div><p class="eyebrow"><span class="eyebrow-line"></span> SUPPORT</p><h2 id="my-tickets-heading">My Tickets</h2></div>
-            <button class="button button-secondary" id="my-tickets-refresh" type="button" aria-label="Refresh my tickets">Refresh</button>
-          </div>
-          <p class="ticket-portal-note">Your tickets are available in this browser. Clearing its saved site data removes access.</p>
-          <div class="my-tickets-list" id="my-tickets-list" aria-live="polite"><p class="ticket-empty">No saved tickets yet.</p></div>
-        </section>
-      </div>
-    </section>
-
-    <section class="hub-panel content-width contact-view" id="contact" data-hub-panel="contact" aria-labelledby="contact-heading" hidden>
-      <div class="view-heading"><div><p class="eyebrow"><span class="eyebrow-line"></span> GET IN TOUCH</p><h1 id="contact-heading" tabindex="-1">Contact</h1></div></div>
-      <a class="contact-email" href="mailto:RealMrOcto@Outlook.com">RealMrOcto@Outlook.com</a>
-      <p>For general questions or partnership inquiries.</p>
-      <button class="button button-secondary" type="button" data-feedback-open>Suggestions / Issues</button>
+    <section class="about-section" id="about" aria-labelledby="about-heading">
+      <div class="about-inner content-width"><img class="about-emblem" src="Octo-Industries/branding/icon-only.png" alt="" aria-hidden="true"><div><p class="eyebrow">A LITTLE MORE HUMAN. A LOT MORE PLAY.</p><h2 id="about-heading">Building the future<br>of <span>gaming.</span></h2><p>We bring good games closer. Find your world, take your time, and play your way.</p></div><a class="about-link" href="#top" aria-label="Back to top">↑</a></div>
     </section>
   </main>
 
   <dialog class="feedback-dialog" id="feedback-dialog" aria-labelledby="feedback-title">
     <form class="feedback-form" id="feedback-form">
       <header class="gallery-header">
-        <div><p class="eyebrow"><span class="eyebrow-line"></span> HELP US MAKE OCTO BETTER</p><h2 id="feedback-title">Inquiries</h2></div>
+        <div><p class="eyebrow"><span class="eyebrow-line"></span> HELP US MAKE OCTO BETTER</p><h2 id="feedback-title">Suggestions / Issues</h2></div>
         <button class="gallery-close" id="feedback-close" type="button" aria-label="Close feedback form">×</button>
       </header>
       <label for="feedback-type">What are you sending?</label>
@@ -277,7 +125,7 @@
       </select>
       <label for="feedback-message">Your message</label>
       <textarea id="feedback-message" name="message" rows="5" maxlength="5000" placeholder="Tell us about your suggestion or issue..." required></textarea>
-      <p class="feedback-privacy">No name, email, account, or phone number is needed. Basic device details help investigate issues; ticket access is saved in this browser.</p>
+      <p class="feedback-privacy">No name, email, account, or phone number is needed. We only collect basic device details to help us investigate.</p>
       <p class="feedback-status" id="feedback-status" role="status" aria-live="polite" hidden></p>
       <div class="feedback-actions"><button class="button button-secondary" id="feedback-cancel" type="button">Cancel</button><button class="button button-primary" id="feedback-submit" type="submit">Send</button></div>
     </form>
@@ -299,6 +147,6 @@
     </div>
   </dialog>
 
-  <footer class="site-footer content-width"><a class="footer-brand" href="#top" aria-label="Octo Industries home"><img src="Octo-Industries/branding/horizontal-logo.png" alt=""></a><span>© Octo Industries Inc. All Rights Reserved.</span></footer>
+  <footer class="site-footer content-width"><a class="footer-brand" href="#top" aria-label="Octo Industries home"><img src="Octo-Industries/branding/horizontal-logo.png" alt=""></a><span>© Octo Industries Inc. All Rights Reserved.</span><button class="footer-feedback-link" type="button" data-feedback-open>SUGGESTIONS / ISSUES</button><a class="footer-admin-link" href="Octo-Industries/BehindTheScenes/admin/">ADMIN SIGN IN <span aria-hidden="true">↗</span></a><a class="back-to-top" href="#top">BACK TO TOP <span aria-hidden="true">↑</span></a></footer>
 </body>
 </html>

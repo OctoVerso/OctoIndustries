@@ -12,18 +12,6 @@
         "uriFormat": "http://localhost:%s/",
         "action": "openExternally"
       }
-    },
-    {
-      "name": "Run Admin-capable Game Hub",
-      "type": "node-terminal",
-      "request": "launch",
-      "command": "npm --prefix Octo-Industries/BehindTheScenes run sync && npm --prefix Octo-Industries/BehindTheScenes start",
-      "cwd": "${workspaceFolder}",
-      "serverReadyAction": {
-        "pattern": "Octo Industries service listening on port (\\d+)",
-        "uriFormat": "http://localhost:%s/",
-        "action": "openExternally"
-      }
     }
   ]
 }

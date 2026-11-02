@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { applyUnifiedDiff, createGitHubPullRequest, isAllowedCodePath } from './change-proposals.mjs';
+import { applyUnifiedDiff, createGitHubPullRequest, isAllowedCodePath } from './change-proposals.js';
 
 const original = 'const greeting = "hello";\nconsole.log(greeting);\n';
 const diff = [
@@ -14,7 +14,7 @@ const diff = [
 
 test('code proposal paths are restricted to supported repository source files', () => {
   assert.equal(isAllowedCodePath('Octo-Industries/BehindTheScenes/hub/app.js'), true);
-  assert.equal(isAllowedCodePath('Octo-Industries/BehindTheScenes/admin/server.mjs'), false);
+  assert.equal(isAllowedCodePath('Octo-Industries/BehindTheScenes/admin/admin.js.map'), false);
   assert.equal(isAllowedCodePath('../package.json'), false);
   assert.equal(isAllowedCodePath('Octo-Industries/BehindTheScenes/admin/.env'), false);
   assert.equal(isAllowedCodePath('Octo-Industries/BehindTheScenes/admin/package.json'), false);

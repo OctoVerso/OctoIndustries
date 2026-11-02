@@ -213,22 +213,49 @@
 
     <footer><span>Choose a card to launch the game.</span><strong>© 2026 Octo Industries</strong></footer>
   </div>
+  <script src="hub/config.js"></script>
   <script src="hub/catalog.js"></script>
   <script>
     const games = document.querySelector('#games');
     const search = document.querySelector('#game-search');
     const category = document.querySelector('#game-category');
-    const catalog = Array.isArray(window.OCTO_GAMES) ? window.OCTO_GAMES : [];
-    [...new Set(catalog.map((game) => game.category))].sort().forEach((value) => category.insertAdjacentHTML('beforeend', `<option value="${value}">${value}</option>`));
+    const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (character) => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+    })[character]);
+    const normalize = (entries) => entries.map((game) => ({
+      ...game,
+      launch: window.OCTO_CONFIG.assetUrl(game.launch),
+      thumbnail: window.OCTO_CONFIG.assetUrl(game.thumbnail),
+    }));
+    let catalog = normalize(Array.isArray(window.OCTO_GAMES) ? window.OCTO_GAMES : []);
+    function renderCategories() {
+      const selected = category.value;
+      category.replaceChildren(new Option('All categories', 'all'));
+      [...new Set(catalog.map((game) => game.category))].sort().forEach((value) => {
+        category.add(new Option(value, value));
+      });
+      if ([...category.options].some((option) => option.value === selected)) category.value = selected;
+    }
     function renderGames() {
       const query = search.value.trim().toLowerCase();
       const selectedCategory = category.value;
       const filtered = catalog.filter((game) => (!query || `${game.title} ${game.description} ${game.category}`.toLowerCase().includes(query)) && (selectedCategory === 'all' || game.category === selectedCategory));
-      games.innerHTML = filtered.map((game) => `<a class="game-card" href="${game.launch}" data-game="${game.id}"><div class="art" style="--card-color: ${game.accent}"><img src="${game.thumbnail}" alt="${game.title}"></div><div class="card-copy"><div><h2>${game.title}</h2><p>${game.description} · ${game.category} · v${game.version}</p></div><span class="arrow" aria-hidden="true">↗</span></div></a>`).join('');
+      games.innerHTML = filtered.map((game) => `<a class="game-card" href="${escapeHtml(game.launch)}" data-game="${escapeHtml(game.id)}"><div class="art" style="--card-color: ${escapeHtml(game.accent)}"><img src="${escapeHtml(game.thumbnail)}" alt="${escapeHtml(game.title)}"></div><div class="card-copy"><div><h2>${escapeHtml(game.title)}</h2><p>${escapeHtml(game.description)} · ${escapeHtml(game.category)} · v${escapeHtml(game.version)}</p></div><span class="arrow" aria-hidden="true">↗</span></div></a>`).join('');
     }
     search.addEventListener('input', renderGames);
     category.addEventListener('change', renderGames);
+    async function loadCatalog() {
+      const response = await fetch(window.OCTO_CONFIG.apiUrl('/api/catalog'), { headers: { Accept: 'application/json' } });
+      if (!response.ok) throw new Error(`Catalog request failed (${response.status}).`);
+      const result = await response.json();
+      if (!Array.isArray(result)) throw new Error('The server returned an invalid game catalog.');
+      catalog = normalize(result);
+      renderCategories();
+      renderGames();
+    }
+    renderCategories();
     renderGames();
+    loadCatalog().catch((error) => console.error('Unable to load the live game catalog; using the generated catalog instead.', error));
   </script>
 </body>
 </html>

@@ -1,30 +1,7 @@
-import { readdir, readFile, stat } from 'node:fs/promises';
-import { dirname, relative, resolve, sep } from 'node:path';
 
-const sourceRoots = [
-  'Octo-Industries/BehindTheScenes/admin',
-  'Octo-Industries/BehindTheScenes/hub',
-  'Octo-Industries/BehindTheScenes/scripts',
-  'Octo-Industries',
-];
-const preferredFiles = [
-  'index.html',
-  'Octo-Industries/BehindTheScenes/admin/admin.js',
-  'Octo-Industries/BehindTheScenes/admin/admin.css',
-  'Octo-Industries/BehindTheScenes/admin/index.html',
-  'Octo-Industries/BehindTheScenes/admin/server.mjs',
-  'Octo-Industries/BehindTheScenes/hub/app.js',
-  'Octo-Industries/BehindTheScenes/hub/app.css',
-  'Octo-Industries/BehindTheScenes/scripts/sync-games.mjs',
-];
 const supportedExtensions = new Set(['.css', '.html', '.js', '.mjs']);
 const excludedSegments = new Set(['Build', 'dist', 'node_modules', 'vendor', 'www']);
-const protectedPaths = new Set([
-  'Octo-Industries/BehindTheScenes/admin/server.mjs',
-  'Octo-Industries/BehindTheScenes/admin/change-proposals.mjs',
-]);
 const maximumFileBytes = 256 * 1024;
-const maximumContextBytes = 180 * 1024;
 
 function repositoryPath(value) {
   if (typeof value !== 'string' || !value || value.includes('\\') || value.startsWith('/')) {
@@ -46,7 +23,7 @@ export function isAllowedCodePath(value) {
   }
   const segments = path.split('/');
   if (segments.some((segment) => excludedSegments.has(segment))) return false;
-  if (protectedPaths.has(path) || path.startsWith('Octo-Industries/BehindTheScenes/scripts/')) return false;
+  if (path.startsWith('Octo-Industries/BehindTheScenes/scripts/')) return false;
   if (segments.some((segment) => /(?:min|bundle|vendor)\.js$/i.test(segment))) return false;
   if (!supportedExtensions.has(path.slice(path.lastIndexOf('.')))) return false;
   if (path === 'index.html') return true;
@@ -54,43 +31,6 @@ export function isAllowedCodePath(value) {
     || path.startsWith('Octo-Industries/BehindTheScenes/hub/')
     || path.startsWith('Octo-Industries/BehindTheScenes/scripts/')) return true;
   return /^Octo-Industries\/[A-Za-z0-9_-]+(?:\/[A-Za-z0-9_.-]+)*\.(?:css|html|js|mjs)$/.test(path);
-}
-
-export async function readCodeContext(root) {
-  const paths = new Set(preferredFiles);
-  for (const rootPath of sourceRoots) {
-    const absoluteRoot = resolve(root, rootPath);
-    const rootInfo = await stat(absoluteRoot).catch(() => null);
-    if (!rootInfo?.isDirectory()) continue;
-    const pending = [absoluteRoot];
-    while (pending.length && paths.size < 200) {
-      const directory = pending.pop();
-      for (const entry of await readdir(directory, { withFileTypes: true })) {
-        const absolute = resolve(directory, entry.name);
-        const relativePath = relative(root, absolute).split(sep).join('/');
-        if (entry.isSymbolicLink()) continue;
-        if (entry.isDirectory()) {
-          if (!excludedSegments.has(entry.name) && !entry.name.startsWith('.')) pending.push(absolute);
-        } else if (entry.isFile() && isAllowedCodePath(relativePath)) {
-          paths.add(relativePath);
-        }
-      }
-    }
-  }
-
-  const files = [];
-  let total = 0;
-  for (const path of [...paths]) {
-    if (!isAllowedCodePath(path)) continue;
-    const absolute = resolve(root, path);
-    if (!absolute.startsWith(`${resolve(root)}${sep}`) && path !== 'index.html') continue;
-    const info = await stat(absolute).catch(() => null);
-    if (!info?.isFile() || info.size > maximumFileBytes || total + info.size > maximumContextBytes) continue;
-    const content = await readFile(absolute, 'utf8');
-    files.push({ path, content });
-    total += info.size;
-  }
-  return files;
 }
 
 function parseDiffFiles(diff) {
@@ -252,7 +192,7 @@ export async function createGitHubPullRequest({
   repository = 'nv24191/Personal',
   fetchImpl = fetch,
 }) {
-  if (!token) throw new Error('GitHub PR access is not configured. Add the GITHUB_TOKEN secret in Render.');
+  if (!token) throw new Error('GitHub PR access is not configured. Add the GITHUB_TOKEN secret as a Supabase Edge Function secret.');
   if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repository)) throw new Error('GITHUB_REPOSITORY must use owner/repository format.');
   const [owner, repo] = repository.split('/');
   const api = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`;
@@ -272,7 +212,7 @@ export async function createGitHubPullRequest({
     for (const file of parsed) {
       const source = await githubRequest(fetchImpl, token, `${api}/contents/${githubPath(file.path)}?ref=${encodeURIComponent(base)}`);
       if (source.type !== 'file' || typeof source.content !== 'string') throw new Error(`GitHub could not load ${file.path}.`);
-      const current = Buffer.from(source.content.replace(/\n/g, ''), 'base64').toString('utf8');
+      const current = new TextDecoder().decode(Uint8Array.from(atob(source.content.replace(/\n/g, '')), (c) => c.charCodeAt(0)));
       changes.push(applyUnifiedDiff(current, proposal.diff));
     }
   } else if (proposal.kind === 'game') {
