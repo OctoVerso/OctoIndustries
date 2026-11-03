@@ -73,7 +73,7 @@ const salt = '0123456789abcdef0123456789abcdef';
 const iterations = 10000;
 const derived = pbkdf2Sync(password, salt, iterations, 64, 'sha512');
 const env = {
-  ALLOWED_ORIGIN: 'https://nv24191.github.io',
+  ALLOWED_ORIGIN: 'https://octoverso.github.io',
   ADMIN_SESSION_SECRET: 'x'.repeat(40),
   OCTO_ADMIN_PASSWORD_HASH: `pbkdf2$${iterations}$${salt}$${derived.toString('hex')}`,
 };
@@ -81,7 +81,7 @@ const base = 'https://project.supabase.co/functions/v1';
 const call = (handler, name, path, { method = 'GET', body, token, headers = {} } = {}) => handler(new Request(`${base}/${name}${path}`, {
   method,
   headers: {
-    Origin: 'https://nv24191.github.io', 'x-forwarded-for': '203.0.113.7', ...(token ? { Authorization: `Bearer ${token}` } : {}), ...headers,
+    Origin: 'https://octoverso.github.io', 'x-forwarded-for': '203.0.113.7', ...(token ? { Authorization: `Bearer ${token}` } : {}), ...headers,
   },
   body: body === undefined ? undefined : JSON.stringify(body),
 }), env, db);
@@ -98,7 +98,7 @@ test('catalog returns only published games without internal fields and with CORS
   db = createDb({ games: [game('alpha'), game('beta', 'draft')] });
   const response = await call(catalog, 'catalog', '');
   assert.equal(response.status, 200);
-  assert.equal(response.headers.get('access-control-allow-origin'), 'https://nv24191.github.io');
+  assert.equal(response.headers.get('access-control-allow-origin'), 'https://octoverso.github.io');
   const body = await response.json();
   assert.deepEqual(body.map((entry) => entry.id), ['alpha']);
   assert.equal('status' in body[0], false);

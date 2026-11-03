@@ -270,7 +270,7 @@ export const proposals = serve('proposals', async ({ request, env, db, method, p
   if (await bumpRateLimit(db, `approve:${id}`, 120) > 1) throw httpError('This proposal is already being approved.', 409);
   try {
     const pullRequest = await createGitHubPullRequest({
-      proposal: proposalFromRow(row), token: env.GITHUB_TOKEN, repository: env.GITHUB_REPOSITORY || 'nv24191/Personal',
+      proposal: proposalFromRow(row), token: env.GITHUB_TOKEN, repository: env.GITHUB_REPOSITORY || 'OctoVerso/OctoIndustries',
     });
     const update = {
       status: 'approved', approved_at: now, updated_at: now, last_error: null,

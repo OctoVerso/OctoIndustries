@@ -189,7 +189,7 @@ async function githubRequest(fetchImpl, token, url, options = {}) {
 export async function createGitHubPullRequest({
   proposal,
   token,
-  repository = 'nv24191/Personal',
+  repository = 'OctoVerso/OctoIndustries',
   fetchImpl = fetch,
 }) {
   if (!token) throw new Error('GitHub PR access is not configured. Add the GITHUB_TOKEN secret as a Supabase Edge Function secret.');

@@ -36,7 +36,7 @@ test('GitHub pull request is created from an approved proposal without merging',
     requests.push({ url: String(url), method: options.method || 'GET', body: options.body && JSON.parse(options.body) });
     const pathname = new URL(url).pathname;
     let body = {};
-    if (pathname.endsWith('/repos/nv24191/Personal')) body = { default_branch: 'main' };
+    if (pathname.endsWith('/repos/OctoVerso/OctoIndustries')) body = { default_branch: 'main' };
     else if (pathname.endsWith('/git/ref/heads/main')) body = { object: { sha: 'base-commit' } };
     else if (pathname.endsWith('/git/commits/base-commit')) body = { tree: { sha: 'base-tree' } };
     else if (pathname.includes('/contents/Octo-Industries/BehindTheScenes/hub/app.js')) {
@@ -46,7 +46,7 @@ test('GitHub pull request is created from an approved proposal without merging',
     else if (pathname.endsWith('/git/trees')) body = { sha: 'new-tree' };
     else if (pathname.endsWith('/git/commits')) body = { sha: 'new-commit' };
     else if (pathname.includes('/git/refs/heads/')) body = { ref: 'updated' };
-    else if (pathname.endsWith('/pulls')) body = { html_url: 'https://github.com/nv24191/Personal/pull/17', number: 17 };
+    else if (pathname.endsWith('/pulls')) body = { html_url: 'https://github.com/OctoVerso/OctoIndustries/pull/17', number: 17 };
     else return new Response(JSON.stringify({ message: `Unexpected request: ${pathname}` }), { status: 500 });
     return new Response(JSON.stringify(body), { status: 200, headers: { 'Content-Type': 'application/json' } });
   };
@@ -64,7 +64,7 @@ test('GitHub pull request is created from an approved proposal without merging',
   });
 
   assert.deepEqual(result, {
-    url: 'https://github.com/nv24191/Personal/pull/17',
+    url: 'https://github.com/OctoVerso/OctoIndustries/pull/17',
     number: 17,
     branch: 'octo-ai/0123456789abcdef0123',
   });
