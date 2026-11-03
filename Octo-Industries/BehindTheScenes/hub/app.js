@@ -1077,6 +1077,13 @@ function bindFeedbackForm() {
       });
       const result = await response.json().catch(() => null);
       if (!response.ok) throw new Error(result?.error || 'Could not send feedback. Please try again.');
+      if (!result?.ticketId || !result?.accessToken || !Number.isInteger(result.ticketNumber)) {
+        form.reset();
+        game.hidden = true;
+        gameLabel.hidden = true;
+        status.textContent = 'Thanks — your feedback was sent. Ticket tracking is not available right now.';
+        return;
+      }
       const credential = {
         ticketId: result.ticketId,
         accessToken: result.accessToken,

@@ -45,6 +45,16 @@ if (functionsUrl) {
 // Short admin URL: <site>/admin/ forwards to the admin dashboard.
 await mkdir(join(output, 'admin'), { recursive: true });
 await writeFile(join(output, 'admin/index.html'), '<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0; url=../Octo-Industries/BehindTheScenes/admin/"><title>Octo Industries Admin</title><a href="../Octo-Industries/BehindTheScenes/admin/">Open the admin dashboard</a>\n');
+// Project pages return 404.html for unknown paths: forward clean hub URLs such as /OctoIndustries/trending to the hash routes.
+await writeFile(join(output, '404.html'), `<!doctype html><meta charset="utf-8"><title>Octo Industries</title><meta name="robots" content="noindex">
+<script>
+  const base = location.pathname.split('/').slice(0, 2).join('/') + '/';
+  const route = location.pathname.slice(base.length).replace(/\\/+$/, '');
+  const known = ['games', 'trending', 'recently-added', 'news', 'coming-soon', 'about', 'contact', 'inquiries'];
+  if (known.includes(route)) location.replace(base + '#/' + route + location.search);
+  else document.addEventListener('DOMContentLoaded', () => { document.body.innerHTML = '<h1>Page not found</h1><p><a href="' + base + '">Back to Octo Industries</a></p>'; });
+</script>
+`);
 await writeFile(join(output, '.nojekyll'), '');
 
 async function walk(directory) {
