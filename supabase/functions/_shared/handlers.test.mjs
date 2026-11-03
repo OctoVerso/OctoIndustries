@@ -235,3 +235,56 @@ test('proposals can be created, listed and dismissed; approval needs GitHub cred
   assert.equal((await dismissed.json()).status, 'dismissed');
   assert.equal((await call(proposals, 'proposals', `/${id}/dismiss`, { method: 'POST', token })).status, 409);
 });
+
+test('inquiry tickets: users track replies with an access token and admins manage the thread', async () => {
+  db = createDb({
+    games: [game('alpha')], feedback_conversations: [], feedback_activity: [],
+  });
+  const created = await call(feedback, 'feedback', '', { method: 'POST', body: { type: 'suggestion', message: 'Add co-op' } });
+  assert.equal(created.status, 201);
+  const { ticketId, accessToken } = await created.json();
+  assert.match(accessToken, /^[a-f\d]{64}$/);
+  assert.notEqual(db.tables.feedback[0].access_token_hash, accessToken);
+  const headers = { 'x-ticket-access-token': accessToken };
+  assert.equal((await call(feedback, 'feedback', `/tickets/${ticketId}`, { headers: { 'x-ticket-access-token': 'f'.repeat(64) } })).status, 404);
+  assert.equal((await call(feedback, 'feedback', `/tickets/${ticketId}`)).status, 401);
+  const view = await (await call(feedback, 'feedback', `/tickets/${ticketId}`, { headers })).json();
+  assert.equal(view.conversation.length, 1);
+  assert.equal('adminNotes' in view, false);
+
+  const { body: { token } } = await signIn();
+  const reply = await call(admin, 'admin', `/feedback/${ticketId}/reply`, { method: 'POST', token, body: { message: 'Thanks!' } });
+  assert.equal(reply.status, 201);
+  assert.equal(db.tables.feedback[0].status, 'awaiting_user_reply');
+  assert.equal((await call(admin, 'admin', `/feedback/${ticketId}/priority`, { method: 'PATCH', token, body: { priority: 'high' } })).status, 200);
+  assert.equal((await call(admin, 'admin', `/feedback/${ticketId}/priority`, { method: 'PATCH', token, body: { priority: 'x' } })).status, 400);
+  const userReply = await call(feedback, 'feedback', `/tickets/${ticketId}/messages`, { method: 'POST', headers, body: { message: 'Great' } });
+  assert.equal(userReply.status, 201);
+  const thread = await (await call(admin, 'admin', `/feedback/${ticketId}/conversation`, { token })).json();
+  assert.deepEqual(thread.conversation.map((entry) => entry.author), ['user', 'admin', 'user']);
+  assert.equal((await call(admin, 'admin', `/feedback/${ticketId}/archive`, { method: 'POST', token })).status, 200);
+  assert.equal((await call(feedback, 'feedback', `/tickets/${ticketId}/messages`, { method: 'POST', headers, body: { message: 'Hi' } })).status, 409);
+  assert.equal((await call(admin, 'admin', `/feedback/${ticketId}`, { method: 'DELETE', token })).status, 200);
+  assert.deepEqual(await (await call(admin, 'admin', '/feedback', { token })).json(), []);
+  assert.equal((await call(feedback, 'feedback', `/tickets/${ticketId}`, { headers })).status, 404);
+});
+
+test('roadmap supports the full status set, bulk updates, and hides released items publicly', async () => {
+  const row = (id, status) => ({ id, title: id, description: 'd', status, category: 'platform', priority: 'normal', internal_notes: '', created_at: '2026-01-01T00:00:00Z', updated_at: '2026-01-01T00:00:00Z' });
+  db = createDb({ roadmap: [row('a', 'planned'), row('b', 'idea'), row('c', 'released')] });
+  assert.deepEqual((await (await call(roadmap, 'roadmap', '')).json()).map((item) => item.id).sort(), ['a', 'b']);
+  const { body: { token } } = await signIn();
+  assert.equal((await call(roadmap, 'roadmap', '/bulk', { method: 'POST', token, body: { ids: ['a', 'b'], status: 'testing' } })).status, 200);
+  assert.deepEqual(db.tables.roadmap.map((item) => item.status), ['testing', 'testing', 'released']);
+  assert.equal((await call(roadmap, 'roadmap', '/bulk', { method: 'POST', token, body: { ids: ['a'], status: 'nope' } })).status, 400);
+  const dashboard = await (await call(admin, 'admin', '/dashboard', { token })).json();
+  assert.equal(dashboard.roadmap.length, 3);
+});
+
+test('game inspector requires admin, validates URLs and never fetches private hosts', async () => {
+  db = createDb();
+  assert.equal((await call(admin, 'admin', '/analyze', { method: 'POST', body: { url: 'https://example.com' } })).status, 401);
+  const { body: { token } } = await signIn();
+  assert.equal((await call(admin, 'admin', '/analyze', { method: 'POST', token, body: { url: 42 } })).status, 400);
+  assert.equal((await call(admin, 'admin', '/analyze', { method: 'POST', token, body: { url: 'http://169.254.169.254/' } })).status, 400);
+});

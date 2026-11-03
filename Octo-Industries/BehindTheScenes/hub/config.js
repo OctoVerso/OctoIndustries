@@ -15,6 +15,7 @@
     [/^\/api\/admin(?=\/|\?|$)/, '/admin'],
     [/^\/api\/catalog(?=\/|\?|$)/, '/catalog'],
     [/^\/api\/feedback(?=\/|\?|$)/, '/feedback'],
+    [/^\/api\/tickets(?=\/|\?|$)/, '/feedback/tickets'],
   ];
 
   // Maps the application's logical /api paths onto the Supabase Edge Function URLs.

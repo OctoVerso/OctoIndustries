@@ -10,3 +10,4 @@ admin_state.json
 feedback.json
 d1-backup.sql
 tables.json
+supabase/.temp/

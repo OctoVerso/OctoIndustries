@@ -6,6 +6,7 @@ import { ensureGameBranding } from './branding-injection.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
 const gameCollection = resolve(root, 'Octo-Industries');
+const output = resolve(root, 'Octo-Industries', 'BehindTheScenes', 'hub', 'catalog.js');
 const excludedDirectories = new Set(['.git', '.octo-data', '.vscode', 'node_modules', 'dist']);
 const gamesToRegister = [];
 

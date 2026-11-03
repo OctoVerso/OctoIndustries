@@ -3,10 +3,12 @@ import {
   addJob, enforceRateLimit, gameFromRow, listJobs, must, proposalFromRow, publicGame, roadmapFromRow,
 } from './data.js';
 import {
-  normalizeFeedback, validateAdminNotes, validateFeedbackStatus, validateFeedbackSubmission,
+  normalizeFeedback, validateAdminNotes, validateConversationMessage, validateFeedbackPriority,
+  validateFeedbackStatus, validateFeedbackSubmission,
 } from './feedback.js';
+import { inspectGame } from './inspector.js';
 import {
-  bodyJson, bumpRateLimit, httpError, json, logActivity, randomHex, serve,
+  bodyJson, bumpRateLimit, digest, httpError, json, logActivity, randomHex, serve,
 } from './http.js';
 import {
   createGitHubPullRequest, isAllowedCodePath, validateProposalSummary, validateProposalTitle,
@@ -26,7 +28,65 @@ export const catalog = serve('catalog', async ({ db, method }) => {
   return json(rows.map(publicGame), 200, { 'Cache-Control': 'public, max-age=60' });
 });
 
+const closedTicketStatuses = ['closed', 'rejected', 'implemented'];
+
+async function recordTicketActivity(db, ids, action, actorType) {
+  const createdAt = new Date().toISOString();
+  must(await db.from('feedback_activity').insert([ids].flat().map((id) => ({
+    feedback_id: id, action, actor_type: actorType, created_at: createdAt,
+  }))), 'Could not record ticket activity.');
+}
+
+async function ticketMessages(db, id) {
+  const rows = must(await db.from('feedback_conversations').select('author_type, message, created_at')
+    .eq('feedback_id', id).order('created_at', { ascending: true }));
+  return rows.map((row) => ({ author: row.author_type, message: row.message, createdAt: row.created_at }));
+}
+
+async function addTicketMessage(db, id, authorType, message, status) {
+  const now = new Date().toISOString();
+  must(await db.from('feedback_conversations').insert({ feedback_id: id, author_type: authorType, message, created_at: now }));
+  must(await db.from('feedback').update({ status, updated_at: now }).eq('id', id));
+  await recordTicketActivity(db, id, `${authorType}_reply`, authorType);
+  return now;
+}
+
+async function ticketForAccess(db, request, id) {
+  const token = request.headers.get('x-ticket-access-token') || '';
+  if (!/^[a-f\d]{64}$/.test(token)) throw httpError('Ticket access is invalid.', 401);
+  const row = must(await db.from('feedback').select('*').eq('id', id).maybeSingle());
+  if (!row || row.deleted_at || !row.access_token_hash || row.access_token_hash !== await digest(token)) {
+    throw httpError('Ticket not found or access is invalid.', 404);
+  }
+  return row;
+}
+
 export const feedback = serve('feedback', async ({ request, db, method, path }) => {
+  const ticketRoute = /^\/tickets\/([a-f\d]{32})(?:\/(messages))?$/.exec(path);
+  if (ticketRoute) {
+    const [, id, messagesPath] = ticketRoute;
+    const row = await ticketForAccess(db, request, id);
+    const ticket = normalizeFeedback(row);
+    if (method === 'GET' && !messagesPath) {
+      return json({
+        ticketNumber: ticket.ticketNumber,
+        type: ticket.type,
+        gameId: ticket.gameId,
+        status: ticket.status,
+        priority: ticket.priority,
+        createdAt: ticket.createdAt,
+        updatedAt: ticket.updatedAt,
+        conversation: [{ author: 'user', message: row.message, createdAt: ticket.createdAt }, ...await ticketMessages(db, id)],
+      });
+    }
+    if (method === 'POST' && messagesPath) {
+      if (closedTicketStatuses.includes(ticket.status) || ticket.archived) throw httpError('This ticket is closed to replies.', 409);
+      const message = validateConversationMessage((await bodyJson(request)).message);
+      const updatedAt = await addTicketMessage(db, id, 'user', message, 'under_review');
+      return json({ sent: true, status: 'under_review', updatedAt }, 201);
+    }
+    throw httpError('Method not allowed.', 405);
+  }
   if (method !== 'POST' || path !== '/') throw httpError('Method not allowed.', 405);
   const body = await bodyJson(request);
   const games = must(await db.from('games').select('id, status'));
@@ -44,6 +104,16 @@ export const feedback = serve('feedback', async ({ request, db, method, path }) 
     created_at: now,
     updated_at: now,
   };
+  const accessToken = randomHex(32);
+  const ticketed = await db.from('feedback').insert({ ...row, access_token_hash: await digest(accessToken), priority: 'medium' })
+    .select('ticket_number').maybeSingle();
+  if (!ticketed.error) {
+    return json({
+      id: row.id, status: 'new', submitted: true, ticketId: row.id, ticketNumber: ticketed.data?.ticket_number ?? null, accessToken,
+    }, 201);
+  }
+  // The inquiry_tickets migration has not been applied yet: store the submission without a ticket.
+  console.error('Ticketed feedback insert failed; falling back to the legacy columns.', ticketed.error);
   must(await db.from('feedback').insert(row), 'Could not store feedback.');
   return json({ id: row.id, status: 'new' }, 201);
 });
@@ -52,11 +122,12 @@ export const roadmap = serve('roadmap', async ({ request, env, db, method, path 
   const isAdmin = Boolean(await readSession(request, env, db));
   if (method === 'GET' && path === '/') {
     const rows = must(await db.from('roadmap').select('*').order('created_at', { ascending: true }));
-    return json(rows.map((row) => roadmapFromRow(row, isAdmin)), 200, isAdmin ? {} : { 'Cache-Control': 'public, max-age=60' });
+    const visible = isAdmin ? rows : rows.filter((row) => !['released', 'archived'].includes(row.status));
+    return json(visible.map((row) => roadmapFromRow(row, isAdmin)), 200, isAdmin ? {} : { 'Cache-Control': 'public, max-age=60' });
   }
   await requireAdmin({ request, env, db });
-  const statuses = ['idea', 'planned', 'in-progress', 'on-hold'];
-  const priorities = ['high', 'normal', 'low'];
+  const statuses = ['idea', 'planned', 'in-progress', 'testing', 'released', 'on-hold', 'archived'];
+  const priorities = ['low', 'normal', 'high', 'urgent'];
   const validate = (input, partial) => {
     const row = {};
     const text = [['title', 'title', 120, true], ['description', 'description', 2000, false], ['category', 'category', 60, false], ['internalNotes', 'internal_notes', 5000, false]];
@@ -91,6 +162,22 @@ export const roadmap = serve('roadmap', async ({ request, env, db, method, path 
     must(await db.from('roadmap').insert(record));
     await logActivity(db, `Added roadmap item ${record.title}`);
     return json(roadmapFromRow(record, true), 201);
+  }
+  if (method === 'POST' && path === '/bulk') {
+    const body = await bodyJson(request);
+    if (!Array.isArray(body.ids) || !body.ids.length || body.ids.length > 50
+      || body.ids.some((id) => typeof id !== 'string' || !/^[a-z0-9-]{1,80}$/.test(id))) {
+      throw httpError('Select between 1 and 50 valid roadmap items.', 400);
+    }
+    const { status } = validate({ status: body.status }, true);
+    if (!status) throw httpError('Choose a supported roadmap status.', 400);
+    const ids = [...new Set(body.ids)];
+    const existing = must(await db.from('roadmap').select('id, title').in('id', ids));
+    if (existing.length) {
+      must(await db.from('roadmap').update({ status, updated_at: now }).in('id', existing.map((item) => item.id)));
+      await logActivity(db, `Updated ${existing.length} roadmap items to ${status}`);
+    }
+    return json({ updated: existing.length, status });
   }
   const match = /^\/([a-z0-9-]{1,80})$/.exec(path);
   if (!match) throw httpError('Roadmap endpoint not found.', 404);
@@ -312,13 +399,17 @@ export const admin = serve('admin', async (context) => {
       games,
       jobs: jobList.slice(0, 30),
       activity: await activityList(db, 30),
+      roadmap: must(await db.from('roadmap').select('*').order('updated_at', { ascending: false })).map((row) => roadmapFromRow(row, true)),
       proposals: pending.map(proposalFromRow),
       capabilities: { changeProposals: Boolean(env.GITHUB_TOKEN) },
     });
   }
   if (path === '/feedback' && method === 'GET') {
-    return json(must(await db.from('feedback').select('*').order('created_at', { ascending: false })).map(normalizeFeedback));
+    const rows = must(await db.from('feedback').select('*').order('created_at', { ascending: false }));
+    return json(rows.filter((row) => !row.deleted_at).map(normalizeFeedback));
   }
+  // Status and note changes keep working before the inquiry_tickets migration; the audit trail is best effort.
+  const noteTicketActivity = (...args) => recordTicketActivity(db, ...args).catch(() => {});
   if (path === '/feedback/bulk' && method === 'POST') {
     const body = await bodyJson(request);
     if (!Array.isArray(body.ids) || !body.ids.length || body.ids.length > 50
@@ -328,26 +419,65 @@ export const admin = serve('admin', async (context) => {
     const status = validateFeedbackStatus(body.status);
     const ids = [...new Set(body.ids)];
     must(await db.from('feedback').update({ status, updated_at: new Date().toISOString() }).in('id', ids));
+    await noteTicketActivity(ids, `status_${status}`, 'admin');
     return json({ updated: ids.length, status });
   }
-  const feedbackMatch = /^\/feedback\/([a-f\d]{32})\/(status|notes)$/.exec(path);
-  if (feedbackMatch && method === 'PATCH') {
-    const [, id, action] = feedbackMatch;
-    if (!must(await db.from('feedback').select('id').eq('id', id).maybeSingle())) throw httpError('Feedback submission not found.', 404);
-    const body = await bodyJson(request);
+  const ticketAdminRoute = /^\/feedback\/([a-f\d]{32})(?:\/(status|notes|priority|conversation|reply|archive|unarchive))?$/.exec(path);
+  if (ticketAdminRoute) {
+    const [, id, action] = ticketAdminRoute;
+    const row = must(await db.from('feedback').select('*').eq('id', id).maybeSingle());
+    if (!row || row.deleted_at) throw httpError('Feedback submission not found.', 404);
     const updatedAt = new Date().toISOString();
-    if (action === 'notes') {
-      const adminNotes = validateAdminNotes(body.adminNotes);
-      must(await db.from('feedback').update({ admin_notes: adminNotes, updated_at: updatedAt }).eq('id', id));
-      return json({ id, adminNotes, updatedAt });
+    if (method === 'GET' && action === 'conversation') {
+      const activity = must(await db.from('feedback_activity').select('action, actor_type, created_at')
+        .eq('feedback_id', id).order('created_at', { ascending: true }));
+      return json({
+        conversation: [{ author: 'user', message: row.message, createdAt: row.created_at }, ...await ticketMessages(db, id)],
+        activity: activity.map((entry) => ({ action: entry.action, actor_type: entry.actor_type, created_at: entry.created_at })),
+      });
     }
-    const status = validateFeedbackStatus(body.status);
-    must(await db.from('feedback').update({ status, updated_at: updatedAt }).eq('id', id));
-    return json({ id, status, updatedAt });
+    if (method === 'POST' && action === 'reply') {
+      if (!row.access_token_hash) throw httpError('This legacy inquiry has no user access token.', 409);
+      const message = validateConversationMessage((await bodyJson(request)).message);
+      return json({ sent: true, status: 'awaiting_user_reply', updatedAt: await addTicketMessage(db, id, 'admin', message, 'awaiting_user_reply') }, 201);
+    }
+    if (method === 'POST' && (action === 'archive' || action === 'unarchive')) {
+      must(await db.from('feedback').update({ archived_at: action === 'archive' ? updatedAt : null, updated_at: updatedAt }).eq('id', id));
+      await recordTicketActivity(db, id, action, 'admin');
+      return json({ id, archived: action === 'archive', updatedAt });
+    }
+    if (method === 'DELETE' && !action) {
+      must(await db.from('feedback').update({ deleted_at: updatedAt, updated_at: updatedAt }).eq('id', id));
+      await recordTicketActivity(db, id, 'deleted', 'admin');
+      return json({ deleted: true, id, updatedAt });
+    }
+    if (method === 'PATCH' && (!action || ['status', 'notes', 'priority'].includes(action))) {
+      const body = await bodyJson(request);
+      if (action === 'notes') {
+        const adminNotes = validateAdminNotes(body.adminNotes);
+        must(await db.from('feedback').update({ admin_notes: adminNotes, updated_at: updatedAt }).eq('id', id));
+        await noteTicketActivity(id, 'admin_note_updated', 'admin');
+        return json({ id, adminNotes, updatedAt });
+      }
+      if (action === 'priority') {
+        const priority = validateFeedbackPriority(body.priority);
+        must(await db.from('feedback').update({ priority, updated_at: updatedAt }).eq('id', id));
+        await recordTicketActivity(db, id, `priority_${priority}`, 'admin');
+        return json({ id, priority, updatedAt });
+      }
+      const status = validateFeedbackStatus(body.status);
+      must(await db.from('feedback').update({ status, updated_at: updatedAt }).eq('id', id));
+      await noteTicketActivity(id, `status_${status}`, 'admin');
+      return json({ id, status, updatedAt });
+    }
+    throw httpError('Method not allowed.', 405);
   }
   if (path === '/chat' && method === 'POST') return chat(context);
   if (path === '/analyze' && method === 'POST') {
-    return json({ error: 'Remote page analysis is not enabled yet.' }, 501);
+    const body = await bodyJson(request);
+    if (typeof body.url !== 'string' || body.url.length > 2048) throw httpError('Enter a valid game page URL (maximum 2048 characters).', 400);
+    const result = await inspectGame(body.url);
+    return json(await addJob(db, 'analysis', null, result, `Scanned ${result.title || result.entry}: ${result.resourceCount} resources, ${result.externalCount} external.`), 202);
   }
   const gameRoute = /^\/games\/([a-z0-9-]+)(?:\/(publish|health))?$/.exec(path);
   if (gameRoute) {

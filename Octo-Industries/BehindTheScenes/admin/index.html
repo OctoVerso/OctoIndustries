@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#071019">
-  <title>Octo Industries Admin</title>
+  <title>Octo Industries Admin Dashboard</title>
   <link rel="icon" href="../../branding/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="admin.css">
   <script src="../hub/config.js"></script>
@@ -22,7 +22,7 @@
 
     <section class="login-card" id="login-view" aria-labelledby="login-title">
       <p class="eyebrow">PRIVATE CONTROL ROOM</p>
-      <h1 id="login-title">Admin sign in</h1>
+      <h1 id="login-title">Admin Dashboard sign in</h1>
       <p class="muted">Sign in to manage the Octo Industries game library.</p>
       <form id="login-form">
         <label for="password">Admin password</label>
@@ -33,119 +33,225 @@
     </section>
 
     <section id="dashboard-view" hidden>
-      <div class="welcome-row">
-        <div><p class="eyebrow">OCTO INDUSTRIES / ADMIN</p><h1>Library control room</h1><p class="muted">Review your catalog, inspect game pages, and track administrative jobs.</p></div>
-        <button class="button button-secondary" id="build-button" type="button">Build standalone hub <span aria-hidden="true">↗</span></button>
-      </div>
-
-      <section class="metrics" aria-label="Library summary">
-        <article class="metric"><span>All games</span><strong id="metric-total">—</strong></article>
-        <article class="metric"><span>Published</span><strong id="metric-published">—</strong></article>
-        <article class="metric"><span>Drafts</span><strong id="metric-drafts">—</strong></article>
-        <article class="metric"><span>Offline verified</span><strong id="metric-offline">—</strong></article>
-        <article class="metric"><span>Failed jobs</span><strong id="metric-failed">—</strong></article>
-      </section>
-
-      <section class="panel feedback-inbox" aria-labelledby="feedback-inbox-title">
-        <div class="section-heading"><div><p class="eyebrow">PRIVATE INBOX</p><h2 id="feedback-inbox-title">Suggestions &amp; Issues <span class="feedback-new-badge" id="feedback-new-count">0 New</span></h2></div></div>
-        <div class="feedback-toolbar">
-          <label class="visually-hidden" for="feedback-search">Search feedback</label>
-          <input type="search" id="feedback-search" placeholder="Search message, game, type, or device">
-          <label class="visually-hidden" for="feedback-type-filter">Filter by type</label>
-          <select id="feedback-type-filter"><option value="all">All types</option><option value="issue">Issues</option><option value="suggestion">Suggestions</option></select>
-          <label class="visually-hidden" for="feedback-status-filter">Filter by status</label>
-          <select id="feedback-status-filter"><option value="all">All statuses</option><option value="new">New</option><option value="seen">Seen</option><option value="working">Working on it</option><option value="resolved">Resolved</option><option value="important">Important</option><option value="archived">Archived</option></select>
-          <label class="visually-hidden" for="feedback-game-filter">Filter by game</label>
-          <select id="feedback-game-filter"><option value="all">All games</option><option value="none">Not related to a game</option></select>
-          <label class="visually-hidden" for="feedback-sort">Sort feedback</label>
-          <select id="feedback-sort"><option value="newest">Newest</option><option value="oldest">Oldest</option><option value="updated">Recently updated</option><option value="status">Status</option><option value="type">Type</option><option value="game">Game</option></select>
-        </div>
-        <div class="feedback-bulk">
-          <label class="check-label"><input id="feedback-select-all" type="checkbox"> Select visible</label>
-          <label class="visually-hidden" for="feedback-bulk-status">Set selected submissions status</label>
-          <select id="feedback-bulk-status"><option value="">Bulk status…</option><option value="new">New</option><option value="seen">Seen</option><option value="working">Working on it</option><option value="resolved">Resolved</option><option value="important">Important</option><option value="archived">Archived</option></select>
-          <button class="small-button" id="feedback-bulk-apply" type="button">Apply to selected</button>
-          <span class="subtle" id="feedback-selection-count"></span>
-          <span class="subtle">50 per bulk action max</span>
-        </div>
-        <div class="feedback-list" id="feedback-list" aria-live="polite"></div>
-      </section>
-
-      <section class="panel roadmap-panel" aria-labelledby="roadmap-title">
-        <div class="section-heading"><div><p class="eyebrow">PRODUCT PLANNING</p><h2 id="roadmap-title">Roadmap</h2></div></div>
-        <form class="roadmap-create" id="roadmap-create">
-          <label>Title<input name="title" maxlength="120" required></label>
-          <label>Description<textarea name="description" rows="2" maxlength="2000"></textarea></label>
-          <label>Category<input name="category" maxlength="60"></label>
-          <label>Priority<select name="priority"><option value="normal">Normal</option><option value="high">High</option><option value="low">Low</option></select></label>
-          <button class="small-button" type="submit">Add roadmap item</button>
-        </form>
-        <p class="notice" id="roadmap-message" role="status" hidden></p>
-        <div class="roadmap-list" id="roadmap-list" aria-live="polite"></div>
-      </section>
-
-      <section class="panel agent-panel" aria-labelledby="agent-title">
-        <div class="section-heading"><div><p class="eyebrow">OCTO GAME INSPECTOR</p><h2 id="agent-title">Inspect a game page</h2></div><span class="mode-badge">Source scan</span></div>
-        <p class="muted">Inspect only a game page you are authorized to access. This bounded source scan lists page resources; it does not download or alter game files, or test gameplay or offline behavior.</p>
-        <form class="url-form" id="analyze-form">
-          <label class="visually-hidden" for="game-url">Authorized game page URL</label>
-          <input id="game-url" type="url" placeholder="https://example.com/game" autocomplete="url" required>
-          <button class="button button-primary" type="submit">Analyze page</button>
-        </form>
-        <p class="notice" id="agent-message" role="status" hidden></p>
-      </section>
-
-      <section class="panel chat-panel" aria-labelledby="chat-title">
-        <div class="section-heading"><div><p class="eyebrow">OCTO AI GAME AGENT</p><h2 id="chat-title">Ask about your library</h2></div><span class="mode-badge">Read only</span></div>
-        <p class="muted">Ask Octo AI questions about the current library, recent jobs, and activity. It cannot change games or create proposals.</p>
-        <div class="chat-transcript" id="chat-transcript" role="log" aria-live="polite" aria-relevant="additions">
-          <p class="chat-empty">Try “Which games need attention?” or “What recent jobs need attention?”</p>
-        </div>
-        <section class="proposal-review" id="proposal-review" aria-labelledby="proposal-review-title" hidden>
-          <h3 id="proposal-review-title">Changes waiting for your review</h3>
-          <form class="proposal-create" id="proposal-create">
-            <label>Proposal type<select name="kind" id="proposal-kind"><option value="code">Code change</option><option value="game">Game registration</option></select></label>
-            <label>Title<input name="title" maxlength="100" required></label>
-            <label>Summary<textarea name="summary" rows="2" minlength="8" maxlength="500" required></textarea></label>
-            <label data-proposal-code>Unified diff<textarea name="diff" rows="6" placeholder="--- a/path/to/file.js&#10;+++ b/path/to/file.js"></textarea></label>
-            <div class="proposal-game-fields" data-proposal-game hidden>
-              <label>Manifest path<input name="manifestPath" placeholder="Octo-Industries/Game/game.json"></label>
-              <label>Manifest JSON<textarea name="manifest" rows="6" placeholder="{ &quot;launch&quot;: &quot;Octo-Industries/Game/index.html&quot; }"></textarea></label>
-            </div>
-            <button class="small-button" type="submit">Add proposal for review</button>
-            <p class="notice" id="proposal-create-message" role="status" hidden></p>
-          </form>
-          <div id="proposal-list"></div>
-        </section>
-        <p class="muted proposal-capability" id="proposal-capability" hidden>Add the GITHUB_TOKEN Supabase function secret to open pull requests after approval. Changes are never merged automatically.</p>
-        <div class="chat-prompts" aria-label="Suggested questions">
-          <button class="small-button" type="button" data-chat-prompt="Which published games are not marked offline-ready?">Offline status</button>
-          <button class="small-button" type="button" data-chat-prompt="What recent jobs need attention?">Recent job issues</button>
-          <button class="small-button" type="button" data-chat-prompt="How many games are published, and what can I manage here?">Library overview</button>
-        </div>
-        <form class="chat-form" id="chat-form">
-          <label class="visually-hidden" for="chat-input">Message Octo AI</label>
-          <textarea id="chat-input" rows="2" maxlength="4000" placeholder="Ask Octo AI about your game library…" required></textarea>
-          <button class="button button-primary" id="chat-send" type="submit">Send <span aria-hidden="true">↗</span></button>
-        </form>
-        <p class="notice" id="chat-message" role="status" hidden></p>
-      </section>
-
-      <div class="content-grid">
-        <section class="panel library-panel" aria-labelledby="library-title">
-          <div class="section-heading"><div><p class="eyebrow">CANONICAL LIBRARY</p><h2 id="library-title">Games</h2></div><span class="subtle" id="library-count"></span></div>
-          <div class="toolbar">
-            <label class="visually-hidden" for="game-filter">Search games</label>
-            <input type="search" id="game-filter" placeholder="Search games">
-            <label class="visually-hidden" for="status-filter">Filter by status</label>
-            <select id="status-filter"><option value="all">All statuses</option><option value="published">Published</option><option value="draft">Draft</option></select>
-          </div>
-          <div class="game-list" id="game-list"></div>
-        </section>
-        <aside class="side-column">
-          <section class="panel" aria-labelledby="jobs-title"><div class="section-heading"><div><p class="eyebrow">BACKGROUND TASKS</p><h2 id="jobs-title">Recent jobs</h2></div></div><div class="job-list" id="job-list"></div></section>
-          <section class="panel" aria-labelledby="activity-title"><div class="section-heading"><div><p class="eyebrow">AUDIT TRAIL</p><h2 id="activity-title">Admin activity</h2></div></div><div class="activity-list" id="activity-list"></div></section>
+      <div class="dashboard-layout">
+        <aside class="admin-sidebar" id="admin-sidebar" aria-label="Admin Dashboard navigation">
+          <div class="sidebar-brand"><img src="../../branding/primary-logo.png" alt=""><div><strong>OCTO INDUSTRIES</strong><span>ADMIN DASHBOARD</span></div></div>
+          <nav class="admin-navigation" aria-label="Admin Dashboard sections">
+            <button class="nav-item is-active" type="button" data-admin-view="overview" aria-current="page" aria-label="Overview" title="Overview"><span class="nav-icon" aria-hidden="true">⌂</span><span>Overview</span></button>
+            <button class="nav-item roadmap-nav-item" type="button" data-admin-view="roadmap" aria-label="Roadmap" title="Roadmap"><span class="nav-icon" aria-hidden="true">↗</span><span>Roadmap</span><span class="nav-count" id="nav-roadmap-count">Loading…</span></button>
+            <details class="nav-group" open>
+              <summary aria-label="Games" title="Games" data-admin-view="games"><span class="nav-icon" aria-hidden="true">◈</span><span>Games</span></summary>
+              <button class="nav-item nav-subitem" type="button" data-admin-view="games"><span>Library</span><span class="nav-count" id="nav-game-count">Loading…</span></button>
+              <button class="nav-item nav-subitem" type="button" data-admin-view="games" data-focus-target="#category-filter"><span>Categories &amp; tags</span></button>
+              <button class="nav-item nav-subitem is-planned" type="button" disabled title="No game creation API is available yet"><span>Add game</span><small>Planned</small></button>
+              <button class="nav-item nav-subitem is-planned" type="button" disabled title="Game DNA storage is not available yet"><span>Game DNA</span><small data-roadmap-label="game-dna">Planned</small></button>
+              <button class="nav-item nav-subitem is-planned" type="button" disabled title="Game changelog management is not available yet"><span>Changelogs</span><small>Planned</small></button>
+            </details>
+            <details class="nav-group" open>
+              <summary aria-label="Community" title="Community" data-admin-view="community"><span class="nav-icon" aria-hidden="true">◉</span><span>Community</span><span class="nav-count" id="nav-feedback-count">Loading…</span></summary>
+              <button class="nav-item nav-subitem" type="button" data-admin-view="community"><span>Inquiries</span></button>
+              <button class="nav-item nav-subitem is-planned" type="button" disabled title="Reviews are not collected by the current backend"><span>Reviews, requests &amp; voting</span><small>Planned</small></button>
+            </details>
+            <details class="nav-group">
+              <summary aria-label="Content" title="Content"><span class="nav-icon" aria-hidden="true">▤</span><span>Content</span></summary>
+              <button class="nav-item nav-subitem is-planned" type="button" disabled title="Content publishing is not available yet"><span>News &amp; announcements</span><small data-roadmap-label="octo-news">Planned</small></button>
+              <button class="nav-item nav-subitem is-planned" type="button" disabled title="Featured content workflow is not available yet"><span>Coming soon &amp; featured</span><small>Planned</small></button>
+            </details>
+            <details class="nav-group" open>
+              <summary aria-label="Operations" title="Operations" data-admin-view="operations"><span class="nav-icon" aria-hidden="true">⌁</span><span>Operations</span><span class="nav-count" id="nav-failed-count">Loading…</span></summary>
+              <button class="nav-item nav-subitem" type="button" data-admin-view="operations"><span>Job center</span></button>
+              <button class="nav-item nav-subitem" type="button" data-admin-view="operations" data-focus-target="#game-url"><span>Health checks &amp; source scan</span></button>
+              <button class="nav-item nav-subitem is-planned" type="button" disabled title="Integrity scanning is not available yet"><span>Integrity Scanner</span><small>Planned</small></button>
+              <button class="nav-item nav-subitem is-planned" type="button" disabled title="Backup restore workflows are not available yet"><span>Backup Manager</span><small data-roadmap-label="backup-manager">Planned</small></button>
+              <button class="nav-item nav-subitem is-planned" type="button" disabled title="Offline hub mode is not available yet"><span>Offline Hub</span><small data-roadmap-label="offline-hub">On Hold</small></button>
+            </details>
+            <details class="nav-group">
+              <summary aria-label="Octo Nexus" title="Octo Nexus"><span class="nav-icon" aria-hidden="true">⌘</span><span>Octo Nexus</span></summary>
+              <button class="nav-item nav-subitem is-planned" type="button" disabled title="GitHub automation views are not available yet"><span>Sync &amp; commit timeline</span><small data-roadmap-label="octo-nexus">In Progress</small></button>
+              <button class="nav-item nav-subitem is-planned" type="button" disabled title="Release snapshots are not available yet"><span>Release Snapshots</span><small data-roadmap-label="release-snapshots">Planned</small></button>
+            </details>
+            <details class="nav-group" open>
+              <summary aria-label="AI Center" title="AI Center" data-admin-view="ai"><span class="nav-icon" aria-hidden="true">✳</span><span>AI Center</span></summary>
+              <button class="nav-item nav-subitem" type="button" data-admin-view="ai"><span>Library assistant</span></button>
+              <button class="nav-item nav-subitem" type="button" data-admin-view="operations" data-focus-target="#game-url"><span>Game page inspector</span></button>
+              <button class="nav-item nav-subitem is-planned" type="button" disabled title="Metadata generation and trend analysis are not available yet"><span>Metadata generator</span><small data-roadmap-label="ai-metadata-generator">Planned</small></button>
+              <button class="nav-item nav-subitem is-planned" type="button" disabled title="Personalized recommendations are not available yet"><span>Recommendations</span><small data-roadmap-label="game-recommendations">Planned</small></button>
+              <button class="nav-item nav-subitem is-planned" type="button" disabled title="Trend forecasting is not available yet"><span>Trend Forecaster</span><small data-roadmap-label="trend-forecaster">Planned</small></button>
+            </details>
+            <details class="nav-group">
+              <summary aria-label="Museum and analytics" title="Museum and analytics"><span class="nav-icon" aria-hidden="true">▧</span><span>Museum &amp; analytics</span></summary>
+              <button class="nav-item nav-subitem is-planned" type="button" disabled title="Historical archives and analytics are not available yet"><span>Archives &amp; platform stats</span><small data-roadmap-label="octo-museum">Planned</small></button>
+              <button class="nav-item nav-subitem is-planned" type="button" disabled title="Search analytics are not available yet"><span>Search Analytics</span><small data-roadmap-label="search-analytics">Planned</small></button>
+            </details>
+          </nav>
+          <button class="sidebar-collapse" id="sidebar-collapse" type="button" aria-label="Collapse navigation" title="Collapse navigation"><span aria-hidden="true">‹</span><span class="collapse-label">Collapse navigation</span></button>
         </aside>
+        <button class="sidebar-scrim" id="sidebar-scrim" type="button" aria-label="Close navigation"></button>
+
+        <div class="admin-main">
+          <header class="dashboard-heading">
+            <button class="drawer-toggle" id="sidebar-drawer-toggle" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="admin-sidebar"><span aria-hidden="true">☰</span></button>
+            <div class="dashboard-heading-copy"><p class="eyebrow">OCTO INDUSTRIES / ADMIN DASHBOARD</p><h1 id="admin-view-title">Admin Dashboard</h1><p class="muted" id="admin-view-description">Your compact operations overview.</p></div>
+            <div class="global-search">
+              <label class="visually-hidden" for="global-admin-search">Search games, feedback, roadmap, and jobs</label>
+              <input id="global-admin-search" type="search" placeholder="Search the dashboard" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="global-search-results">
+              <div class="global-search-results" id="global-search-results" role="listbox" hidden></div>
+            </div>
+            <div class="dashboard-actions">
+              <button class="button button-secondary" id="build-button" type="button">Build standalone hub <span aria-hidden="true">↗</span></button>
+              <button class="button button-primary" type="button" data-admin-view="ai" data-focus-target="#chat-input">Ask Octo AI</button>
+            </div>
+          </header>
+
+          <div class="dashboard-error dashboard-load-error" id="dashboard-error" role="alert" aria-live="assertive" hidden>
+            <div><strong>Dashboard data unavailable</strong><p id="dashboard-error-message"></p>
+              <details><summary>Admin technical details</summary><pre id="dashboard-error-details"></pre></details>
+            </div>
+            <button class="small-button" id="dashboard-retry" type="button">Retry</button>
+          </div>
+
+          <main class="admin-views" id="admin-views">
+            <section class="admin-panel" data-admin-panel="overview" aria-labelledby="overview-title">
+              <h2 class="visually-hidden" id="overview-title">Overview</h2>
+              <section class="metrics" aria-label="Platform summary">
+                <article class="metric"><span>Total games</span><strong id="metric-total">Loading…</strong></article>
+                <article class="metric"><span>Published</span><strong id="metric-published">Loading…</strong></article>
+                <article class="metric"><span>Drafts</span><strong id="metric-drafts">Loading…</strong></article>
+                <article class="metric"><span>Open inquiries</span><strong id="metric-open-feedback">Loading…</strong></article>
+                <article class="metric"><span>Failed jobs</span><strong id="metric-failed">Loading…</strong></article>
+                <article class="metric"><span>Offline verified</span><strong id="metric-offline">Loading…</strong></article>
+                <article class="metric"><span>Categories</span><strong id="metric-categories">Loading…</strong></article>
+                <article class="metric"><span>Activity today</span><strong id="metric-activity-today">Loading…</strong></article>
+              </section>
+              <div class="overview-actions-bar" aria-label="Quick actions">
+                <button class="quick-action" type="button" data-admin-view="games"><span aria-hidden="true">▦</span>Open game library</button>
+                <button class="quick-action" type="button" data-admin-view="community"><span aria-hidden="true">✉</span>Review inbox</button>
+                <button class="quick-action" type="button" data-admin-view="operations"><span aria-hidden="true">⌁</span>Open job center</button>
+                <button class="quick-action" type="button" data-admin-view="ai" data-focus-target="#chat-input"><span aria-hidden="true">✳</span>Ask Octo AI</button>
+              </div>
+              <div class="overview-grid">
+                <section class="panel overview-widget" aria-labelledby="overview-jobs-title"><div class="section-heading"><div><p class="eyebrow">OPERATIONS</p><h2 id="overview-jobs-title">Recent jobs</h2></div><button class="text-action" type="button" data-admin-view="operations">All jobs <span aria-hidden="true">→</span></button></div><div class="overview-list" id="overview-jobs"></div></section>
+                <section class="panel overview-widget" aria-labelledby="overview-activity-title"><div class="section-heading"><div><p class="eyebrow">AUDIT TRAIL</p><h2 id="overview-activity-title">Recent activity</h2></div><button class="text-action" type="button" data-admin-view="operations">Activity <span aria-hidden="true">→</span></button></div><div class="overview-list" id="overview-activity"></div></section>
+                <section class="panel overview-widget overview-feedback" aria-labelledby="overview-feedback-title"><div class="section-heading"><div><p class="eyebrow">COMMUNITY</p><h2 id="overview-feedback-title">Recent inquiries</h2></div><button class="text-action" type="button" data-admin-view="community">Inbox <span aria-hidden="true">→</span></button></div><div class="overview-list" id="overview-feedback"></div></section>
+                <section class="panel overview-widget roadmap-overview" aria-labelledby="roadmap-overview-title"><div class="section-heading"><div><p class="eyebrow">PLATFORM DEVELOPMENT</p><h2 id="roadmap-overview-title">Roadmap overview</h2></div><button class="text-action" type="button" data-admin-view="roadmap">Manage <span aria-hidden="true">→</span></button></div><div class="roadmap-summary" id="roadmap-summary"></div></section>
+              </div>
+            </section>
+
+            <section class="admin-panel" data-admin-panel="roadmap" aria-labelledby="roadmap-title" hidden>
+              <section class="panel roadmap-panel">
+                <div class="section-heading"><div><p class="eyebrow">SOURCE OF TRUTH</p><h2 id="roadmap-title">Roadmap</h2></div><button class="button button-primary" id="roadmap-create" type="button">Create feature <span aria-hidden="true">+</span></button></div>
+                <div class="roadmap-status-summary" id="roadmap-status-summary" aria-label="Filter roadmap by status"></div>
+                <div class="roadmap-toolbar">
+                  <label class="visually-hidden" for="roadmap-search">Search roadmap</label><input type="search" id="roadmap-search" placeholder="Search title, description, notes">
+                  <label class="visually-hidden" for="roadmap-status-filter">Filter by status</label><select id="roadmap-status-filter"><option value="all">All statuses</option><option value="idea">Idea</option><option value="planned">Planned</option><option value="in-progress">In Progress</option><option value="testing">Testing</option><option value="released">Released</option><option value="on-hold">On Hold</option><option value="archived">Archived</option></select>
+                  <label class="visually-hidden" for="roadmap-category-filter">Filter by category</label><select id="roadmap-category-filter"><option value="all">All categories</option><option value="games">Games</option><option value="community">Community</option><option value="content">Content</option><option value="operations">Operations</option><option value="platform">Platform</option><option value="ai">AI</option><option value="museum">Museum</option><option value="analytics">Analytics</option><option value="other">Other</option></select>
+                  <label class="visually-hidden" for="roadmap-priority-filter">Filter by priority</label><select id="roadmap-priority-filter"><option value="all">All priorities</option><option value="urgent">Urgent</option><option value="high">High</option><option value="normal">Normal</option><option value="low">Low</option></select>
+                  <label class="visually-hidden" for="roadmap-sort">Sort roadmap</label><select id="roadmap-sort"><option value="updated">Recently updated</option><option value="priority">Priority</option><option value="title">Title A to Z</option><option value="created">Recently created</option></select>
+                </div>
+                <div class="roadmap-bulk">
+                  <label class="visually-hidden" for="roadmap-bulk-status">Set selected roadmap items status</label>
+                  <select id="roadmap-bulk-status"><option value="">Bulk status…</option><option value="idea">Idea</option><option value="planned">Planned</option><option value="in-progress">In Progress</option><option value="testing">Testing</option><option value="released">Released</option><option value="on-hold">On Hold</option><option value="archived">Archived</option></select>
+                  <button class="small-button" id="roadmap-bulk-apply" type="button">Apply to selected</button>
+                  <span class="subtle" id="roadmap-selection-count">0 selected</span>
+                  <label class="check-label"><input id="roadmap-select-all" type="checkbox" aria-label="Select all visible roadmap items"> All visible</label>
+                </div>
+                <div class="roadmap-table-wrap"><table class="roadmap-table"><caption class="visually-hidden">Manage Octo Industries roadmap features</caption><thead><tr><th scope="col"><input id="roadmap-header-select" type="checkbox" aria-label="Toggle all roadmap items"></th><th scope="col">Feature</th><th scope="col">Status</th><th scope="col">Category</th><th scope="col">Priority</th><th scope="col">Created</th><th scope="col">Updated</th><th scope="col">Actions</th></tr></thead><tbody id="roadmap-list"></tbody></table></div>
+                <p class="subtle roadmap-count" id="roadmap-count" aria-live="polite"></p>
+              </section>
+            </section>
+
+            <section class="admin-panel" data-admin-panel="games" aria-labelledby="library-title" hidden>
+              <section class="panel library-panel">
+                <div class="section-heading"><div><p class="eyebrow">CANONICAL LIBRARY</p><h2 id="library-title">Game library</h2></div><span class="subtle" id="library-count"></span></div>
+                <div class="toolbar">
+                  <label class="visually-hidden" for="game-filter">Search games</label>
+                  <input type="search" id="game-filter" placeholder="Search title, category, tags, or description">
+                  <label class="visually-hidden" for="status-filter">Filter by status</label>
+                  <select id="status-filter"><option value="all">All statuses</option><option value="published">Published</option><option value="draft">Draft</option></select>
+                  <label class="visually-hidden" for="category-filter">Filter by category</label>
+                  <select id="category-filter"><option value="all">All categories</option></select>
+                  <label class="visually-hidden" for="game-sort">Sort games</label>
+                  <select id="game-sort"><option value="title">Title A to Z</option><option value="category">Category</option><option value="status">Status</option></select>
+                </div>
+                <div class="game-list" id="game-list" aria-live="polite"></div>
+              </section>
+            </section>
+
+            <section class="admin-panel" data-admin-panel="community" aria-labelledby="feedback-inbox-title" hidden>
+              <section class="panel feedback-inbox">
+                <div class="section-heading"><div><p class="eyebrow">PRIVATE INBOX</p><h2 id="feedback-inbox-title">Inquiries <span class="feedback-new-badge" id="feedback-new-count">0 New</span></h2></div></div>
+                <section class="ticket-analytics" aria-labelledby="ticket-analytics-title">
+                  <h3 id="ticket-analytics-title">Ticket analytics</h3>
+                  <div class="ticket-analytics-metrics">
+                    <div><span>Open</span><strong id="ticket-metric-open">0</strong></div>
+                    <div><span>Awaiting user</span><strong id="ticket-metric-awaiting">0</strong></div>
+                    <div><span>Critical</span><strong id="ticket-metric-critical">0</strong></div>
+                    <div><span>Created in 30 days</span><strong id="ticket-metric-recent">0</strong></div>
+                  </div>
+                  <div class="ticket-status-breakdown" id="ticket-status-breakdown" aria-label="Ticket counts by status"></div>
+                </section>
+                <div class="feedback-toolbar">
+                  <label class="visually-hidden" for="feedback-search">Search feedback</label>
+                  <input type="search" id="feedback-search" placeholder="Search ticket, message, device, browser, language, or timezone">
+                  <label class="visually-hidden" for="feedback-type-filter">Filter by type</label>
+                  <select id="feedback-type-filter"><option value="all">All types</option><option value="issue">Issues</option><option value="suggestion">Suggestions</option></select>
+                  <label class="visually-hidden" for="feedback-status-filter">Filter by status</label>
+                  <select id="feedback-status-filter"><option value="all">All statuses</option><option value="new">New</option><option value="under_review">Under Review</option><option value="planned">Planned</option><option value="in_progress">In Progress</option><option value="awaiting_user_reply">Awaiting User Reply</option><option value="implemented">Implemented</option><option value="resolved">Resolved</option><option value="rejected">Rejected</option><option value="closed">Closed</option><option value="archived">Archived</option></select>
+                  <label class="visually-hidden" for="feedback-priority-filter">Filter by priority</label>
+                  <select id="feedback-priority-filter"><option value="all">All priorities</option><option value="low">Low Priority</option><option value="medium">Medium Priority</option><option value="high">High Priority</option><option value="critical">Critical Priority</option></select>
+                  <label class="visually-hidden" for="feedback-game-filter">Filter by game</label>
+                  <select id="feedback-game-filter"><option value="all">All games</option><option value="none">Not related to a game</option></select>
+                  <label class="visually-hidden" for="feedback-sort">Sort feedback</label>
+                  <select id="feedback-sort"><option value="newest">Newest</option><option value="oldest">Oldest</option><option value="updated">Recently updated</option><option value="status">Status</option><option value="type">Type</option><option value="game">Game</option></select>
+                  <label class="visually-hidden" for="feedback-date-from">Created from (Bahrain time)</label>
+                  <input type="date" id="feedback-date-from" aria-label="Created from date in Bahrain time">
+                  <label class="visually-hidden" for="feedback-date-to">Created through (Bahrain time)</label>
+                  <input type="date" id="feedback-date-to" aria-label="Created through date in Bahrain time">
+                </div>
+                <div class="feedback-bulk">
+                  <label class="check-label"><input id="feedback-select-all" type="checkbox"> Select visible</label>
+                  <label class="visually-hidden" for="feedback-bulk-status">Set selected submissions status</label>
+                  <select id="feedback-bulk-status"><option value="">Bulk status…</option><option value="new">New</option><option value="under_review">Under Review</option><option value="planned">Planned</option><option value="in_progress">In Progress</option><option value="awaiting_user_reply">Awaiting User Reply</option><option value="implemented">Implemented</option><option value="resolved">Resolved</option><option value="rejected">Rejected</option><option value="closed">Closed</option></select>
+                  <button class="small-button" id="feedback-bulk-apply" type="button">Apply to selected</button>
+                  <button class="small-button" id="feedback-bulk-archive" type="button">Archive selected</button>
+                  <button class="small-button" id="feedback-bulk-delete" type="button">Delete selected</button>
+                  <span class="subtle" id="feedback-selection-count"></span>
+                  <span class="subtle">50 per bulk action max</span>
+                </div>
+                <div class="feedback-list" id="feedback-list" aria-live="polite"></div>
+              </section>
+            </section>
+
+            <section class="admin-panel" data-admin-panel="operations" aria-labelledby="operations-title" hidden>
+              <h2 class="visually-hidden" id="operations-title">Operations</h2>
+              <div class="operations-grid">
+                <div class="operations-stream">
+                  <section class="panel" aria-labelledby="jobs-title"><div class="section-heading"><div><p class="eyebrow">BACKGROUND TASKS</p><h2 id="jobs-title">Job center</h2></div></div><label class="visually-hidden" for="job-search">Filter jobs</label><input class="job-search" id="job-search" type="search" placeholder="Filter recent jobs"><div class="job-list" id="job-list" aria-live="polite"></div></section>
+                  <section class="panel" aria-labelledby="activity-title"><div class="section-heading"><div><p class="eyebrow">AUDIT TRAIL</p><h2 id="activity-title">Admin activity</h2></div></div><div class="activity-list" id="activity-list" aria-live="polite"></div></section>
+                </div>
+                <section class="panel agent-panel" aria-labelledby="agent-title">
+                  <div class="section-heading"><div><p class="eyebrow">OCTO GAME INSPECTOR</p><h2 id="agent-title">Inspect a game page</h2></div><span class="mode-badge">Source scan</span></div>
+                  <p class="muted">Inspect only a game page you are authorized to access. This bounded source scan lists page resources; it does not download or alter game files, or test gameplay or offline behavior.</p>
+                  <form class="url-form" id="analyze-form"><label class="visually-hidden" for="game-url">Authorized game page URL</label><input id="game-url" type="url" placeholder="https://example.com/game" autocomplete="url" required><button class="button button-primary" type="submit">Analyze page</button></form>
+                  <p class="notice" id="agent-message" role="status" hidden></p>
+                </section>
+              </div>
+            </section>
+
+            <section class="admin-panel" data-admin-panel="ai" aria-labelledby="chat-title" hidden>
+              <section class="panel chat-panel">
+                <div class="section-heading"><div><p class="eyebrow">OCTO AI GAME AGENT</p><h2 id="chat-title">Library assistant</h2></div><span class="mode-badge">Changes need your approval</span></div>
+                <p class="muted">Ask Octo AI to investigate code issues or register a game whose files are already in the repository. It prepares a change for your review; only approval opens a GitHub pull request. It never merges or deploys changes.</p>
+                <div class="chat-transcript" id="chat-transcript" role="log" aria-live="polite" aria-relevant="additions"><p class="chat-empty">Try “Which games need attention?” or “Review the game hub code and propose a fix for [issue].”</p></div>
+                <section class="proposal-review" id="proposal-review" aria-labelledby="proposal-review-title" hidden><h3 id="proposal-review-title">Changes waiting for your review</h3><div id="proposal-list"></div></section>
+                <p class="muted proposal-capability" id="proposal-capability" hidden>To enable approved changes, add a GitHub token to the Render service. The site only opens a pull request after your approval; it never merges.</p>
+                <div class="chat-prompts" aria-label="Suggested questions"><button class="small-button" type="button" data-chat-prompt="Which published games are not marked offline-ready?">Offline status</button><button class="small-button" type="button" data-chat-prompt="What recent jobs need attention?">Recent job issues</button><button class="small-button" type="button" data-chat-prompt="How many games are published, and what can I manage here?">Library overview</button></div>
+                <form class="chat-form" id="chat-form"><label class="visually-hidden" for="chat-input">Message Octo AI</label><textarea id="chat-input" rows="2" maxlength="4000" placeholder="Ask Octo AI about your game library…" required></textarea><button class="button button-primary" id="chat-send" type="submit">Send <span aria-hidden="true">↗</span></button></form>
+                <p class="notice" id="chat-message" role="status" hidden></p>
+              </section>
+            </section>
+          </main>
+        </div>
       </div>
     </section>
   </main>
@@ -161,6 +267,22 @@
       <label class="check-label"><input id="edit-featured" type="checkbox"> Featured on the public hub</label>
       <div class="dialog-actions"><button class="button button-quiet" type="button" id="cancel-edit">Cancel</button><button class="button button-primary" type="submit">Save metadata</button></div>
       <p class="notice" id="edit-message" role="alert" hidden></p>
+    </form>
+  </dialog>
+  <dialog id="roadmap-dialog" class="edit-dialog roadmap-dialog" aria-labelledby="roadmap-dialog-title">
+    <form id="roadmap-form">
+      <div class="section-heading"><div><p class="eyebrow">PLATFORM DEVELOPMENT</p><h2 id="roadmap-dialog-title">Create roadmap feature</h2></div><button class="icon-button" type="button" id="roadmap-close" aria-label="Close">×</button></div>
+      <input type="hidden" id="roadmap-id">
+      <label for="roadmap-title-input">Title</label><input id="roadmap-title-input" maxlength="100" required>
+      <label for="roadmap-description">Description</label><textarea id="roadmap-description" maxlength="1000" rows="3" required></textarea>
+      <div class="roadmap-form-grid">
+        <label for="roadmap-status">Status<select id="roadmap-status" required><option value="idea">Idea</option><option value="planned">Planned</option><option value="in-progress">In Progress</option><option value="testing">Testing</option><option value="released">Released</option><option value="on-hold">On Hold</option><option value="archived">Archived</option></select></label>
+        <label for="roadmap-category">Category<select id="roadmap-category" required><option value="games">Games</option><option value="community">Community</option><option value="content">Content</option><option value="operations">Operations</option><option value="platform">Platform</option><option value="ai">AI</option><option value="museum">Museum</option><option value="analytics">Analytics</option><option value="other">Other</option></select></label>
+        <label for="roadmap-priority">Priority<select id="roadmap-priority" required><option value="low">Low</option><option value="normal">Normal</option><option value="high">High</option><option value="urgent">Urgent</option></select></label>
+      </div>
+      <label for="roadmap-notes">Internal notes</label><textarea id="roadmap-notes" maxlength="5000" rows="4"></textarea>
+      <div class="dialog-actions"><button class="button button-quiet" type="button" id="roadmap-cancel">Cancel</button><button class="button button-primary" id="roadmap-save" type="submit">Save feature</button></div>
+      <p class="notice" id="roadmap-message" role="alert" hidden></p>
     </form>
   </dialog>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>

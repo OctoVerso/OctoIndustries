@@ -1,4 +1,10 @@
-export const feedbackStatuses = ['new', 'seen', 'working', 'resolved', 'important', 'archived'];
+export const feedbackStatuses = [
+  'new', 'under_review', 'planned', 'in_progress', 'awaiting_user_reply', 'implemented', 'resolved', 'rejected', 'closed',
+  // Statuses stored by earlier releases remain valid.
+  'seen', 'working', 'important', 'archived',
+];
+export const feedbackPriorities = ['low', 'medium', 'high', 'critical'];
+const legacyStatuses = { seen: 'under_review', working: 'in_progress', important: 'under_review', archived: 'closed' };
 
 const maximumMessageLength = 5000;
 const deviceValues = {
@@ -44,15 +50,37 @@ export function validateFeedbackSubmission(body, games) {
 export function normalizeFeedback(row) {
   return {
     id: row.id,
+    ticketNumber: row.ticket_number || null,
+    userAccessEnabled: Boolean(row.access_token_hash),
     type: row.type,
     gameId: row.game_id,
     message: row.message,
     deviceInfo: typeof row.device_info === 'string' ? JSON.parse(row.device_info || '{}') : row.device_info || {},
-    status: row.status,
+    status: legacyStatuses[row.status] || row.status,
+    priority: row.priority || 'medium',
+    archived: Boolean(row.archived_at),
+    deleted: Boolean(row.deleted_at),
     adminNotes: row.admin_notes || '',
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
+}
+
+export function validateFeedbackPriority(priority) {
+  if (!feedbackPriorities.includes(priority)) {
+    throw Object.assign(new Error('Choose a valid ticket priority.'), { status: 400 });
+  }
+  return priority;
+}
+
+export function validateConversationMessage(value) {
+  const message = typeof value === 'string'
+    ? value.replace(/\r\n?/g, '\n').replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, '').trim()
+    : '';
+  if (!message || message.length > maximumMessageLength) {
+    throw Object.assign(new Error('A reply is required and must be 5,000 characters or fewer.'), { status: 400 });
+  }
+  return message;
 }
 
 export function validateFeedbackStatus(status) {
