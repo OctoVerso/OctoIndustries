@@ -27,7 +27,12 @@ await cp(join(root, 'Octo-Industries'), join(output, 'Octo-Industries'), {
   },
 });
 
-const functionsUrl = process.env.SUPABASE_FUNCTIONS_URL || (process.env.SUPABASE_URL ? `${process.env.SUPABASE_URL.replace(/\/+$/, '')}/functions/v1` : '');
+const rawFunctionsUrl = (process.env.SUPABASE_FUNCTIONS_URL || process.env.SUPABASE_URL || '').trim();
+// Accept the project URL, a bare host, or the full functions URL; always end up with https://<host>/functions/v1.
+const functionsUrl = rawFunctionsUrl
+  ? `${(/^https?:\/\//i.test(rawFunctionsUrl) ? rawFunctionsUrl : `https://${rawFunctionsUrl}`)
+    .replace(/\/+$/, '').replace(/\/functions\/v1$/i, '').toLowerCase()}/functions/v1`
+  : '';
 if (functionsUrl) {
   if (!/^https:\/\/[a-z0-9.-]+\/functions\/v1$/.test(functionsUrl)) throw new Error('SUPABASE_FUNCTIONS_URL must look like https://<ref>.supabase.co/functions/v1');
   const configPath = join(output, 'Octo-Industries/BehindTheScenes/hub/config.js');
