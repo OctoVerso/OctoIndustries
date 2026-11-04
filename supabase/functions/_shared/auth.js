@@ -26,22 +26,24 @@ export function parsePasswordHash(value) {
   return match ? { iterations: Number(match[1]), salt: match[2], expected: hexToBytes(match[3]) } : null;
 }
 
-// Describes why a hash secret is rejected using only lengths and shape, never the secret itself.
+// Names the failed validation using only shape and lengths, never the secret itself.
 export function describePasswordHashProblem(value) {
-  if (!value) return 'secret is empty or unset';
+  if (!value) return { code: 'value_missing', detail: 'secret is empty or unset' };
   const cleaned = String(value).trim().replace(/^OCTO_ADMIN_PASSWORD_HASH\s*=\s*/, '').replace(/^(['"])(.*)\1$/, '$2').trim();
   const parts = cleaned.split('$');
-  if (parts.length !== 4) return `expected 4 "$"-separated parts but found ${parts.length} (a "$..." segment was probably dropped by shell/.env expansion)`;
-  const [scheme, iterations, salt, hash] = parts;
-  if (scheme !== 'pbkdf2') return 'value does not start with "pbkdf2$"';
-  if (!/^\d{5,7}$/.test(iterations)) return `iterations must be 5-7 digits, found length ${iterations.length}`;
-  if (!/^[a-f\d]{32}$/.test(salt)) return `salt must be 32 lowercase hex characters, found length ${salt.length}`;
-  if (!/^[a-f\d]{128}$/.test(hash)) return `hash must be 128 lowercase hex characters, found length ${hash.length}`;
-  return 'unknown';
+  if (parts.length !== 4 || parts[0] !== 'pbkdf2') return { code: 'part_count_invalid', detail: `expected pbkdf2 plus 3 "$"-separated parts, found ${parts.length} part(s)` };
+  const [, iterations, salt, hash] = parts;
+  if (!/^\d{5,7}$/.test(iterations)) return { code: 'iterations_invalid', detail: `iterations must be 5-7 digits, found length ${iterations.length}` };
+  if (salt.length !== 32) return { code: 'salt_length_invalid', detail: `salt must be 32 characters, found ${salt.length}` };
+  if (!/^[a-f\d]{32}$/.test(salt)) return { code: 'salt_characters_invalid', detail: 'salt must be lowercase hex' };
+  if (hash.length !== 128) return { code: 'hash_length_invalid', detail: `hash must be 128 characters, found ${hash.length}` };
+  if (!/^[a-f\d]{128}$/.test(hash)) return { code: 'hash_characters_invalid', detail: 'hash must be lowercase hex' };
+  return { code: 'unknown', detail: 'unknown' };
 }
 
 function notConfigured(value) {
-  return httpError(`Admin login is not configured. Set a valid OCTO_ADMIN_PASSWORD_HASH secret. Reason: ${describePasswordHashProblem(value)}.`, 503);
+  const { code, detail } = describePasswordHashProblem(value);
+  return Object.assign(httpError(`Admin login is not configured. Set a valid OCTO_ADMIN_PASSWORD_HASH secret. Reason: ${detail}.`, 503), { reason: code });
 }
 
 function sessionSecret(env) {

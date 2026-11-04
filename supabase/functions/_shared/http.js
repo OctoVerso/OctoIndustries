@@ -91,7 +91,7 @@ export function serve(name, handler) {
         ? json({ error: 'Not found.' }, 404)
         : await handler({ request, env, db, path, method: request.method });
     } catch (error) {
-      if (error.status) response = json({ error: error.message }, error.status);
+      if (error.status) response = json(error.reason ? { error: error.message, reason: error.reason } : { error: error.message }, error.status);
       else {
         console.error(`${name} function failed:`, error);
         response = json({ error: 'The service could not complete the request.' }, 500);

@@ -298,3 +298,16 @@ test('password hash secret tolerates a pasted NAME=value line and quotes', async
   assert.equal(parsePasswordHash(value.replace('pbkdf2$', () => 'pbkdf2$$')), null);
   assert.equal(parsePasswordHash('pbkdf2$'), null);
 });
+
+test('password hash diagnostic names the failed check without leaking the secret', async () => {
+  const { describePasswordHashProblem } = await import('./auth.js');
+  const salt = 'a'.repeat(32);
+  const hash = 'b'.repeat(128);
+  assert.equal(describePasswordHashProblem('').code, 'value_missing');
+  assert.equal(describePasswordHashProblem(`pbkdf2${'$'}120000${'$'}${salt}`).code, 'part_count_invalid');
+  assert.equal(describePasswordHashProblem(`pbkdf2${'$'}12${'$'}${salt}${'$'}${hash}`).code, 'iterations_invalid');
+  assert.equal(describePasswordHashProblem(`pbkdf2${'$'}120000${'$'}${salt}a${'$'}${hash}`).code, 'salt_length_invalid');
+  assert.equal(describePasswordHashProblem(`pbkdf2${'$'}120000${'$'}${'A'.repeat(32)}${'$'}${hash}`).code, 'salt_characters_invalid');
+  assert.equal(describePasswordHashProblem(`pbkdf2${'$'}120000${'$'}${salt}${'$'}${hash.slice(1)}`).code, 'hash_length_invalid');
+  assert.equal(describePasswordHashProblem(`pbkdf2${'$'}120000${'$'}${salt}${'$'}${'G'.repeat(128)}`).code, 'hash_characters_invalid');
+});
