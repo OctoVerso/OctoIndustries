@@ -47,8 +47,10 @@ function notConfigured(value) {
 }
 
 function sessionSecret(env) {
-  if (!env.ADMIN_SESSION_SECRET || env.ADMIN_SESSION_SECRET.length < 32) {
-    throw httpError('Admin login is not configured. Set a random ADMIN_SESSION_SECRET of at least 32 characters.', 503);
+  const length = String(env.ADMIN_SESSION_SECRET || '').length;
+  if (length < 32) {
+    const reason = length === 0 ? 'missing_session_secret' : 'invalid_session_secret';
+    throw Object.assign(httpError(`Admin login is not configured. Set a random ADMIN_SESSION_SECRET of at least 32 characters. Reason: ${reason} (length ${length}).`, 503), { reason });
   }
   return env.ADMIN_SESSION_SECRET;
 }
