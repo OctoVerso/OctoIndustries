@@ -288,3 +288,13 @@ test('game inspector requires admin, validates URLs and never fetches private ho
   assert.equal((await call(admin, 'admin', '/analyze', { method: 'POST', token, body: { url: 42 } })).status, 400);
   assert.equal((await call(admin, 'admin', '/analyze', { method: 'POST', token, body: { url: 'http://169.254.169.254/' } })).status, 400);
 });
+
+test('password hash secret tolerates a pasted NAME=value line and quotes', async () => {
+  const { parsePasswordHash } = await import('./auth.js');
+  const value = env.OCTO_ADMIN_PASSWORD_HASH;
+  assert.ok(parsePasswordHash(value));
+  assert.ok(parsePasswordHash(`OCTO_ADMIN_PASSWORD_HASH=${value}`));
+  assert.ok(parsePasswordHash(` "${value}" \n`));
+  assert.equal(parsePasswordHash(value.replace('pbkdf2$', 'pbkdf2$$')), null);
+  assert.equal(parsePasswordHash('pbkdf2$'), null);
+});

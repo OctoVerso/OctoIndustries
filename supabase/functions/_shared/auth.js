@@ -20,7 +20,9 @@ function constantTimeEqual(first, second) {
 }
 
 export function parsePasswordHash(value) {
-  const match = /^pbkdf2\$(\d{5,7})\$([a-f\d]{32})\$([a-f\d]{128})$/.exec(value || '');
+  // Tolerate a pasted "NAME=value" line, surrounding quotes and whitespace from the admin:hash output.
+  const cleaned = String(value || '').trim().replace(/^OCTO_ADMIN_PASSWORD_HASH\s*=\s*/, '').replace(/^(['"])(.*)\1$/, '$2').trim();
+  const match = /^pbkdf2\$(\d{5,7})\$([a-f\d]{32})\$([a-f\d]{128})$/.exec(cleaned);
   return match ? { iterations: Number(match[1]), salt: match[2], expected: hexToBytes(match[3]) } : null;
 }
 
