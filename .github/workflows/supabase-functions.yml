@@ -28,4 +28,4 @@ jobs:
           [ -n "$SUPABASE_ACCESS_TOKEN" ] || { echo "::error::Secret SUPABASE_ACCESS_TOKEN is not set (Settings > Secrets and variables > Actions > Secrets)."; exit 1; }
           [ -n "$SUPABASE_PROJECT_REF" ] || { echo "::error::Variable SUPABASE_PROJECT_REF is not set (Settings > Secrets and variables > Actions > Variables)."; exit 1; }
       - name: Deploy functions
-        run: supabase functions deploy --project-ref "$SUPABASE_PROJECT_REF" --no-verify-jwt
+        run: supabase functions deploy --project-ref "$SUPABASE_PROJECT_REF" --no-verify-jwt --yes
