@@ -9,6 +9,7 @@ const describe = (text) => `${text.length} (${[...text].filter((character) => !/
 console.log(`total length:        ${raw.length}`);
 console.log(`"$" parts:           ${parts.length} (expected 4)`);
 console.log(`starts with NAME=:   ${/^\s*OCTO_ADMIN_PASSWORD_HASH\s*=/.test(raw)}`);
+console.log(`uppercase letters:    ${/[A-Z]/.test(raw)}`);
 console.log(`quotes present:      ${/['"]/.test(raw)}`);
 console.log(`hidden/control chars: ${hidden.length}${hidden.length ? ` (codes: ${hidden.map((c) => c.codePointAt(0).toString(16)).join(', ')})` : ''}`);
 if (parts.length === 4) {
@@ -19,5 +20,5 @@ if (parts.length === 4) {
 }
 
 const ok = /^pbkdf2\$\d{5,7}\$[a-f\d]{32}\$[a-f\d]{128}$/.test(raw);
-console.log(ok ? '\nVALID: paste this exact value into Supabase.' : '\nINVALID: do not use this value.');
+console.log(ok ? '\nVALID' : '\nINVALID');
 process.exitCode = ok ? 0 : 1;
