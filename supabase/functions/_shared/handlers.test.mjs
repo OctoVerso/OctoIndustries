@@ -31,7 +31,7 @@ function createDb(seed = {}) {
       let selected = rows.filter(matches);
       if (state.order) {
         const [column, ascending] = state.order;
-        selected = [...selected].sort((a, b) => (a[column] > b[column] ? 1 : -1) * (ascending ? 1 : -1));
+        selected = [...selected].sort((a, b) => (a[column] === b[column] ? 0 : a[column] > b[column] ? 1 : -1) * (ascending ? 1 : -1));
       }
       if (state.range) selected = selected.slice(state.range[0], state.range[1] + 1);
       return { data: state.head ? null : selected, count: selected.length, error: null };
