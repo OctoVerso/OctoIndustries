@@ -33,11 +33,13 @@ export function describePasswordHashProblem(value) {
   const parts = cleaned.split('$');
   if (parts.length !== 4 || parts[0] !== 'pbkdf2') return { code: 'part_count_invalid', detail: `expected pbkdf2 plus 3 "$"-separated parts, found ${parts.length} part(s)` };
   const [, iterations, salt, hash] = parts;
-  if (!/^\d{5,7}$/.test(iterations)) return { code: 'iterations_invalid', detail: `iterations must be 5-7 digits, found length ${iterations.length}` };
-  if (salt.length !== 32) return { code: 'salt_length_invalid', detail: `salt must be 32 characters, found ${salt.length}` };
-  if (!/^[a-f\d]{32}$/.test(salt)) return { code: 'salt_characters_invalid', detail: 'salt must be lowercase hex' };
-  if (hash.length !== 128) return { code: 'hash_length_invalid', detail: `hash must be 128 characters, found ${hash.length}` };
-  if (!/^[a-f\d]{128}$/.test(hash)) return { code: 'hash_characters_invalid', detail: 'hash must be lowercase hex' };
+  const nonHex = (text) => text.replace(/[a-f\d]/g, '').length;
+  const shape = ` [raw length ${String(value).length}, cleaned length ${cleaned.length}, iterations ${iterations.length}, salt ${salt.length} (${nonHex(salt)} non-hex), hash ${hash.length} (${nonHex(hash)} non-hex)]`;
+  if (!/^\d{5,7}$/.test(iterations)) return { code: 'iterations_invalid', detail: `iterations must be 5-7 digits, found length ${iterations.length}${shape}` };
+  if (salt.length !== 32) return { code: 'salt_length_invalid', detail: `salt must be 32 characters, found ${salt.length}${shape}` };
+  if (!/^[a-f\d]{32}$/.test(salt)) return { code: 'salt_characters_invalid', detail: 'salt must be lowercase hex' + shape };
+  if (hash.length !== 128) return { code: 'hash_length_invalid', detail: `hash must be 128 characters, found ${hash.length}${shape}` };
+  if (!/^[a-f\d]{128}$/.test(hash)) return { code: 'hash_characters_invalid', detail: 'hash must be lowercase hex' + shape };
   return { code: 'unknown', detail: 'unknown' };
 }
 
