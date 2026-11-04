@@ -311,3 +311,12 @@ test('password hash diagnostic names the failed check without leaking the secret
   assert.equal(describePasswordHashProblem(`pbkdf2${'$'}120000${'$'}${salt}${'$'}${hash.slice(1)}`).code, 'hash_length_invalid');
   assert.equal(describePasswordHashProblem(`pbkdf2${'$'}120000${'$'}${salt}${'$'}${'G'.repeat(128)}`).code, 'hash_characters_invalid');
 });
+
+test('password hash secret tolerates line breaks and zero-width characters inside the value', async () => {
+  const { parsePasswordHash } = await import('./auth.js');
+  const salt = 'a'.repeat(32);
+  const hash = 'b'.repeat(128);
+  const value = `pbkdf2${'$'}120000${'$'}${salt}${'$'}${hash}`;
+  assert.ok(parsePasswordHash(`${value.slice(0, 20)}\n${value.slice(20, 60)}\u200b${value.slice(60)}\r\n`));
+  assert.equal(parsePasswordHash(`pbkdf2${'$'}120000${'$'}${salt}a${'$'}${hash}`), null);
+});

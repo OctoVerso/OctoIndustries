@@ -19,9 +19,12 @@ function constantTimeEqual(first, second) {
   return difference === 0;
 }
 
+// Whitespace, control and zero-width characters never occur in a valid hash; copy/paste often injects them.
+const invisible = /[\s\u0000-\u001f\u007f\u200b-\u200f\u2028\u2029\u202a-\u202e\u2060\ufeff]/g;
+
 export function parsePasswordHash(value) {
   // Tolerate a pasted "NAME=value" line, surrounding quotes and whitespace from the admin:hash output.
-  const cleaned = String(value || '').trim().replace(/^OCTO_ADMIN_PASSWORD_HASH\s*=\s*/, '').replace(/^(['"])(.*)\1$/, '$2').trim();
+  const cleaned = String(value || '').replace(invisible, '').trim().replace(/^OCTO_ADMIN_PASSWORD_HASH\s*=\s*/, '').replace(/^(['"])(.*)\1$/, '$2').trim();
   const match = /^pbkdf2\$(\d{5,7})\$([a-f\d]{32})\$([a-f\d]{128})$/.exec(cleaned);
   return match ? { iterations: Number(match[1]), salt: match[2], expected: hexToBytes(match[3]) } : null;
 }
@@ -29,7 +32,7 @@ export function parsePasswordHash(value) {
 // Names the failed validation using only shape and lengths, never the secret itself.
 export function describePasswordHashProblem(value) {
   if (!value) return { code: 'value_missing', detail: 'secret is empty or unset' };
-  const cleaned = String(value).trim().replace(/^OCTO_ADMIN_PASSWORD_HASH\s*=\s*/, '').replace(/^(['"])(.*)\1$/, '$2').trim();
+  const cleaned = String(value).replace(invisible, '').trim().replace(/^OCTO_ADMIN_PASSWORD_HASH\s*=\s*/, '').replace(/^(['"])(.*)\1$/, '$2').trim();
   const parts = cleaned.split('$');
   if (parts.length !== 4 || parts[0] !== 'pbkdf2') return { code: 'part_count_invalid', detail: `expected pbkdf2 plus 3 "$"-separated parts, found ${parts.length} part(s)` };
   const [, iterations, salt, hash] = parts;
