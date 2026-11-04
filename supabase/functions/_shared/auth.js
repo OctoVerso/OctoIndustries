@@ -26,6 +26,24 @@ export function parsePasswordHash(value) {
   return match ? { iterations: Number(match[1]), salt: match[2], expected: hexToBytes(match[3]) } : null;
 }
 
+// Describes why a hash secret is rejected using only lengths and shape, never the secret itself.
+export function describePasswordHashProblem(value) {
+  if (!value) return 'secret is empty or unset';
+  const cleaned = String(value).trim().replace(/^OCTO_ADMIN_PASSWORD_HASH\s*=\s*/, '').replace(/^(['"])(.*)\1$/, '$2').trim();
+  const parts = cleaned.split('$');
+  if (parts.length !== 4) return `expected 4 "$"-separated parts but found ${parts.length} (a "$..." segment was probably dropped by shell/.env expansion)`;
+  const [scheme, iterations, salt, hash] = parts;
+  if (scheme !== 'pbkdf2') return 'value does not start with "pbkdf2$"';
+  if (!/^\d{5,7}$/.test(iterations)) return `iterations must be 5-7 digits, found length ${iterations.length}`;
+  if (!/^[a-f\d]{32}$/.test(salt)) return `salt must be 32 lowercase hex characters, found length ${salt.length}`;
+  if (!/^[a-f\d]{128}$/.test(hash)) return `hash must be 128 lowercase hex characters, found length ${hash.length}`;
+  return 'unknown';
+}
+
+function notConfigured(value) {
+  return httpError(`Admin login is not configured. Set a valid OCTO_ADMIN_PASSWORD_HASH secret. Reason: ${describePasswordHashProblem(value)}.`, 503);
+}
+
 function sessionSecret(env) {
   if (!env.ADMIN_SESSION_SECRET || env.ADMIN_SESSION_SECRET.length < 32) {
     throw httpError('Admin login is not configured. Set a random ADMIN_SESSION_SECRET of at least 32 characters.', 503);
@@ -70,7 +88,7 @@ export async function requireAdmin({ request, env, db }) {
 
 export async function loginChallenge({ request, env, db }) {
   const configured = parsePasswordHash(env.OCTO_ADMIN_PASSWORD_HASH);
-  if (!configured) throw httpError('Admin login is not configured. Set a valid OCTO_ADMIN_PASSWORD_HASH secret.', 503);
+  if (!configured) throw notConfigured(env.OCTO_ADMIN_PASSWORD_HASH);
   const secret = sessionSecret(env);
   const key = await clientKey(request);
   if (await bumpRateLimit(db, `login-challenge:${key}`, 60) > 10) {
@@ -84,7 +102,7 @@ export async function loginChallenge({ request, env, db }) {
 
 export async function login({ request, env, db }, body) {
   const configured = parsePasswordHash(env.OCTO_ADMIN_PASSWORD_HASH);
-  if (!configured) throw httpError('Admin login is not configured. Set a valid OCTO_ADMIN_PASSWORD_HASH secret.', 503);
+  if (!configured) throw notConfigured(env.OCTO_ADMIN_PASSWORD_HASH);
   const secret = sessionSecret(env);
   const key = await clientKey(request);
   if (await bumpRateLimit(db, `login-attempt:${key}`, 15 * 60) > 5) {
