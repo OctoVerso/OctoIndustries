@@ -1,0 +1,13 @@
+{
+  "id": "pvz-ipad",
+  "addedAt": "2026-11-12T00:00:00.000Z",
+  "title": "PvZ2 Gardendless",
+  "description": "Play the iPad-friendly PvZ2 Gardendless browser game with local saves and offline support.",
+  "version": "0.16.1",
+  "category": "Strategy",
+  "tags": ["plants vs zombies", "zombies", "tower defense", "ipad", "browser"],
+  "launch": "index.html",
+  "thumbnail": "thumbnail.png",
+  "bannerSource": "thumbnail.png",
+  "bannerFit": "contain"
+}

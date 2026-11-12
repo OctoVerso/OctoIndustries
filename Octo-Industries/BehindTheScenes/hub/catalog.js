@@ -177,6 +177,27 @@ window.OCTO_GAMES = Object.freeze([
     "featured": false
   },
   {
+    "id": "pvz-ipad",
+    "addedAt": "2026-11-12T00:00:00.000Z",
+    "title": "PvZ2 Gardendless",
+    "description": "Play the iPad-friendly PvZ2 Gardendless browser game with local saves and offline support.",
+    "version": "0.16.1",
+    "category": "Strategy",
+    "tags": [
+      "plants vs zombies",
+      "zombies",
+      "tower defense",
+      "ipad",
+      "browser"
+    ],
+    "launch": "/Octo-Industries/PvZ-iPad/index.html",
+    "thumbnail": "/Octo-Industries/PvZ-iPad/hub-banner.svg?v=9ab3e2d6e940966a",
+    "sourceFile": "Octo-Industries/PvZ-iPad/game.json",
+    "banner": "/Octo-Industries/PvZ-iPad/hub-banner.svg?v=9ab3e2d6e940966a",
+    "screenshots": [],
+    "featured": false
+  },
+  {
     "id": "ragdoll-archers",
     "addedAt": "2026-10-06T12:00:00.000Z",
     "title": "Ragdoll Archers",

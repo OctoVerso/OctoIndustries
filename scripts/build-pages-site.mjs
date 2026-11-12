@@ -27,6 +27,42 @@ await cp(join(root, 'Octo-Industries'), join(output, 'Octo-Industries'), {
   },
 });
 
+const pvzSource = join(root, 'pvz-ipad');
+const pvzRevision = spawnSync('git', ['-C', pvzSource, 'rev-parse', 'HEAD'], {
+  cwd: root,
+  encoding: 'utf8',
+});
+if (pvzRevision.status !== 0 || !/^[a-f0-9]{40}\s*$/i.test(pvzRevision.stdout)) {
+  throw new Error('The PvZ iPad source checkout is missing or has no valid Git revision.');
+}
+const pvzBuild = spawnSync('node', [
+  join(pvzSource, 'scripts/build-pages-lite.mjs'),
+  '--input',
+  join(pvzSource, 'docs'),
+  '--output',
+  join(output, 'pvz-ipad'),
+], {
+  cwd: pvzSource,
+  env: { ...process.env, GITHUB_SHA: pvzRevision.stdout.trim() },
+  stdio: 'inherit',
+});
+if (pvzBuild.status !== 0) throw new Error('The PvZ iPad Pages build failed.');
+
+const pvzManifestPath = join(output, 'pvz-ipad/manifest.webmanifest');
+const pvzManifest = JSON.parse(await readFile(pvzManifestPath, 'utf8'));
+pvzManifest.start_url = './';
+pvzManifest.scope = './';
+await writeFile(pvzManifestPath, `${JSON.stringify(pvzManifest, null, 2)}\n`);
+
+const pvzLauncherPath = join(output, 'Octo-Industries/PvZ-iPad/index.html');
+const pvzLauncher = await readFile(pvzLauncherPath, 'utf8');
+const deployedLauncher = pvzLauncher.replace(
+  'src="../../pvz-ipad/docs/"',
+  'src="../../pvz-ipad/"',
+);
+if (deployedLauncher === pvzLauncher) throw new Error('Could not point the PvZ launcher at its Pages build.');
+await writeFile(pvzLauncherPath, deployedLauncher);
+
 const rawFunctionsUrl = (process.env.SUPABASE_FUNCTIONS_URL || process.env.SUPABASE_URL || '').trim();
 // Accept the project URL, a bare host, or the full functions URL; always end up with https://<host>/functions/v1.
 const functionsUrl = rawFunctionsUrl

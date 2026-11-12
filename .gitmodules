@@ -1,0 +1,3 @@
+[submodule "tools/GhidraMCP"]
+	path = tools/GhidraMCP
+	url = https://github.com/LaurieWired/GhidraMCP.git
