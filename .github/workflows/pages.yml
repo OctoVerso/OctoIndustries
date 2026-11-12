@@ -21,9 +21,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Check out PvZ iPad game source
+        uses: actions/checkout@v4
+        with:
+          repository: fakedummyfortestingthings-web/pvz-ipad
+          ref: main
+          path: pvz-ipad
+          lfs: true
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
+      - name: Install PvZ Pages build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes ffmpeg unzip
+          bash pvz-ipad/scripts/install-linux-codecs.sh "$RUNNER_TEMP/pvz-codecs"
+          echo "$RUNNER_TEMP/pvz-codecs" >> "$GITHUB_PATH"
       - name: Build static site
         env:
           # Repository variable (Settings > Secrets and variables > Actions > Variables).

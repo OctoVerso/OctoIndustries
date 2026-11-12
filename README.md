@@ -11,7 +11,7 @@ npm --prefix Octo-Industries/BehindTheScenes run sync   # regenerate the fallbac
 python3 -m http.server 8080                             # preview at http://localhost:8080/
 ```
 
-The preview calls the live Supabase Edge Functions configured in `Octo-Industries/BehindTheScenes/hub/config.js` (add your origin, e.g. `http://localhost:8080`, to the `ALLOWED_ORIGIN` function secret). Admin lives at `Octo-Industries/BehindTheScenes/admin/` (`/admin/` on the deployed site). Run the function tests with `npm test`.
+The PvZ iPad game source is kept in the sibling `pvz-ipad/` checkout; the Pages workflow builds its optimized local copy into the site. For local preview, clone it with `git clone https://github.com/fakedummyfortestingthings-web/pvz-ipad.git pvz-ipad`. The preview calls the live Supabase Edge Functions configured in `Octo-Industries/BehindTheScenes/hub/config.js` (add your origin, e.g. `http://localhost:8080`, to the `ALLOWED_ORIGIN` function secret). Admin lives at `Octo-Industries/BehindTheScenes/admin/` (`/admin/` on the deployed site). Run the function tests with `npm test`.
 
 ## Discover and add games
 
