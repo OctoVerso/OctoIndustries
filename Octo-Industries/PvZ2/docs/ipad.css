@@ -1,0 +1,245 @@
+/* PvZ2 Gardendless – iPad layout + save/offline UI */
+
+:root {
+  --pvz-vw: 100vw;
+  --pvz-vh: 100vh;
+  --pvz-safe-top: env(safe-area-inset-top, 0px);
+  --pvz-safe-right: env(safe-area-inset-right, 0px);
+  --pvz-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --pvz-safe-left: env(safe-area-inset-left, 0px);
+}
+
+html, body {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100vh;               /* fallback */
+  height: 100dvh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
+  background: #000;
+  touch-action: none;
+  -webkit-text-size-adjust: 100%;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* The engine sizes #GameDiv itself (exact-fit to the window, or to the full-screen element);
+   overriding its size here made the picture and the tap positions disagree in full screen. */
+#GameDiv { touch-action: none; }
+
+#Cocos2dGameContainer,
+#Cocos3dGameContainer,
+#GameCanvas,
+canvas {
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  outline: none;
+}
+
+/* ---------- Rotate overlay (touch devices in portrait) ---------- */
+#pvz-rotate {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  background: #0d1a0d;
+  color: #fff;
+  font: 600 20px/1.3 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  text-align: center;
+  padding: 24px;
+}
+#pvz-rotate p { margin: 0; max-width: 18em; }
+.pvz-rotate-icon {
+  width: 56px;
+  height: 88px;
+  border: 4px solid #7ed957;
+  border-radius: 10px;
+  animation: pvz-rotate 1.8s ease-in-out infinite;
+}
+@keyframes pvz-rotate {
+  0%, 20% { transform: rotate(0deg); }
+  60%, 100% { transform: rotate(-90deg); }
+}
+@media (orientation: portrait) and (pointer: coarse) {
+  #pvz-rotate { display: flex; }
+}
+
+/* ---------- HUD (full screen + settings), left edge, out of the game's way ---------- */
+#pvz-hud {
+  position: fixed;
+  left: calc(var(--pvz-safe-left) + 2px);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2147482000;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  opacity: 0.45;
+  touch-action: manipulation;
+}
+#pvz-hud:active, #pvz-hud.offline { opacity: 0.9; }
+.pvz-hud-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 34px;
+  min-height: 34px;
+  padding: 4px 6px;
+  border: 0;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  font: 600 12px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.pvz-hud-btn[data-h="fs"] { font-size: 16px; }
+#pvz-hud .pvz-dot { width: 7px; height: 7px; border-radius: 50%; background: #4ade80; }
+#pvz-hud.offline .pvz-dot { background: #f87171; }
+#pvz-hud .pvz-hud-label:empty { display: none; }
+#pvz-hud .pvz-gear { font-size: 14px; }
+
+/* ---------- Settings panel ---------- */
+#pvz-panel-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2147482500;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.55);
+  touch-action: manipulation;
+}
+#pvz-panel-backdrop.open { display: flex; }
+#pvz-panel {
+  width: min(420px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  overflow: auto;
+  box-sizing: border-box;
+  padding: 18px;
+  border-radius: 16px;
+  background: #1c2a1c;
+  color: #f2f7f2;
+  font: 15px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+  touch-action: pan-y;
+  -webkit-user-select: text;
+  user-select: text;
+}
+#pvz-panel h2 { margin: 0 0 12px; font-size: 18px; }
+#pvz-panel .pvz-row { display: flex; justify-content: space-between; gap: 12px; margin: 4px 0; }
+#pvz-panel .pvz-row span:first-child { opacity: 0.7; }
+#pvz-panel .pvz-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+#pvz-panel button {
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 10px;
+  background: #3a5a2a;
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+#pvz-panel button.wide { grid-column: 1 / -1; }
+#pvz-panel button.ghost { background: transparent; border: 1px solid rgba(255, 255, 255, 0.25); }
+#pvz-panel button:disabled { opacity: 0.5; }
+#pvz-progress { display: none; margin-top: 10px; }
+#pvz-progress.show { display: block; }
+#pvz-progress .bar { height: 8px; border-radius: 4px; background: rgba(255, 255, 255, 0.15); overflow: hidden; }
+#pvz-progress .fill { width: 0; height: 100%; background: #7ed957; transition: width 0.2s; }
+#pvz-progress .text { margin-top: 6px; font-size: 13px; opacity: 0.8; }
+
+/* ---------- Toast ---------- */
+#pvz-toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--pvz-safe-bottom) + 16px);
+  transform: translateX(-50%);
+  z-index: 2147482800;
+  display: none;
+  align-items: center;
+  gap: 12px;
+  max-width: calc(100vw - 32px);
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgba(20, 30, 20, 0.95);
+  color: #fff;
+  font: 14px/1.3 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
+}
+#pvz-toast.show { display: flex; }
+#pvz-toast button {
+  min-height: 36px;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: #7ed957;
+  color: #0d1a0d;
+  font: inherit;
+  font-weight: 700;
+}
+#pvz-toast button.close { background: transparent; color: #fff; opacity: 0.7; }
+
+#pvz-hud.has-errors .pvz-gear::after { content: " !"; color: #fbbf24; }
+#pvz-diag h3 { margin: 14px 0 4px; font-size: 13px; opacity: 0.7; font-weight: 600; }
+#pvz-diag pre {
+  margin: 0;
+  padding: 8px;
+  max-height: 140px;
+  overflow: auto;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.35);
+  font: 11px/1.4 ui-monospace, Menlo, monospace;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+#pvz-panel .pvz-row span:last-child { min-width: 0; text-align: right; overflow-wrap: anywhere; }
+#pvz-diag pre { text-align: left; }
+
+#pvz-panel .pvz-quality { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 8px 0 4px; }
+#pvz-panel .pvz-quality > span { opacity: 0.7; }
+#pvz-panel .pvz-seg { display: flex; gap: 4px; }
+#pvz-panel .pvz-seg button { min-height: 36px; padding: 6px 10px; background: rgba(255, 255, 255, 0.08); font-size: 13px; }
+#pvz-panel .pvz-seg button.on { background: #7ed957; color: #0d1a0d; }
+
+#pvz-gl-lost {
+  position: fixed; inset: 0; z-index: 2147483100;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(13, 26, 13, 0.92); color: #fff; text-align: center; padding: 24px;
+  font: 600 18px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+#pvz-gl-lost p { margin: 0 0 10px; max-width: 26em; }
+#pvz-gl-lost button {
+  margin-top: 8px; min-height: 44px; padding: 8px 20px; border: 0; border-radius: 10px;
+  background: #7ed957; color: #0d1a0d; font: inherit;
+}
+
+#pvz-save-sheet {
+  position: fixed; inset: 0; z-index: 2147483200; display: flex; align-items: center; justify-content: center;
+  background: rgba(0, 0, 0, 0.55); padding: 16px;
+  font: 500 16px/1.35 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+#pvz-save-sheet .pvz-sheet-box {
+  background: #1d2b1d; color: #fff; border-radius: 14px; padding: 18px; width: min(360px, 100%);
+  display: flex; flex-direction: column; gap: 10px; box-shadow: 0 10px 40px rgba(0,0,0,.5);
+}
+#pvz-save-sheet b { word-break: break-all; }
+#pvz-save-sheet p { margin: 0; color: #cfe6c6; font-size: 14px; }
+#pvz-save-sheet button {
+  min-height: 46px; border: 0; border-radius: 10px; background: #7ed957; color: #0d1a0d; font-weight: 600; font-size: 16px; line-height: 1.2;
+  font-family: inherit;
+}
+#pvz-save-sheet button.pvz-sheet-close { background: #3a4a3a; color: #fff; }

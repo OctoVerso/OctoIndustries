@@ -1,0 +1,12 @@
+{
+  "id": "monkey-mart",
+  "addedAt": "2026-11-15T00:00:00.000Z",
+  "title": "Monkey Mart",
+  "description": "Run your own supermarket, grow fresh produce, stock the shelves, and serve customers.",
+  "version": "1.0.0",
+  "category": "Simulation",
+  "tags": ["management", "shop", "idle", "business"],
+  "launch": "index.html",
+  "bannerSource": "bg_loading.png",
+  "accent": "#4acb82"
+}

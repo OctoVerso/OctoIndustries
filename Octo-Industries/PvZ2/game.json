@@ -1,0 +1,13 @@
+{
+  "id": "pvz2-gardendless",
+  "addedAt": "2026-11-15T00:00:00.000Z",
+  "title": "Plants vs. Zombies 2: Gardendless",
+  "description": "Defend your garden in this locally hosted web version of PvZ2 Gardendless, with persistent saves and offline support.",
+  "version": "0.16.1",
+  "category": "Strategy",
+  "tags": ["plants-vs-zombies", "tower-defense", "strategy", "gardendless"],
+  "launch": "docs/index.html",
+  "bannerSource": "docs/icons/icon-512.png",
+  "bannerFit": "contain",
+  "accent": "#8fcb4a"
+}

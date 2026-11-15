@@ -177,6 +177,7 @@ window.OCTO_GAMES = Object.freeze([
     "featured": false
   },
   {
+<<<<<<< HEAD
     "id": "pvz-ipad",
     "addedAt": "2026-11-12T00:00:00.000Z",
     "title": "PvZ2 Gardendless",
@@ -194,6 +195,46 @@ window.OCTO_GAMES = Object.freeze([
     "thumbnail": "/Octo-Industries/PvZ-iPad/hub-banner.svg?v=9ab3e2d6e940966a",
     "sourceFile": "Octo-Industries/PvZ-iPad/game.json",
     "banner": "/Octo-Industries/PvZ-iPad/hub-banner.svg?v=9ab3e2d6e940966a",
+=======
+    "id": "monkey-mart",
+    "addedAt": "2026-11-15T00:00:00.000Z",
+    "title": "Monkey Mart",
+    "description": "Run your own supermarket, grow fresh produce, stock the shelves, and serve customers.",
+    "version": "1.0.0",
+    "category": "Simulation",
+    "tags": [
+      "management",
+      "shop",
+      "idle",
+      "business"
+    ],
+    "launch": "/Octo-Industries/Monkey-Mart/index.html",
+    "accent": "#4acb82",
+    "sourceFile": "Octo-Industries/Monkey-Mart/game.json",
+    "banner": "/Octo-Industries/Monkey-Mart/hub-banner.svg?v=aa45d0285e43fc28",
+    "thumbnail": "/Octo-Industries/Monkey-Mart/hub-banner.svg?v=aa45d0285e43fc28",
+    "screenshots": [],
+    "featured": false
+  },
+  {
+    "id": "pvz2-gardendless",
+    "addedAt": "2026-11-15T00:00:00.000Z",
+    "title": "Plants vs. Zombies 2: Gardendless",
+    "description": "Defend your garden in this locally hosted web version of PvZ2 Gardendless, with persistent saves and offline support.",
+    "version": "0.16.1",
+    "category": "Strategy",
+    "tags": [
+      "plants-vs-zombies",
+      "tower-defense",
+      "strategy",
+      "gardendless"
+    ],
+    "launch": "/Octo-Industries/PvZ2/docs/index.html",
+    "accent": "#8fcb4a",
+    "sourceFile": "Octo-Industries/PvZ2/game.json",
+    "banner": "/Octo-Industries/PvZ2/hub-banner.svg?v=82cf82448ad7d4c3",
+    "thumbnail": "/Octo-Industries/PvZ2/hub-banner.svg?v=82cf82448ad7d4c3",
+>>>>>>> c6bb70d (2 games addition)
     "screenshots": [],
     "featured": false
   },

@@ -21,7 +21,9 @@ Add a game directory directly beneath `Octo-Industries/` with an `index.html`; t
 
 ## Game projects
 
+- `Octo-Industries/Monkey-Mart/` — locally hosted supermarket management game.
 - `Octo-Industries/Block-Blast/` — Unity WebGL puzzle game.
+- `Octo-Industries/PvZ2/` — locally hosted PvZ2 Gardendless web game, with persistent saves and offline support.
 - `Octo-Industries/Endless-Siege/` — HTML5 tower defense game.
 - `Octo-Industries/Idle-Mining-Empire/` — locally hosted original HTML5 idle-mining game.
 - `Octo-Industries/Red-Ball-4/` — locally hosted original Unity WebGL platform game, with offline caching and a local screenshot gallery.
