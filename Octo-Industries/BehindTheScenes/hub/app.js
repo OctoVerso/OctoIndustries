@@ -1,5 +1,5 @@
 import { getRouteTitle, normalizeHubRoute } from './route-utils.js';
-import { gameCategories } from './catalog-utils.mjs';
+import { gameCategories, mergeGameCatalog } from './catalog-utils.mjs';
 
 const normalizeGame = (game) => ({
   ...game,
@@ -8,7 +8,10 @@ const normalizeGame = (game) => ({
   screenshots: Array.isArray(game.screenshots) ? game.screenshots.map(window.OCTO_CONFIG.assetUrl) : game.screenshots,
 });
 
-let games = Array.isArray(window.OCTO_GAMES) ? window.OCTO_GAMES.map(normalizeGame) : [];
+const generatedCatalog = Array.isArray(window.OCTO_GAMES) ? window.OCTO_GAMES : [];
+let games = generatedCatalog.map(normalizeGame);
+console.info('[Octo Industries] Generated catalog loaded.', { totalGames: games.length });
+if (!games.length) console.error('[Octo Industries] The generated catalog is missing or empty.');
 let byId = new Map(games.map((game) => [game.id, game]));
 const grid = document.querySelector('#game-grid');
 const searchInput = document.querySelector('#game-search');
@@ -30,6 +33,7 @@ let slideIndex = 0;
 let searchTimer;
 let activeGallery;
 let galleryIndex = 0;
+let gameInteractionsBound = false;
 const octoConfig = window.OCTO_CONFIG;
 const fallbackBannerUrl = octoConfig.assetUrl('Octo-Industries/branding/fallback-banner.svg?v=1');
 
@@ -197,6 +201,40 @@ function renderDashboardOverview() {
   if (overviewTrending) overviewTrending.textContent = String(trendingEntries.length || 0);
   if (overviewContinue) overviewContinue.textContent = String(recent.length || 0);
   if (welcomeCopy) welcomeCopy.textContent = `${String(currentGames.length || 0)} Games Ready to Play`;
+}
+
+function renderGameCollection() {
+  if (!games.length) {
+    grid.hidden = true;
+    emptyState.hidden = false;
+    emptyState.querySelector('h3').textContent = 'The collection is offline.';
+    emptyState.querySelector('p').textContent = 'Run npm --prefix Octo-Industries/BehindTheScenes run sync to discover games and build the local catalog.';
+    resultSummary.textContent = 'No game catalog found';
+    return;
+  }
+
+  document.querySelector('#header-count').textContent = String(games.length).padStart(2, '0');
+  document.querySelector('#library-count').innerHTML = `${String(games.length).padStart(2, '0')} GAMES IN THE COLLECTION <span>↘</span>`;
+  categories();
+  renderFeatured();
+  renderGames();
+  renderRecent();
+  renderTrending();
+  renderRecentlyAdded();
+  renderHomeRoutes();
+  if (!gameInteractionsBound) {
+    bindEvents();
+    drawAmbient();
+    gameInteractionsBound = true;
+  }
+}
+
+function updateFeedbackGameOptions() {
+  const gameSelect = document.querySelector('#feedback-game');
+  if (!gameSelect) return;
+  const selectedGame = gameSelect.value;
+  gameSelect.replaceChildren(...games.map((game) => new Option(game.title, game.id)));
+  if (games.some((game) => game.id === selectedGame)) gameSelect.value = selectedGame;
 }
 
 function getUpcomingRoadmapItems() {
@@ -1176,26 +1214,7 @@ function start() {
   window.setTimeout(() => bootScreen?.remove(), 550);
 
   renderDashboardOverview();
-
-  if (!games.length) {
-    grid.hidden = true;
-    emptyState.hidden = false;
-    emptyState.querySelector('h3').textContent = 'The collection is offline.';
-    emptyState.querySelector('p').textContent = 'Run npm --prefix Octo-Industries/BehindTheScenes run sync to discover games and build the local catalog.';
-    resultSummary.textContent = 'No game catalog found';
-  } else {
-    document.querySelector('#header-count').textContent = String(games.length).padStart(2, '0');
-    document.querySelector('#library-count').innerHTML = `${String(games.length).padStart(2, '0')} GAMES IN THE COLLECTION <span>↘</span>`;
-    categories();
-    renderFeatured();
-    renderGames();
-    renderRecent();
-    renderTrending();
-    renderRecentlyAdded();
-    renderHomeRoutes();
-    bindEvents();
-    drawAmbient();
-  }
+  renderGameCollection();
 
   applyRoute(currentRoute());
   bindNavigationControls();
@@ -1208,12 +1227,24 @@ async function loadPublicCatalog() {
   if (!response.ok) throw new Error(`Catalog request failed (${response.status}).`);
   const catalog = await response.json();
   if (!Array.isArray(catalog)) throw new Error('The server returned an invalid game catalog.');
-  games = catalog.map(normalizeGame);
+  if (!catalog.length) throw new Error('The server returned an empty game catalog.');
+  const publicIds = new Set(catalog.map((game) => game.id));
+  const generatedOnly = generatedCatalog.filter((game) => !publicIds.has(game.id)).map((game) => game.id);
+  const mergedCatalog = mergeGameCatalog(generatedCatalog, catalog);
+  console.info('[Octo Industries] Public catalog loaded.', {
+    publicGames: catalog.length,
+    generatedGames: generatedCatalog.length,
+    totalGames: mergedCatalog.length,
+    gamesMissingFromPublicCatalog: generatedOnly,
+  });
+  games = mergedCatalog.map(normalizeGame);
   byId = new Map(games.map((game) => [game.id, game]));
   featuredGames = games.filter((game) => game.featured);
   slides = featuredGames.length ? featuredGames : games;
   slideIndex = 0;
   renderDashboardOverview();
+  renderGameCollection();
+  updateFeedbackGameOptions();
 }
 
 async function loadRoadmap() {
@@ -1233,7 +1264,6 @@ async function loadRoadmap() {
 const initialHubView = new URLSearchParams(window.location.search).get('view') || 'home';
 setHubView(initialHubView);
 
-Promise.all([
-  loadPublicCatalog().catch((error) => console.error('Unable to load the live game catalog; using the generated catalog instead.', error)),
-  loadRoadmap(),
-]).finally(start);
+void loadRoadmap();
+start();
+loadPublicCatalog().catch((error) => console.error('[Octo Industries] Unable to load the public game catalog; keeping the generated catalog.', error));

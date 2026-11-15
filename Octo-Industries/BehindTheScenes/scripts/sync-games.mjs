@@ -32,6 +32,7 @@ function walk(directory) {
     if (existsSync(manifest)) {
       gamesToRegister.push({ gameDirectory, manifest });
     } else if (directory === gameCollection && existsSync(resolve(gameDirectory, 'index.html'))) {
+      console.warn(`No game.json found for ${relative(root, gameDirectory)}; inferring game metadata.`);
       gamesToRegister.push({ gameDirectory, manifest: null });
     }
     walk(gameDirectory);
@@ -153,15 +154,21 @@ function bannerSvg(game, gameDirectory) {
 
 function resolveGameFile(gameDirectory, value) {
   const collectionDirectory = dirname(gameDirectory);
-  for (const candidate of [
+  const candidates = [
     resolve(gameDirectory, value),
     resolve(collectionDirectory, value),
     resolve(root, value),
-  ]) {
+  ];
+  for (const candidate of candidates) {
     if (candidate.startsWith(`${root}${sep}`) && existsSync(candidate) && statSync(candidate).isFile()) {
       return relative(root, candidate).split(sep).map(encodeURIComponent).join('/');
     }
   }
+  console.error('Could not resolve game asset path.', {
+    game: relative(root, gameDirectory),
+    path: value,
+    candidates: candidates.map((candidate) => relative(root, candidate)),
+  });
   return '';
 }
 
@@ -177,9 +184,14 @@ function versionedAssetReference(file) {
 walk(gameCollection);
 
 const games = gamesToRegister.map(({ gameDirectory, manifest }) => {
-  const game = manifest
-    ? JSON.parse(readFileSync(manifest, 'utf8'))
-    : inferGameMetadata(gameDirectory);
+  let game;
+  try {
+    game = manifest
+      ? JSON.parse(readFileSync(manifest, 'utf8'))
+      : inferGameMetadata(gameDirectory);
+  } catch (error) {
+    throw new Error(`Could not load game manifest ${relative(root, manifest || gameDirectory)}: ${error.message}`, { cause: error });
+  }
   const source = manifest || gameDirectory;
   const sourceFile = relative(root, manifest || resolve(gameDirectory, 'index.html')).split(sep).join('/');
   for (const field of ['id', 'title', 'description', 'category', 'launch']) {
