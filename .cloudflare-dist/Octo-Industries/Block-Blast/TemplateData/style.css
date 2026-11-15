@@ -1,0 +1,8 @@
+body { padding: 0; margin: 0 }
+#unity-container { position: fixed; width: 100%; height: 100%; }
+#unity-canvas { width: 100%; height: 100%; background: #231F20 }
+#unity-loading-bar { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: none }
+#unity-logo { width: 154px; height: 130px; margin: 0 auto; background: url('../../branding/watermark-logo.png') no-repeat center; background-size: contain }
+#unity-progress-bar-empty { margin-left: auto; margin-right: auto; width: 141px; height: 18px; margin-top: 10px; overflow: hidden; border: 1px solid rgba(255, 255, 255, .35); border-radius: 9px; background: rgba(255, 255, 255, .12) }
+#unity-progress-bar-full { width: 0%; height: 18px; background: linear-gradient(90deg, #f28b87, #f6d36b); border-radius: inherit }
+#unity-warning { position: absolute; left: 50%; top: 5%; transform: translate(-50%); background: white; padding: 10px; display: none }

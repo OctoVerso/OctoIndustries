@@ -1,0 +1,15 @@
+{
+  "id": "age-of-war",
+  "addedAt": "2026-10-06T12:00:00.000Z",
+  "title": "Age of War",
+  "description": "Command your civilization through multiple eras in a fast-paced base-defense battle against an opposing army.",
+  "version": "1.0.0",
+  "category": "Strategy",
+  "tags": ["defense", "war", "strategy", "side-scrolling", "base-defense", "flash"],
+  "featured": true,
+  "launch": "Age-of-War/index.html",
+  "thumbnail": "Age-of-War/hub/banner-source.jpg",
+  "accent": "#7ab4ff",
+  "bannerSource": "hub/banner-source.jpg",
+  "bannerFit": "cover"
+}

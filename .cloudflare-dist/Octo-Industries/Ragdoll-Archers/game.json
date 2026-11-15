@@ -1,0 +1,15 @@
+{
+  "id": "ragdoll-archers",
+  "addedAt": "2026-10-06T12:00:00.000Z",
+  "title": "Ragdoll Archers",
+  "description": "Aim, draw, and fire in physics-driven duels as ragdoll archers battle for the last shot.",
+  "version": "1.1.1",
+  "category": "Action",
+  "tags": ["archery", "physics", "duel"],
+  "featured": true,
+  "launch": "Ragdoll-Archers/index.html",
+  "thumbnail": "Ragdoll-Archers/logo.jpeg",
+  "accent": "#efab72",
+  "bannerSource": "logo.jpeg",
+  "bannerFit": "cover"
+}

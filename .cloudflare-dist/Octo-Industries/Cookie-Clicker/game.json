@@ -1,0 +1,15 @@
+{
+  "id": "cookie-clicker",
+  "addedAt": "2026-10-13T00:00:00.000Z",
+  "title": "Cookie Clicker",
+  "description": "Bake cookies, automate your bakery, and chase endless idle progression in a classic incremental clicker loop.",
+  "version": "2.058",
+  "category": "Idle",
+  "tags": ["clicker", "incremental", "idle", "bakery", "management"],
+  "launch": "index.html",
+  "thumbnail": "screenshots/cookie-clicker-gameplay.png",
+  "accent": "#f4c856",
+  "bannerSource": "screenshots/cookie-clicker-gameplay.png",
+  "bannerFit": "cover",
+  "screenshots": ["screenshots/cookie-clicker-gameplay.png"]
+}

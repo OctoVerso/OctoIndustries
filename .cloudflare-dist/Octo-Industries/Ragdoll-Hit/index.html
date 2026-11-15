@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#4d4d4d">
+  <meta name="description" content="Play the original Ragdoll Hit Unity WebGL game, locally hosted by Octo Industries.">
+  <title>Ragdoll Hit | Octo Industries</title>
+  <link rel="icon" href="../branding/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../branding/game-branding.css">
+  <script defer src="../branding/game-branding.js"></script>
+  <link rel="stylesheet" href="../branding/game-loader.css">
+  <script src="../branding/game-loader.js"></script>
+  <script src="MobileDetect.js"></script>
+  <script src="poki-sdk-compat.js"></script>
+  <style>
+    :root {
+      color-scheme: dark;
+      background: #4d4d4d;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      min-height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: #4d4d4d;
+    }
+
+    body {
+      position: fixed;
+      inset: 0;
+      touch-action: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    #game {
+      display: block;
+      width: 100%;
+      height: 100%;
+      background: #4d4d4d;
+      outline: none;
+    }
+
+    #game-error {
+      position: fixed;
+      right: max(16px, env(safe-area-inset-right));
+      bottom: max(16px, env(safe-area-inset-bottom));
+      left: max(16px, env(safe-area-inset-left));
+      z-index: 10;
+      margin: 0 auto;
+      padding: 14px 18px;
+      border: 1px solid rgba(255, 255, 255, .24);
+      border-radius: 8px;
+      background: #17191c;
+      color: #fff;
+      font: 14px/1.5 system-ui, sans-serif;
+    }
+
+    #game-error[hidden] { display: none; }
+  </style>
+</head>
+<body>
+  <canvas id="game" tabindex="0" aria-label="Ragdoll Hit game"></canvas>
+  <p id="game-error" role="alert" hidden></p>
+  <script>
+    (() => {
+      const canvas = document.querySelector('#game');
+      const errorMessage = document.querySelector('#game-error');
+      const loading = OctoLoader.show();
+      const build = 'Build/';
+      const config = {
+        dataUrl: `${build}959bf1c60308f1c34bf072f43c3c17d4.data.unityweb`,
+        frameworkUrl: `${build}3276aa7c11496bcc48eb6908f112f0c3.js.unityweb`,
+        codeUrl: `${build}f23c0f3f40a28f1adce731399dde22aa.wasm.unityweb`,
+        decompressionFallback: 'Brotli',
+        cachedDecompressedFileSizes: {
+          '3276aa7c11496bcc48eb6908f112f0c3.js.unityweb': 66682,
+          '959bf1c60308f1c34bf072f43c3c17d4.data.unityweb': 4377721,
+          'f23c0f3f40a28f1adce731399dde22aa.wasm.unityweb': 5105161,
+          'v84.loader.js': 114199,
+        },
+        streamingAssetsUrl: 'StreamingAssets',
+        webglContextAttributes: { powerPreference: 'high-performance' },
+        companyName: 'Ericetto',
+        productName: 'Ragdoll Hit',
+        productVersion: '0.1',
+      };
+
+      function startGame() {
+        const loaderScript = document.createElement('script');
+        loaderScript.src = `${build}v84.loader.js`;
+        loaderScript.onerror = () => {
+          loading.finish();
+          errorMessage.textContent = 'The locally hosted Unity loader could not be loaded.';
+          errorMessage.hidden = false;
+        };
+        loaderScript.onload = () => {
+          createUnityInstance(canvas, config, (progress) => loading.progress(progress * 100))
+            .then((instance) => {
+              window.unityGame = instance;
+              loading.finish();
+              canvas.focus({ preventScroll: true });
+            })
+            .catch((error) => {
+              console.error('Ragdoll Hit failed to initialize:', error);
+              loading.finish();
+              errorMessage.textContent = 'Ragdoll Hit could not start. Reload the page to try again.';
+              errorMessage.hidden = false;
+            });
+        };
+        document.body.append(loaderScript);
+      }
+
+      async function prepareOfflineCache() {
+        if (!('serviceWorker' in navigator)) return;
+        try {
+          await navigator.serviceWorker.register('service-worker.js');
+          await navigator.serviceWorker.ready;
+          if (!navigator.serviceWorker.controller) {
+            await Promise.race([
+              new Promise((resolve) => navigator.serviceWorker.addEventListener('controllerchange', resolve, { once: true })),
+              new Promise((resolve) => setTimeout(resolve, 1500)),
+            ]);
+          }
+        } catch (error) {
+          console.warn('Offline caching is unavailable for this session.', error);
+        }
+      }
+
+      prepareOfflineCache().finally(startGame);
+      document.addEventListener('pointerdown', () => canvas.focus({ preventScroll: true }));
+    })();
+  </script>
+</body>
+</html>

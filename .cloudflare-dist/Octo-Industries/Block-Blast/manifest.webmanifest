@@ -1,0 +1,23 @@
+{
+    "name": "Block Blast | Octo Industries",
+    "short_name": "Block Blast Puzzle",
+    "start_url": "index.html",
+    "display": "fullscreen",
+    "background_color": "#231F20",
+    "theme_color": "#16121a",
+    "description": "",
+    "icons": [
+      {
+        "src": "../branding/icon-only.png",
+        "sizes": "512x512",
+        "type": "image/png",
+        "purpose": "any"
+      },
+      {
+        "src": "../branding/primary-logo.png",
+        "sizes": "640x720",
+        "type": "image/png",
+        "purpose": "any"
+      }
+    ]
+  }

@@ -1,0 +1,14 @@
+{
+  "id": "web-dashers",
+  "title": "Web Dashers",
+  "description": "A browser-based Geometry Dash demo mod with built-in levels, an icon kit, and online level features. Hosted by its creators; an internet connection is required.",
+  "version": "upstream",
+  "category": "Platform",
+  "tags": ["platformer", "rhythm", "phaser", "online-levels", "browser"],
+  "featured": false,
+  "thumbnail": "wd_branding/wordmark/wordmark_1080.png",
+  "bannerSource": "wd_branding/wordmark/wordmark_1080.png",
+  "bannerFit": "contain",
+  "accent": "#c1fb3d",
+  "launch": "index.html"
+}

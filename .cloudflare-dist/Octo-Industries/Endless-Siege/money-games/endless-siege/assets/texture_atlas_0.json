@@ -1,0 +1,125 @@
+{
+	"textures": [
+		{
+			"image": "texture_atlas_0.png",
+			"format": "RGBA8888",
+			"size": {
+				"w": 1024,
+				"h": 1024
+			},
+			"scale": 1,
+			"frames": [
+				{
+					"filename": "splash_bg",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 768,
+						"h": 128
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 768,
+						"h": 128
+					},
+					"frame": {
+						"x": 1,
+						"y": 1,
+						"w": 768,
+						"h": 128
+					}
+				},
+				{
+					"filename": "endless_siege_title_02",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 580,
+						"h": 219
+					},
+					"spriteSourceSize": {
+						"x": 391,
+						"y": 0,
+						"w": 189,
+						"h": 219
+					},
+					"frame": {
+						"x": 771,
+						"y": 1,
+						"w": 189,
+						"h": 219
+					}
+				},
+				{
+					"filename": "blue_gradient",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 10,
+						"h": 270
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 10,
+						"h": 264
+					},
+					"frame": {
+						"x": 962,
+						"y": 1,
+						"w": 10,
+						"h": 264
+					}
+				},
+				{
+					"filename": "endless_siege_title_01",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 580,
+						"h": 219
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 13,
+						"w": 558,
+						"h": 201
+					},
+					"frame": {
+						"x": 1,
+						"y": 131,
+						"w": 558,
+						"h": 201
+					}
+				},
+				{
+					"filename": "endless_siege_title_3",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 580,
+						"h": 219
+					},
+					"spriteSourceSize": {
+						"x": 407,
+						"y": 0,
+						"w": 173,
+						"h": 219
+					},
+					"frame": {
+						"x": 561,
+						"y": 131,
+						"w": 173,
+						"h": 219
+					}
+				}
+			]
+		}
+	],
+	"meta": {
+		"app": "https://www.codeandweb.com/texturepacker",
+		"version": "3.0",
+		"smartupdate": "$TexturePacker:SmartUpdate:435e1d60f0cf10bed55d76edb5fa67a8:8e4288f922e2d6a7c7e3590d8de8a7a9:37d6858e7d65f51c1507bb5baedaea8a$"
+	}
+}

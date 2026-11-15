@@ -1,0 +1,13 @@
+{
+  "id": "8-ball-pool-online",
+  "title": "8 Ball Pool",
+  "description": "Play classic 8 Ball Pool in your browser from the Octo Industries game collection.",
+  "addedAt": "2026-10-13T00:00:00.000Z",
+  "version": "1.0.0",
+  "category": "Sports",
+  "tags": ["billiards", "pool", "sports", "arcade"],
+  "launch": "index.html",
+  "thumbnail": "8-ball-billiards-classic.png",
+  "bannerSource": "8-ball-billiards-classic.png",
+  "bannerFit": "contain"
+}

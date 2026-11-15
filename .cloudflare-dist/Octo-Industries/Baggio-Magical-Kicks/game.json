@@ -1,0 +1,15 @@
+{
+  "id": "baggio-magical-kicks",
+  "title": "Baggio Magical Kicks",
+  "description": "Take free kicks as Roberto Baggio. Adjust height, direction, and swerve while accounting for distance, the wall, and wind.",
+  "addedAt": "2026-10-08T00:00:00.000Z",
+  "category": "Sports",
+  "tags": ["football", "soccer", "free kick", "sports", "flash"],
+  "featured": false,
+  "launch": "index.html",
+  "thumbnail": "hub/banner-source.jpg",
+  "bannerSource": "hub/banner-source.jpg",
+  "bannerFit": "contain",
+  "accent": "#46a8e6",
+  "screenshots": []
+}

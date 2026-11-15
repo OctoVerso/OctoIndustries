@@ -1,0 +1,15 @@
+{
+  "id": "ragdoll-hit",
+  "title": "Ragdoll Hit",
+  "description": "Fight through unpredictable ragdoll duels, use weapons, and knock opponents out of the arena.",
+  "addedAt": "2026-10-09T00:00:00.000Z",
+  "category": "Action",
+  "tags": ["ragdoll", "fighting", "physics", "stickman"],
+  "featured": false,
+  "launch": "index.html",
+  "thumbnail": "screenshots/1.jpg",
+  "bannerSource": "screenshots/1.jpg",
+  "bannerFit": "cover",
+  "accent": "#4d4d4d",
+  "screenshots": ["screenshots/1.jpg", "screenshots/2.jpg"]
+}

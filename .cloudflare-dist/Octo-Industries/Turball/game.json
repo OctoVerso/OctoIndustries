@@ -1,0 +1,14 @@
+{
+  "id": "turball",
+  "title": "Turball",
+  "description": "Drive, boost, and score in a 3D car-soccer arena with bot matches and free play.",
+  "version": "1.0.0",
+  "addedAt": "2026-10-21T10:34:00.000Z",
+  "category": "Sports",
+  "tags": ["car soccer", "racing", "sports", "3d", "casual"],
+  "launch": "index.html",
+  "thumbnail": "hub/banner-source.webp",
+  "bannerSource": "hub/banner-source.webp",
+  "bannerFit": "cover",
+  "featured": false
+}

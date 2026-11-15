@@ -1,0 +1,14 @@
+{
+  "id": "stickman-hook",
+  "addedAt": "2026-10-06T12:00:00.000Z",
+  "title": "Stickman Hook",
+  "description": "Grapple, swing through each course, and release at just the right moment to reach the finish.",
+  "version": "1.0.0",
+  "category": "Action",
+  "tags": ["platformer", "swing", "timing"],
+  "launch": "Stickman-Hook/index.html",
+  "thumbnail": "Stickman-Hook/images/761ec028d03babc2072c1bb078017f4f-CHAR_Classic.png",
+  "accent": "#f3a39a",
+  "bannerSource": "images/40e0f1c38d1a31bb28123e4ed6fe1af6-title.png",
+  "bannerFit": "contain"
+}

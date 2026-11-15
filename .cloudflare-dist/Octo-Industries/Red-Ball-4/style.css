@@ -1,0 +1,95 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: #10151c;
+}
+
+body {
+  min-width: 320px;
+  min-height: 240px;
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#unity-container {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: #10151c;
+}
+
+#unity-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  outline: none;
+  touch-action: none;
+}
+
+#loading-screen {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 10px;
+  padding: 24px;
+  background: #10151c;
+  color: #f5f7fa;
+  font-family: Arial, sans-serif;
+  text-align: center;
+}
+
+#loading-screen[hidden] {
+  display: none;
+}
+
+#loading-screen h1 {
+  margin: 0;
+  font-size: clamp(24px, 4vw, 38px);
+}
+
+#loading-status {
+  margin: 0;
+  color: #b8c2cc;
+  font-size: 14px;
+}
+
+.progress-track {
+  width: min(260px, 70vw);
+  height: 4px;
+  overflow: hidden;
+  background: #343c45;
+}
+
+.progress-track span {
+  display: block;
+  width: 0;
+  height: 100%;
+  background: #ff554c;
+  transition: width .15s linear;
+}
+
+#unity-message {
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+  left: 20px;
+  margin: 0;
+  padding: 14px;
+  background: #3e1717;
+  color: #fff;
+  font: 14px/1.5 Arial, sans-serif;
+  text-align: center;
+}
+
+#unity-message[hidden] {
+  display: none;
+}

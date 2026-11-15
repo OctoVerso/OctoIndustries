@@ -1,0 +1,21 @@
+{
+  "id": "red-ball-4",
+  "addedAt": "2026-10-06T12:00:00.000Z",
+  "title": "Red Ball 4",
+  "description": "Roll, jump, and solve physics puzzles across colorful platforming levels.",
+  "version": "1.08.03",
+  "category": "Platform",
+  "tags": ["platformer", "physics", "puzzle", "adventure"],
+  "featured": true,
+  "launch": "Red-Ball-4/index.html",
+  "thumbnail": "hub/banner-source.jpg",
+  "accent": "#ff554c",
+  "bannerSource": "hub/banner-source.jpg",
+  "bannerFit": "cover",
+  "screenshots": [
+    "screenshots/1.jpg",
+    "screenshots/2.jpg",
+    "screenshots/3.jpg",
+    "screenshots/4.jpg"
+  ]
+}

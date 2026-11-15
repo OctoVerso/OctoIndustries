@@ -1,0 +1,15 @@
+{
+  "id": "tap-tap-shots",
+  "title": "Tap Tap Shots",
+  "description": "Sink quick shots, pace your aim, and build a streak in this fast arcade basketball challenge.",
+  "addedAt": "2026-10-13T00:00:00.000Z",
+  "version": "1.0.0",
+  "category": "Sports",
+  "tags": ["basketball", "arcade", "timing", "sports"],
+  "launch": "index.html",
+  "thumbnail": "screenshots/01-gameplay.jpg",
+  "accent": "#f5c95b",
+  "bannerSource": "screenshots/01-gameplay.jpg",
+  "bannerFit": "cover",
+  "screenshots": ["screenshots/01-gameplay.jpg"]
+}

@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#101722">
+  <meta name="description" content="Take Roberto Baggio's magical free kicks in the original Flash game, preserved with Ruffle.">
+  <title>Baggio Magical Kicks</title>
+  <link rel="icon" href="../branding/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../branding/game-branding.css">
+  <script defer src="../branding/game-branding.js"></script>
+  <link rel="stylesheet" href="../branding/game-loader.css">
+  <script src="../branding/game-loader.js"></script>
+  <script src="../Age-of-War/ruffle/ruffle.js"></script>
+  <style>
+    :root {
+      color-scheme: dark;
+      background: #101722;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      min-height: 100%;
+      margin: 0;
+      background: #101722;
+    }
+
+    body {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      touch-action: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    .game {
+      display: block;
+      width: min(96vw, 189.52dvh);
+      height: min(92dvh, 46.6vw);
+      aspect-ratio: 800 / 388;
+    }
+
+    @supports not (height: 100dvh) {
+      .game {
+        width: min(96vw, 189.52vh);
+        height: min(92vh, 46.6vw);
+      }
+    }
+
+  </style>
+</head>
+<body>
+  <div id="game" class="game" role="application" aria-label="Baggio Magical Kicks"></div>
+  <script>
+    window.addEventListener('load', () => {
+      OctoLoader.loadRuffle({
+        url: 'games/baggio-magical-kicks.swf',
+        config: {
+          contextMenu: 'off',
+          letterbox: 'on',
+          quality: 'high',
+          scale: 'showAll',
+        },
+        replace: document.getElementById('game'),
+        className: 'game',
+      });
+    });
+  </script>
+</body>
+</html>

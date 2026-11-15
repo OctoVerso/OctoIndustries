@@ -1,0 +1,15 @@
+{
+  "id": "toss-the-turtle",
+  "addedAt": "2026-10-06T12:00:00.000Z",
+  "title": "Toss The Turtle",
+  "description": "Launch, bounce, and fly farther on each attempt in a physics-driven arcade challenge.",
+  "version": "1.0.0",
+  "category": "Arcade",
+  "tags": ["physics", "launch", "score attack"],
+  "featured": true,
+  "launch": "Toss-The-Turtle/index.html",
+  "thumbnail": "hub/banner-source.png",
+  "accent": "#9bc8d6",
+  "bannerSource": "hub/banner-source.png",
+  "bannerFit": "cover"
+}

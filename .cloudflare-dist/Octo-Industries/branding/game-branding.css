@@ -1,0 +1,165 @@
+.octo-game-brand,
+.octo-game-watermark {
+  box-sizing: border-box;
+  position: fixed;
+  z-index: 2147483647;
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+}
+
+.octo-game-brand {
+  display: grid;
+  width: clamp(44px, 4.2vw, 56px);
+  height: clamp(44px, 4.2vw, 56px);
+  top: calc(env(safe-area-inset-top, 0px) + 10px);
+  right: auto;
+  bottom: auto;
+  left: calc(env(safe-area-inset-left, 0px) + 10px);
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(245, 243, 247, .28);
+  border-radius: 50%;
+  background: rgba(12, 15, 24, .82);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  pointer-events: auto;
+  cursor: grab;
+  touch-action: none;
+  transition: top .18s ease, right .18s ease, bottom .18s ease, left .18s ease, transform .18s ease, border-color .18s ease, background .18s ease;
+}
+
+.octo-game-brand:active,
+.octo-game-brand.is-dragging {
+  cursor: grabbing;
+}
+
+.octo-game-brand:hover {
+  transform: scale(1.06);
+  border-color: rgba(242, 139, 135, .7);
+  background: rgba(12, 15, 24, .9);
+}
+
+.octo-game-brand.is-dragging {
+  z-index: 2147483647;
+  transform: scale(1.08);
+  transition: none;
+}
+
+.octo-game-brand:focus-visible {
+  outline: 2px solid #f28b87;
+  outline-offset: 3px;
+}
+
+body[data-octo-home-corner='top-right'] .octo-game-brand {
+  top: calc(env(safe-area-inset-top, 0px) + 10px);
+  right: calc(env(safe-area-inset-right, 0px) + 10px);
+  bottom: auto;
+  left: auto;
+}
+
+body[data-octo-home-corner='bottom-left'] .octo-game-brand {
+  top: auto;
+  right: auto;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 10px);
+  left: calc(env(safe-area-inset-left, 0px) + 10px);
+}
+
+body[data-octo-home-corner='bottom-right'] .octo-game-brand {
+  top: auto;
+  right: calc(env(safe-area-inset-right, 0px) + 10px);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 10px);
+  left: auto;
+}
+
+.octo-game-brand img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: contain;
+}
+
+.octo-game-watermark {
+  position: fixed;
+  display: block;
+  object-fit: contain;
+  object-position: center;
+  z-index: 2147483646;
+  top: auto;
+  left: auto;
+  right: calc(env(safe-area-inset-right, 0px) + 12px);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+  width: clamp(42px, 4.6vw, 64px);
+  height: clamp(42px, 4.6vw, 64px);
+  opacity: var(--octo-watermark-opacity, .15);
+}
+
+body[data-octo-watermark-corner='top-left'] .octo-game-watermark {
+  top: calc(env(safe-area-inset-top, 0px) + 12px);
+  right: auto;
+  bottom: auto;
+  left: calc(env(safe-area-inset-left, 0px) + 12px);
+}
+
+body[data-octo-watermark-corner='top-right'] .octo-game-watermark {
+  top: calc(env(safe-area-inset-top, 0px) + 12px);
+  right: calc(env(safe-area-inset-right, 0px) + 12px);
+  bottom: auto;
+  left: auto;
+}
+
+body[data-octo-watermark-corner='bottom-left'] .octo-game-watermark {
+  top: auto;
+  right: auto;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+  left: calc(env(safe-area-inset-left, 0px) + 12px);
+}
+
+@media (max-width: 480px) {
+  .octo-game-brand {
+    width: 44px;
+    height: 44px;
+  }
+
+  .octo-game-watermark {
+    right: calc(env(safe-area-inset-right, 0px) + 8px);
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);
+    width: 46px;
+    height: 46px;
+  }
+
+  body[data-octo-watermark-corner='top-left'] .octo-game-watermark {
+    top: calc(env(safe-area-inset-top, 0px) + 8px);
+    right: auto;
+    bottom: auto;
+    left: calc(env(safe-area-inset-left, 0px) + 8px);
+  }
+
+  body[data-octo-watermark-corner='top-right'] .octo-game-watermark {
+    top: calc(env(safe-area-inset-top, 0px) + 8px);
+    right: calc(env(safe-area-inset-right, 0px) + 8px);
+    bottom: auto;
+    left: auto;
+  }
+
+  body[data-octo-watermark-corner='bottom-left'] .octo-game-watermark {
+    top: auto;
+    right: auto;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);
+    left: calc(env(safe-area-inset-left, 0px) + 8px);
+  }
+}
+
+@media (max-height: 440px) {
+  .octo-game-brand {
+    width: 40px;
+    height: 40px;
+  }
+
+  .octo-game-watermark {
+    width: 40px;
+    height: 40px;
+  }
+}

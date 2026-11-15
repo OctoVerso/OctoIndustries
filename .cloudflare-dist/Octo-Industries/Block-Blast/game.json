@@ -1,0 +1,14 @@
+{
+  "id": "block-blast",
+  "addedAt": "2026-10-06T12:00:00.000Z",
+  "title": "Block Blast",
+  "description": "Fit shaped blocks together, clear complete rows and columns, and chase a higher score.",
+  "version": "1.1.8",
+  "category": "Puzzle",
+  "tags": ["blocks", "brain teaser", "high score"],
+  "launch": "Block-Blast/index.html",
+  "thumbnail": "Block-Blast/hub/banner-source.png",
+  "accent": "#f6d36b",
+  "bannerSource": "hub/banner-source.png",
+  "bannerFit": "cover"
+}

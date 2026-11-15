@@ -1,0 +1,14 @@
+{
+  "id": "miragine-war",
+  "addedAt": "2026-10-07T12:00:00.000Z",
+  "title": "Miragine War",
+  "description": "Pick the right units and skills to counter the enemy in a side-scrolling war between Red and Blue, in single-player or two-player battles.",
+  "version": "1.0.0",
+  "category": "Strategy",
+  "tags": ["war", "strategy", "2 players", "units", "flash"],
+  "launch": "Miragine-War/index.html",
+  "thumbnail": "Miragine-War/hub/banner-source.png",
+  "accent": "#e8a33a",
+  "bannerSource": "hub/banner-source.png",
+  "bannerFit": "cover"
+}

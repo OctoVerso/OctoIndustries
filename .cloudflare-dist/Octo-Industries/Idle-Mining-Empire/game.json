@@ -1,0 +1,14 @@
+{
+  "id": "idle-mining-empire",
+  "addedAt": "2026-10-06T12:00:00.000Z",
+  "title": "Idle Mining Empire",
+  "description": "Build a mineral mining business by managing mineshafts, workers, elevators, and upgrades.",
+  "version": "1.0.0",
+  "category": "Idle",
+  "tags": ["clicker", "mining", "tycoon", "management"],
+  "launch": "Idle-Mining-Empire/index.html",
+  "thumbnail": "Idle-Mining-Empire/idle-mining-empire.png",
+  "accent": "#d99b42",
+  "bannerSource": "media/graphics/splash/desktop/cover.png",
+  "bannerFit": "cover"
+}

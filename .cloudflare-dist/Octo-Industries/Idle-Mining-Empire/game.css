@@ -1,0 +1,63 @@
+html,
+body {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: #000;
+  font-family: Arial, sans-serif;
+  touch-action: none;
+}
+
+#game {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+}
+
+#ajaxbar {
+  background: #000 url("media/graphics/loading/ajax-loader.gif") center no-repeat;
+}
+
+#canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  -ms-interpolation-mode: nearest-neighbor;
+  -webkit-transform: scale3d(1, 1, 1);
+}
+
+#orientate {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 10002;
+  display: none;
+  float: left;
+  width: 100%;
+  height: 100%;
+}
+
+#orientate img {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.play {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  display: none;
+  float: left;
+  width: 100%;
+  height: 100%;
+  background-color: #fff;
+}
