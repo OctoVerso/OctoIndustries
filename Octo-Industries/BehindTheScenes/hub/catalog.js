@@ -108,6 +108,35 @@ window.OCTO_GAMES = Object.freeze([
     "featured": false
   },
   {
+    "id": "drive-mad",
+    "title": "Drive Mad",
+    "description": "Take control of a car and navigate physics-driven obstacle courses in Drive Mad.",
+    "addedAt": "2026-11-16T00:00:00.000Z",
+    "version": "1.0.0",
+    "category": "Driving",
+    "status": "Live",
+    "multiplayer": false,
+    "featured": false,
+    "platform": "Web",
+    "mobileOptimized": true,
+    "touchControls": true,
+    "tags": [
+      "Driving",
+      "Physics",
+      "Racing",
+      "Vehicles",
+      "Obstacles",
+      "Casual",
+      "Mobile Classic"
+    ],
+    "launch": "/Octo-Industries/Drive-Mad/index.html",
+    "thumbnail": "/Octo-Industries/Drive-Mad/webapp/cover.jpg?v=be97b0404863a572",
+    "accent": "#40a8ff",
+    "sourceFile": "Octo-Industries/Drive-Mad/game.json",
+    "banner": "/Octo-Industries/Drive-Mad/hub-banner.svg?v=35168c0b38811f2b",
+    "screenshots": []
+  },
+  {
     "id": "endless-siege",
     "addedAt": "2026-10-06T12:00:00.000Z",
     "title": "Endless Siege",

@@ -12,6 +12,19 @@ const excludedNames = new Set(['node_modules', '.git', '.vscode', '.DS_Store']);
 const sync = spawnSync('npm', ['--prefix', 'Octo-Industries/BehindTheScenes', 'run', 'sync'], { cwd: root, stdio: 'inherit' });
 if (sync.status !== 0) throw new Error('Game catalog sync failed.');
 
+const catalogPath = join(root, 'Octo-Industries/BehindTheScenes/hub/catalog.js');
+const catalogSource = await readFile(catalogPath, 'utf8');
+const catalogMatch = /^window\.OCTO_GAMES = Object\.freeze\(([\s\S]*)\);\s*$/.exec(catalogSource);
+if (!catalogMatch) throw new Error('The generated game catalog has an invalid format.');
+const games = JSON.parse(catalogMatch[1]);
+if (!Array.isArray(games)) throw new Error('The generated game catalog must be an array.');
+
+const indexHtml = await readFile(join(root, 'index.html'), 'utf8');
+const canonicalMatch = /<link\s+rel="canonical"\s+href="([^"]+)"/i.exec(indexHtml);
+if (!canonicalMatch) throw new Error('The site index is missing its canonical URL.');
+const siteUrl = new URL(canonicalMatch[1]);
+if (!siteUrl.pathname.endsWith('/')) siteUrl.pathname += '/';
+
 await rm(output, { recursive: true, force: true });
 await mkdir(output, { recursive: true });
 await cp(join(root, 'index.html'), join(output, 'index.html'));
@@ -56,6 +69,14 @@ await writeFile(join(output, '404.html'), `<!doctype html><meta charset="utf-8">
 </script>
 `);
 await writeFile(join(output, '.nojekyll'), '');
+const sitemapUrls = [
+  siteUrl.href,
+  ...games.map((game) => new URL(String(game.launch || '').replace(/^\/+/, ''), siteUrl).href),
+];
+const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemapUrls
+  .map((url) => `  <url><loc>${url.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')}</loc></url>`)
+  .join('\n')}\n</urlset>\n`;
+await writeFile(join(output, 'sitemap.xml'), sitemap);
 
 async function walk(directory) {
   for (const entry of await readdir(directory, { withFileTypes: true })) {

@@ -1,0 +1,29 @@
+{
+  "id": "drive-mad",
+  "title": "Drive Mad",
+  "description": "Take control of a car and navigate physics-driven obstacle courses in Drive Mad.",
+  "addedAt": "2026-11-16T00:00:00.000Z",
+  "version": "1.0.0",
+  "category": "Driving",
+  "status": "Live",
+  "multiplayer": false,
+  "featured": false,
+  "platform": "Web",
+  "mobileOptimized": true,
+  "touchControls": true,
+  "tags": [
+    "Driving",
+    "Physics",
+    "Racing",
+    "Vehicles",
+    "Obstacles",
+    "Casual",
+    "Mobile Classic"
+  ],
+  "launch": "index.html",
+  "thumbnail": "webapp/cover.jpg",
+  "thumbnailDirect": true,
+  "bannerSource": "logo.jpeg",
+  "bannerFit": "contain",
+  "accent": "#40a8ff"
+}
