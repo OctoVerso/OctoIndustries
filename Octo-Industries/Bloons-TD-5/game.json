@@ -1,0 +1,13 @@
+{
+  "id": "bloons-td-5",
+  "addedAt": "2026-11-17T00:00:00.000Z",
+  "title": "Bloons Tower Defense 5",
+  "description": "Build a defense of monkey towers, upgrade them, and stop waves of Bloons across classic maps.",
+  "category": "Strategy",
+  "tags": ["bloons", "tower-defense", "strategy", "ninja-kiwi", "flash"],
+  "launch": "index.html",
+  "thumbnail": "hub/banner-source.jpg",
+  "bannerSource": "hub/banner-source.jpg",
+  "bannerFit": "cover",
+  "featured": false
+}

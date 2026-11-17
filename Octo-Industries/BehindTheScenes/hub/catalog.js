@@ -132,6 +132,26 @@ window.OCTO_GAMES = Object.freeze([
     "featured": false
   },
   {
+    "id": "bloons-td-5",
+    "addedAt": "2026-11-17T00:00:00.000Z",
+    "title": "Bloons Tower Defense 5",
+    "description": "Build a defense of monkey towers, upgrade them, and stop waves of Bloons across classic maps.",
+    "category": "Strategy",
+    "tags": [
+      "bloons",
+      "tower-defense",
+      "strategy",
+      "ninja-kiwi",
+      "flash"
+    ],
+    "launch": "/Octo-Industries/Bloons-TD-5/index.html",
+    "thumbnail": "/Octo-Industries/Bloons-TD-5/hub-banner.svg?v=b28b17fadc59f674",
+    "featured": false,
+    "sourceFile": "Octo-Industries/Bloons-TD-5/game.json",
+    "banner": "/Octo-Industries/Bloons-TD-5/hub-banner.svg?v=b28b17fadc59f674",
+    "screenshots": []
+  },
+  {
     "id": "cookie-clicker",
     "addedAt": "2026-10-13T00:00:00.000Z",
     "title": "Cookie Clicker",

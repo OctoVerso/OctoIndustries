@@ -1,0 +1,930 @@
+OCTO INDUSTRIES — UNIVERSAL GAME ACQUISITION, EXTRACTION, PRESERVATION, RECONSTRUCTION, SELF-HOSTING, AUTOMATIC SAVING, PLAYABILITY AND HUB INTEGRATION SYSTEM
+1. PRIMARY MISSION
+Acquire the ACTUAL target game.
+The objective is to:
+	•	Find the original game.
+	•	Acquire its actual playable files.
+	•	Verify the acquired artifact.
+	•	Extract available resources.
+	•	Preserve original gameplay.
+	•	Localize game files.
+	•	Store the game inside the Octo Industries repository.
+	•	Self-host the game wherever technically and legitimately possible.
+	•	Implement automatic progress saving.
+	•	Integrate the game throughout Octo Industries.
+	•	Verify that the game is genuinely playable.
+The required architecture is:
+ACTUAL GAME ↓ VERIFIED GAME ARTIFACT ↓ EXTRACTED GAME FILES ↓ OCTO INDUSTRIES REPOSITORY ↓ LOCALIZED GAME RUNTIME ↓ AUTOMATIC SAVE SYSTEM ↓ OCTO INDUSTRIES HUB ↓ PLAYABLE GAME
+Do not mistake a game listing, external link, screenshot, iframe, launcher, or promotional webpage for an acquired game.
+2. AUTHORIZATION AND TECHNICAL SCOPE
+Assume the project has obtained the permissions necessary for its intended acquisition, preservation, modification, hosting, and integration.
+Focus on technical implementation.
+Respect applicable platform restrictions, access controls, privacy requirements, and security boundaries.
+Do not bypass DRM, authentication, payment requirements, or other technical access restrictions.
+If an artifact cannot legitimately be obtained, investigate alternative legitimate sources and document the limitation.
+3. MANDATORY REPOSITORY AUDIT
+Before making changes, scan the entire repository.
+Identify:
+	•	Existing project architecture.
+	•	Main Octo Industries Hub.
+	•	Main Game Collection.
+	•	Game Registry.
+	•	Game Library.
+	•	Search.
+	•	Categories.
+	•	Navigation.
+	•	Recently Added.
+	•	Game cards.
+	•	Home Button.
+	•	Watermark.
+	•	Loading System.
+	•	Routing.
+	•	Storage.
+	•	Save systems.
+	•	Synchronization.
+	•	Asset management.
+	•	Existing game import functionality.
+Repository rules
+	1.	Audit everything before implementation.
+	2.	Reuse existing functional systems.
+	3.	Preserve existing functionality.
+	4.	Avoid unnecessary rewrites.
+	5.	Do not create duplicate systems.
+	6.	Maintain backward compatibility.
+	7.	Follow existing coding conventions.
+	8.	Document architectural changes.
+	9.	Preserve existing games and their data.
+	10.	Organize imported games consistently.
+Approval requirement
+Work directly inside the existing repository.
+However, before modifying any existing shared system, component, architecture, or functionality in a way that changes its existing behavior, ask for my approval.
+Routine additive work through existing extension points may proceed.
+Never silently replace, rewrite, remove, or restructure working systems.
+4. UNIVERSAL GAME ACQUISITION
+Support:
+	•	Browser Games.
+	•	Scratch Projects.
+	•	HTML5 Games.
+	•	Unity WebGL.
+	•	Unreal.
+	•	Construct.
+	•	Phaser.
+	•	GameMaker.
+	•	Godot.
+	•	Cocos.
+	•	APK.
+	•	XAPK.
+	•	AAB.
+	•	ZIP archives.
+	•	Git repositories.
+	•	Official game packages.
+	•	Official distribution sources.
+When provided with a game name, store listing, or website:
+	1.	Identify the actual target game.
+	2.	Investigate legitimate acquisition sources.
+	3.	Search for actual game artifacts.
+	4.	Locate official browser versions.
+	5.	Locate downloadable game packages.
+	6.	Investigate original runtime files.
+	7.	Verify the discovered artifact.
+Exhaust legitimate acquisition sources before giving up.
+Do not stop at store listings, promotional websites, catalog entries, or download pages.
+5. ARTIFACT VERIFICATION
+Verify:
+	•	Game identity.
+	•	Application name.
+	•	Package identifier.
+	•	File structure.
+	•	Internal contents.
+	•	Engine signatures.
+	•	Runtime.
+	•	Entry point.
+	•	Assets.
+	•	Dependencies.
+	•	Build information.
+Reject unrelated installers, downloader applications, advertising applications, and launcher applications as substitutes for the actual game.
+Generate an Artifact Verification Report.
+6. PAYLOAD DISCOVERY
+Investigate the actual game delivery structure.
+Identify:
+	•	Entry HTML.
+	•	JavaScript.
+	•	CSS.
+	•	JSON.
+	•	Manifests.
+	•	Bootstrap scripts.
+	•	Loaders.
+	•	WebAssembly.
+	•	Runtime files.
+	•	Images.
+	•	Sprites.
+	•	Audio.
+	•	Fonts.
+	•	Asset bundles.
+	•	Dynamic resources.
+	•	CDN dependencies.
+	•	Available API dependencies.
+	•	Save systems.
+Map the available dependency tree.
+Do not mistake an iframe, wrapper, embed, portal, or launcher for the actual game.
+Investigate whether the original game payload can legitimately be acquired and hosted locally.
+7. ENGINE AND RUNTIME IDENTIFICATION
+Identify the engine wherever possible.
+Supported engines include:
+	•	Unity.
+	•	Unity WebGL.
+	•	Unreal.
+	•	Godot.
+	•	Construct.
+	•	Phaser.
+	•	Cocos.
+	•	GameMaker.
+	•	Flutter.
+	•	React Native.
+	•	Cordova.
+	•	Capacitor.
+	•	Native Android.
+	•	Native iOS.
+	•	Custom engines.
+Determine:
+	•	Engine version.
+	•	Runtime requirements.
+	•	Rendering technology.
+	•	Input system.
+	•	Audio system.
+	•	Asset loading.
+	•	Save mechanism.
+	•	Browser requirements.
+	•	Platform dependencies.
+Generate:
+	1.	Engine Report.
+	2.	Runtime Report.
+8. EXTRACTION AND REPOSITORY LOCALIZATION
+Extract and preserve original files wherever technically and legitimately possible.
+Supported content:
+	•	HTML.
+	•	CSS.
+	•	JavaScript.
+	•	WebAssembly.
+	•	Images.
+	•	Sprites.
+	•	Textures.
+	•	Audio.
+	•	Music.
+	•	Video.
+	•	Fonts.
+	•	JSON.
+	•	Configurations.
+	•	Localization.
+	•	Animations.
+	•	Shaders.
+	•	Asset bundles.
+	•	Runtime resources.
+	•	Save data.
+Store each imported game inside the existing repository.
+Use a consistent folder for each game.
+Example:
+games/ game-id/ index.html assets/ scripts/ styles/ images/ audio/ data/ runtime/ metadata.json
+Adapt the structure to the existing repository architecture.
+Do not force unnecessary architectural changes.
+Preserve original files and distinguish original files from modified compatibility files.
+Localize references whenever possible.
+9. ACTUAL GAME PRESERVATION
+Preserve everything possible:
+	•	Gameplay.
+	•	Mechanics.
+	•	Menus.
+	•	Controls.
+	•	Physics.
+	•	Timing.
+	•	Animations.
+	•	Graphics.
+	•	Audio.
+	•	Music.
+	•	Progression.
+	•	UI.
+	•	Settings.
+	•	Achievements.
+	•	Save functionality.
+Do not unnecessarily replace functioning original files.
+Do not simplify original gameplay.
+10. ACQUISITION PRIORITY
+Follow this priority:
+	1.	Actual original browser-delivered game.
+	2.	Official web version.
+	3.	Original HTML5 build.
+	4.	Original Unity WebGL build.
+	5.	Other legitimate original web builds.
+	6.	Original game package.
+	7.	Compatible runtime adaptation.
+	8.	Reconstruction.
+Reconstruction is the absolute last resort.
+Continue searching when the first acquisition attempt fails.
+11. AUTHENTICITY AND RECONSTRUCTION
+The objective is the actual game, not a clone.
+Do not invent characters, mechanics, abilities, menus, levels, or progression systems when original evidence exists.
+Use:
+	•	Original assets.
+	•	Original UI.
+	•	Gameplay footage.
+	•	Screenshots.
+	•	Audio.
+	•	Animations.
+	•	Metadata.
+	•	Configurations.
+	•	Original behavior.
+Only reconstruct when legitimate acquisition and original runtime options have been exhausted.
+Clearly label reconstructed games:
+RECONSTRUCTED FROM ORIGINAL REFERENCES
+Never present a reconstruction as the original acquired game.
+12. PLAYABILITY
+Make every acquired game playable whenever technically feasible.
+Test:
+	•	Launch.
+	•	Loading.
+	•	Main menu.
+	•	Gameplay.
+	•	Controls.
+	•	Touch.
+	•	Audio.
+	•	Progression.
+	•	Checkpoints.
+	•	Save functionality.
+	•	Restart.
+	•	Continue.
+	•	Error handling.
+A game that exists in the repository but cannot launch is not a successful playable import.
+13. UNIVERSAL AUTOMATIC GAME SAVE SYSTEM
+Primary objective
+Implement a centralized game persistence architecture for ALL imported Octo Industries games.
+Every game containing progression, levels, checkpoints, achievements, statistics, unlocks, settings, or other persistent information must preserve its supported progress automatically.
+Expected experience:
+Player opens Octo Industries. ↓ Player opens a game. ↓ Player completes levels or reaches checkpoints. ↓ Progress is automatically saved. ↓ Player closes the website. ↓ Player returns later. ↓ Player opens the same game. ↓ The latest valid save is detected. ↓ Continue becomes available. ↓ Player resumes previous progress.
+The player should not need to manually save progress.
+13.1 Save timing
+Save automatically at:
+	•	Checkpoints.
+	•	Completed levels.
+	•	Completed stages.
+	•	Important progression milestones.
+	•	Game exit when a reliable save opportunity exists.
+Do not continuously save every movement or action.
+Use original game save events wherever available.
+Do not rely exclusively on browser-close events because browsers and mobile operating systems can terminate pages without executing shutdown handlers.
+Prioritize reliable checkpoint and level-completion saves.
+13.2 Data to preserve
+Preserve all relevant supported data:
+	•	Current level.
+	•	Completed levels.
+	•	Current stage.
+	•	Checkpoints.
+	•	Campaign progress.
+	•	Unlocked levels.
+	•	Characters.
+	•	Abilities.
+	•	Inventory.
+	•	Currency.
+	•	Scores.
+	•	High scores.
+	•	Achievements.
+	•	Quests.
+	•	Player statistics.
+	•	Game settings.
+	•	Control preferences.
+	•	Customization.
+	•	Other game-specific progression.
+Preserve actual supported game state, not merely screenshots or metadata.
+13.3 Automatic Continue
+When a game is reopened:
+	1.	Identify its save.
+	2.	Validate the save.
+	3.	Load the latest valid progress.
+	4.	Restore the supported game state.
+	5.	Make Continue available.
+Never unnecessarily restart a player from Level 1 when valid progress exists.
+Where the original game has a Continue option, preserve its original behavior.
+Do not force automatic mid-level restoration if the game only supports checkpoint-based restoration.
+13.4 Device-wide persistence
+All games must retain their own independent saves on the device and browser profile being used.
+Example:
+Game A:
+	•	Level 5 completed.
+Game B:
+	•	World 2 unlocked.
+Game C:
+	•	High score preserved.
+Game D:
+	•	Campaign halfway completed.
+Closing Octo Industries must not erase these saves.
+When reopening the same website on the same browser and device, restore each game's own progress.
+13.5 Storage architecture
+Preferred storage:
+	1.	IndexedDB for structured and larger game saves.
+	2.	LocalStorage for lightweight settings and metadata.
+	3.	Existing project storage systems where appropriate.
+Never rely exclusively on:
+	•	In-memory variables.
+	•	SessionStorage.
+	•	Temporary runtime state.
+Separate saves using:
+	•	Game ID.
+	•	Save slot.
+	•	Browser/device profile.
+	•	Save version.
+Use one centralized save-management interface.
+Request persistent browser storage where supported, and account for browser quotas and eviction policies.
+Do not promise survival after users clear browser data or storage is removed by the browser or operating system.
+13.6 Original game save compatibility
+Inspect original save systems before implementing new ones.
+Support appropriate adapters for:
+	•	Unity WebGL.
+	•	HTML5.
+	•	Phaser.
+	•	Construct.
+	•	Godot.
+	•	GameMaker.
+	•	Other compatible engines.
+Preserve original save mechanisms whenever possible.
+Avoid competing save systems that corrupt original progress.
+If an original runtime does not expose sufficient game-state information, do not pretend exact-state restoration is possible.
+Implement the most reliable supported checkpoint or progression-based persistence.
+13.7 Save slots
+Every game must have independent save data and support its appropriate save-slot structure.
+Do not overwrite another game's saves.
+Where multiple save slots are supported, keep them independently identifiable.
+13.8 Save integrity
+Implement:
+	•	Save validation.
+	•	Versioning.
+	•	Integrity checks.
+	•	Corruption detection.
+	•	Safe updates.
+	•	Interrupted-write recovery.
+	•	Previous-valid-save backups.
+	•	Migration between save formats.
+Never replace a valid save with corrupted or incomplete data.
+13.9 New Game and Reset Save
+Provide:
+	•	Continue.
+	•	New Game.
+	•	Reset Save.
+Require confirmation before destructive reset operations.
+Do not silently delete existing progress.
+13.10 Save management
+Provide an interface allowing users to:
+	•	View available saves.
+	•	View save information.
+	•	Back up saves.
+	•	Restore saves.
+	•	Export saves.
+	•	Import supported saves.
+	•	Delete saves.
+	•	Reset individual games.
+Never allow one game's management operation to unintentionally affect another game's saves.
+13.11 Cloud synchronization
+Device-local saving is the primary requirement.
+Cloud synchronization is optional.
+If an existing authenticated backend is available and authorized:
+	•	Synchronize local saves when possible.
+	•	Preserve offline functionality.
+	•	Avoid overwriting newer saves.
+	•	Detect conflicts.
+	•	Provide safe recovery.
+	•	Keep cloud and local versions distinguishable.
+Do not make cloud synchronization mandatory for locally playable games.
+Do not assume saves transfer to another device without an actual synchronization mechanism.
+13.12 Save levels
+Classify each game:
+SAVE LEVEL 1 — FULL STATE PERSISTENCE
+Full supported gameplay state restored.
+SAVE LEVEL 2 — CHECKPOINT PERSISTENCE
+Latest supported checkpoint restored.
+SAVE LEVEL 3 — PROGRESSION PERSISTENCE
+Completed levels, unlocks, and progression preserved.
+SAVE LEVEL 4 — LIMITED PERSISTENCE
+Only supported settings or statistics preserved.
+SAVE LEVEL 5 — NO RELIABLE PERSISTENCE
+No reliable save mechanism available.
+Never falsely claim a higher save level.
+13.13 Save testing
+For every imported game:
+	1.	Open the game.
+	2.	Play several levels.
+	3.	Complete a level or reach a checkpoint.
+	4.	Confirm saving.
+	5.	Close the game.
+	6.	Close or refresh Octo Industries.
+	7.	Reopen the website.
+	8.	Open the same game.
+	9.	Verify Continue.
+	10.	Verify previous progress.
+	11.	Test a second game.
+	12.	Confirm the two games have independent saves.
+Test browser restarts where feasible.
+Generate a Save & Persistence Report.
+14. MULTIPLAYER AND ONLINE DEPENDENCIES
+Identify:
+	•	Authentication.
+	•	Matchmaking.
+	•	Multiplayer servers.
+	•	APIs.
+	•	Cloud saves.
+	•	Leaderboards.
+	•	Remote configuration.
+	•	External services.
+Classify:
+Tier 1 — Fully Preserved.
+Tier 2 — Partially Preserved.
+Tier 3 — Backend Dependent.
+Tier 4 — Native Runtime Required.
+Do not fabricate multiplayer functionality.
+Document unavailable services.
+15. OFFLINE CAPABILITY
+Determine:
+	•	Offline startup.
+	•	Offline gameplay.
+	•	Asset locality.
+	•	Save functionality.
+	•	Required APIs.
+	•	Backend dependencies.
+Generate an Offline Capability Report.
+Distinguish between fully offline, partially offline, internet-required, backend-dependent, and native-runtime-required games.
+16. IPAD AND BROWSER PRIORITY
+Device priority:
+	1.	iPad.
+	2.	Other tablets.
+	3.	Phones.
+	4.	Desktop.
+Browser priority:
+	•	Safari on iPad.
+	•	Microsoft Edge on iPad.
+	•	Major desktop browsers.
+	•	Major mobile browsers.
+Evaluate:
+	•	Touch controls.
+	•	Screen scaling.
+	•	Portrait orientation.
+	•	Landscape orientation.
+	•	Fullscreen.
+	•	Audio.
+	•	WebAssembly.
+	•	Memory usage.
+	•	Browser restrictions.
+	•	Loading.
+	•	Input responsiveness.
+Automatically support portrait and landscape wherever the game permits.
+Preserve original game orientation requirements.
+16.1 Touch controls
+Automatically support touch controls where technically appropriate.
+Preserve original controls whenever possible.
+Do not introduce unnecessary control overlays.
+16.2 Fullscreen
+Provide native fullscreen wherever supported.
+Provide a suitable fallback when native fullscreen is unavailable.
+Prioritize iPad usability.
+16.3 Audio
+Integrate centralized Octo Industries audio controls.
+Preserve original game audio.
+Support appropriate:
+	•	Volume.
+	•	Mute.
+	•	Unmute.
+	•	Audio state handling.
+Do not interfere with original gameplay audio behavior.
+16.4 Performance
+Optimize compatibility and performance without changing original gameplay or game speed.
+Preserve:
+	•	Physics.
+	•	Timing.
+	•	Animation speed.
+	•	Responsiveness.
+	•	Original gameplay behavior.
+Target 60 FPS when supported by the game and device.
+Do not force performance settings that change gameplay.
+17. OCTO INDUSTRIES BRANDING
+Reuse existing systems.
+Apply:
+	•	Existing Home Button.
+	•	Existing Watermark.
+	•	Existing Loading System.
+Use existing branding across games wherever compatible.
+Replace non-essential portal branding and navigation with Octo Industries equivalents.
+Preserve original game identity and essential gameplay functionality.
+Do not create duplicate branding components.
+18. CENTRAL GAME REGISTRY
+Maintain one authoritative game registry.
+The registry must power:
+	•	Main Game Collection.
+	•	Game Library.
+	•	Search.
+	•	Categories.
+	•	Navigation.
+	•	Recently Added.
+	•	Favorites.
+	•	Game information pages.
+	•	Game statistics.
+Do not create separate conflicting registries.
+Automatically categorize games, while allowing manual category editing.
+Generate metadata automatically and allow manual editing.
+Detect duplicate imports.
+If a game already exists:
+	•	Identify the existing entry.
+	•	Update it appropriately.
+	•	Avoid creating duplicate entries.
+	•	Preserve game identity.
+	•	Preserve saves.
+	•	Preserve statistics.
+	•	Preserve favorites.
+19. AUTOMATIC GAME REGISTRATION
+Every successfully imported game must appear in all required Hub locations.
+Registration flow:
+Game ↓ Artifact Verification ↓ Main Registry ↓ Main Collection ↓ Library ↓ Search ↓ Categories ↓ Navigation ↓ Recently Added ↓ Favorites eligibility ↓ Game Information Page ↓ Visible Game Card
+A game appearing only in Recently Added is an incomplete import.
+20. GAME CARDS
+Use the existing Octo Industries card design EXACTLY.
+Do not redesign the card system.
+Preserve:
+	•	Styling.
+	•	Sizing.
+	•	Layout.
+	•	Spacing.
+	•	Existing interactions.
+	•	Design consistency.
+Each card displays:
+	•	Thumbnail.
+	•	Game title.
+	•	Description.
+	•	Category.
+	•	Play count.
+	•	General progress summary.
+	•	Last played.
+Use official artwork whenever possible.
+Keep detailed saved gameplay state inside the game.
+When a valid save exists, display both:
+	•	Play.
+	•	Continue.
+Do not silently send Continue to a new game session.
+Use the existing game card component.
+21. FAVORITES SYSTEM
+Implement Favorites.
+Allow users to mark and unmark games as favorites.
+Create a dedicated Favorites section.
+Preserve favorites across normal website closures and reloads using persistent storage.
+Do not create duplicate game entries when favoriting.
+22. INDIVIDUAL GAME INFORMATION PAGES
+Every game must have an individual information page.
+Display:
+	•	Game title.
+	•	Description.
+	•	Thumbnail.
+	•	Screenshots.
+	•	Category.
+	•	Play count.
+	•	Last played.
+	•	General progression information.
+	•	Play button.
+	•	Continue button when a save exists.
+	•	Favorite control.
+Use authentic game media.
+Preserve existing Octo Industries design conventions.
+23. GAME STATISTICS
+Track:
+	•	Play count.
+	•	Last played.
+	•	Time played.
+	•	Completion.
+	•	Progress.
+Keep statistics associated with the correct game.
+Do not mix statistics between games.
+Persist statistics across normal browser sessions.
+Avoid inflating play counts from page refreshes or repeated loading attempts.
+24. GAME IMPORT QUEUE
+Implement a queue for importing multiple games.
+Allow multiple games to be added to the queue.
+Process them individually.
+Display progress for each import.
+Track:
+	•	Queued.
+	•	Investigating.
+	•	Acquiring.
+	•	Verifying.
+	•	Extracting.
+	•	Localizing.
+	•	Integrating.
+	•	Testing.
+	•	Completed.
+	•	Failed.
+	•	Waiting for approval.
+A failed import must not silently stop or corrupt unrelated queued games.
+Allow retrying failed jobs.
+Preserve import status when appropriate.
+Do not claim a queued game has been acquired before its acquisition and verification steps finish.
+25. GAME UPDATE DETECTION
+Detect when improved original game versions become available.
+Before updating:
+	1.	Identify the existing game.
+	2.	Verify the new version.
+	3.	Compare versions and available files.
+	4.	Back up existing game files.
+	5.	Preserve existing save data.
+	6.	Apply the update safely.
+	7.	Verify compatibility.
+	8.	Retest gameplay.
+	9.	Retest saving.
+	10.	Restore the previous version if the update fails.
+Never silently overwrite a valid game installation.
+Do not destroy player progress when updating a game.
+Keep the game ID stable across ordinary version updates.
+26. COLLECTION INTEGRITY
+The number of eligible registered games must match the rendered collection, accounting for intentional filters and visibility rules.
+If the numbers differ:
+	1.	Audit the registry.
+	2.	Identify missing entries.
+	3.	Check filtering.
+	4.	Inspect rendering errors.
+	5.	Rebuild indexes where appropriate.
+	6.	Regenerate missing cards.
+	7.	Verify the result.
+Generate a Collection Integrity Report.
+27. SELF-HOSTING REQUIREMENTS
+The preferred architecture:
+ACTUAL GAME FILES ↓ OCTO INDUSTRIES REPOSITORY ↓ LOCAL RUNTIME ↓ LOCAL ASSETS ↓ LOCAL ENTRY POINT ↓ OCTO INDUSTRIES HUB ↓ PLAYABLE GAME
+The actual game should reside inside the repository wherever technically feasible.
+Do not treat these as successful local acquisitions:
+	•	External links.
+	•	Redirect-only Play Buttons.
+	•	External launch pages.
+	•	Third-party iframe-only implementations.
+	•	Proxy-only implementations.
+	•	Wrapper pages around external game hosts.
+	•	Game cards that merely link to external websites.
+	•	Implementations dependent on an unrelated website remaining online.
+Temporary external access may be used during investigation.
+Document any unavoidable external dependencies.
+28. EXTERNAL HOST INDEPENDENCE TEST
+Where feasible, test without access to the original game host.
+Verify:
+	•	Game launches.
+	•	Runtime loads.
+	•	Assets load.
+	•	Audio works.
+	•	UI works.
+	•	Gameplay works.
+	•	Local saves work.
+If external services remain necessary, identify them.
+Do not claim full independence when authentication, multiplayer, APIs, or other remote services remain required.
+29. MEDIA REQUIREMENTS
+Generate or retrieve:
+	•	Thumbnail.
+	•	Banner.
+	•	Screenshot gallery.
+Priority:
+	1.	Official artwork.
+	2.	Real gameplay.
+	3.	Original menus.
+	4.	Original game assets.
+Never misrepresent generic or AI-generated artwork as authentic game imagery.
+30. IMPORT FAILURE HANDLING
+If acquisition or implementation fails:
+	1.	Identify the exact failure.
+	2.	Investigate its cause.
+	3.	Attempt another legitimate acquisition method.
+	4.	Examine alternative original artifacts.
+	5.	Evaluate runtime compatibility.
+	6.	Attempt reasonable fixes.
+	7.	Retest.
+	8.	Document unresolved limitations.
+Do not abandon the task after one failed attempt.
+If the original game cannot be fully acquired, provide a detailed report explaining:
+	•	What was found.
+	•	What was acquired.
+	•	What was extracted.
+	•	What failed.
+	•	Why it failed.
+	•	What remains possible.
+	•	Whether reconstruction is feasible.
+31. MANDATORY TESTING
+Every imported game must undergo testing before being marked complete.
+Test:
+	•	Artifact verification.
+	•	Runtime.
+	•	Local launch.
+	•	Loading.
+	•	Gameplay.
+	•	Controls.
+	•	Audio.
+	•	UI.
+	•	Touch compatibility.
+	•	Fullscreen.
+	•	Progression.
+	•	Checkpoints.
+	•	Saving.
+	•	Continue.
+	•	Save isolation.
+	•	Browser closure.
+	•	Reopening.
+	•	Hub registration.
+	•	Game cards.
+	•	Search.
+	•	Categories.
+	•	Favorites.
+	•	Statistics.
+	•	External dependencies.
+When a test fails:
+	1.	Investigate.
+	2.	Attempt a fix.
+	3.	Retest.
+	4.	Record unresolved failures.
+Never mark an untested feature as verified.
+32. REQUIRED TECHNICAL REPORTS
+Generate:
+	1.	Repository Audit Report.
+	2.	Artifact Verification Report.
+	3.	Engine Report.
+	4.	Runtime Report.
+	5.	Payload Discovery Report.
+	6.	Extraction Report.
+	7.	Preservation Report.
+	8.	Dependency Report.
+	9.	Multiplayer Report.
+	10.	Offline Capability Report.
+	11.	Browser Compatibility Report.
+	12.	Self-Hosting Feasibility Report.
+	13.	Save & Persistence Report.
+	14.	Playability Test Report.
+	15.	Hub Integration Report.
+	16.	Collection Integrity Report.
+	17.	Update Report when applicable.
+Reports must contain:
+	•	Actual findings.
+	•	Relevant file paths.
+	•	Verification evidence.
+	•	Test results.
+	•	Technical limitations.
+	•	Unresolved issues.
+Use these statuses:
+	•	Verified.
+	•	Partially Verified.
+	•	Failed.
+	•	Not Applicable.
+	•	Not Tested.
+	•	Blocked.
+Do not generate fake reports or generic success messages.
+33. GAME COMPLETION CLASSIFICATION
+A game must not be marked fully complete until its applicable requirements have passed.
+LEVEL 1 — FULLY ACQUIRED & SELF-HOSTED
+Original game files acquired, localized, hosted and playable, with applicable integration and save tests passed.
+LEVEL 2 — ACQUIRED & PARTIALLY SELF-HOSTED
+Original files acquired, but documented external dependencies remain.
+LEVEL 3 — ACQUIRED BUT NOT FULLY PLAYABLE
+Original game artifact exists, but technical limitations prevent full execution.
+LEVEL 4 — RECONSTRUCTED
+Original game could not be acquired and an explicitly labeled reconstruction was created.
+LEVEL 5 — UNAVAILABLE
+Acquisition and reconstruction are blocked by documented technical limitations.
+A game can have a successful acquisition status while remaining incomplete in playability, saving, or integration.
+Track these statuses independently.
+Never award a higher classification without evidence.
+34. FINAL OCTO INDUSTRIES INTEGRATION CHECKLIST
+ACQUISITION
+[ ] Actual game identified. [ ] Artifact verified. [ ] Engine identified. [ ] Runtime investigated. [ ] Payload discovered. [ ] Original files preserved.
+LOCALIZATION
+[ ] Game files stored in repository. [ ] Runtime localized where possible. [ ] Assets localized where possible. [ ] Dependencies documented. [ ] Local entry point verified.
+PLAYABILITY
+[ ] Game launches. [ ] Gameplay works. [ ] Controls work. [ ] Audio works. [ ] Browser compatibility tested. [ ] Fullscreen tested where supported.
+AUTOMATIC SAVING
+[ ] Save mechanism identified. [ ] Appropriate save adapter integrated. [ ] Checkpoint saving tested. [ ] Level-completion saving tested. [ ] Continue tested. [ ] Browser closure tested. [ ] Reopening tested. [ ] Save isolation tested. [ ] Save recovery tested.
+OCTO INDUSTRIES INTEGRATION
+[ ] Home Button. [ ] Watermark. [ ] Loading System. [ ] Main Collection. [ ] Game Registry. [ ] Library. [ ] Search. [ ] Categories. [ ] Navigation. [ ] Recently Added. [ ] Favorites. [ ] Game information page. [ ] Game card. [ ] Play. [ ] Continue. [ ] Statistics.
+SAVE MANAGEMENT
+[ ] Backup. [ ] Restore. [ ] Export. [ ] Import where supported. [ ] Delete. [ ] Reset with confirmation.
+FINAL TESTING
+[ ] Required tests completed. [ ] Failed tests investigated. [ ] Fixes retested. [ ] Reports generated. [ ] Unresolved issues documented.
+35. FINAL EXECUTION DIRECTIVE
+Work inside the existing Octo Industries repository.
+Audit first.
+Acquire the actual game.
+Exhaust legitimate acquisition sources.
+Verify artifacts.
+Identify engines.
+Discover payloads.
+Extract original files.
+Preserve original functionality.
+Localize dependencies.
+Self-host whenever technically feasible.
+Implement automatic game persistence.
+Preserve progress across website closures and browser restarts.
+Provide independent saves for every game.
+Implement Continue, New Game, Reset Save and save management.
+Integrate every game into the central registry.
+Synchronize all Hub sections.
+Implement Favorites.
+Generate individual game information pages.
+Track game statistics.
+Support multiple imports through a progress-tracked queue.
+Detect original game updates.
+Back up files and preserve player saves during updates.
+Prioritize iPad, Safari and Edge compatibility.
+Integrate existing Octo Industries branding.
+Test every imported game.
+Fix failures and retest.
+Generate detailed reports.
+Ask for approval before changing existing shared systems.
+Never claim completion without evidence.
+36. STRICT LOCAL REPOSITORY ACQUISITION REQUIREMENT
+36.1 Primary objective
+The actual playable game must reside inside the Octo Industries repository whenever technically and legitimately possible.
+Required architecture:
+ACTUAL GAME FILES ↓ STORED INSIDE REPOSITORY ↓ LOCALIZED RUNTIME ↓ OCTO INDUSTRIES INTEGRATION ↓ PLAYABLE GAME
+The objective is to host the actual game through Octo Industries, not merely provide access to another website.
+36.2 Failed import implementations
+The following do NOT qualify as successful game acquisitions:
+	•	External game links.
+	•	Redirects.
+	•	External launch pages.
+	•	Embedded third-party websites.
+	•	iframe-only implementations.
+	•	Proxy-only implementations.
+	•	Wrapper pages around third-party hosts.
+	•	Game cards that point to external websites.
+	•	Gameplay dependent on another website remaining online.
+These implementations must never be falsely classified as locally acquired games.
+An iframe may only be used temporarily during investigation or as an explicitly labeled fallback when no technically feasible localization route exists.
+36.3 Localization requirements
+Whenever technically and legitimately possible:
+	1.	Acquire the actual game files.
+	2.	Store the files inside the existing repository.
+	3.	Preserve original assets.
+	4.	Localize runtime dependencies.
+	5.	Rewrite local file references where necessary.
+	6.	Localize loading and asset paths.
+	7.	Remove unnecessary dependencies on the original host.
+	8.	Verify that the local game functions independently.
+Required files may include:
+	•	HTML.
+	•	CSS.
+	•	JavaScript.
+	•	WebAssembly.
+	•	Images.
+	•	Sprites.
+	•	Audio.
+	•	Fonts.
+	•	JSON.
+	•	Data files.
+	•	Runtime files.
+	•	Engine files.
+36.4 Local file verification
+Before declaring a game locally acquired, verify:
+[ ] Game source files exist inside the repository.
+[ ] Required runtime files exist inside the repository.
+[ ] Required assets exist inside the repository.
+[ ] Game launches from repository-hosted files.
+[ ] The Play button launches the local game.
+[ ] No external launch URL is required.
+[ ] No third-party iframe is required.
+[ ] Required external dependencies are documented.
+[ ] Local gameplay has been tested.
+[ ] Save functionality has been tested.
+36.5 External dependency classification
+Classify each game:
+LOCAL LEVEL 1 — FULLY LOCALIZED
+Playable game files and required runtime dependencies are locally hosted, with no required original-host dependency.
+LOCAL LEVEL 2 — LOCALLY HOSTED WITH DOCUMENTED DEPENDENCIES
+The game is hosted locally, but necessary external services remain.
+LOCAL LEVEL 3 — PARTIALLY LOCALIZED
+Some original game files are locally hosted, but the complete playable game still depends on external resources.
+LOCAL LEVEL 4 — EXTERNAL ACCESS ONLY
+The actual game cannot currently be localized. An external implementation may be provided as a clearly labeled temporary access option, but it is NOT an acquired game.
+36.6 Final acquisition rule
+If the Play button opens another website, the game has not been locally acquired.
+If gameplay relies on a third-party iframe, the game has not been locally acquired.
+If the repository does not contain the playable game, the game has not been locally acquired.
+Never classify an external implementation as a successful self-hosted import.
+If localization is blocked:
+	1.	Continue investigating legitimate alternatives.
+	2.	Identify the exact technical limitation.
+	3.	Document what was acquired.
+	4.	Document what remains external.
+	5.	Explain what remains possible.
+	6.	Assign the appropriate acquisition classification.
+Do not silently downgrade the acquisition requirements.
+Do not report an external implementation as a completed local acquisition.
+36.7 Ultimate local acquisition architecture
+ACTUAL GAME ↓ OCTO INDUSTRIES REPOSITORY ↓ OCTO INDUSTRIES HOSTING ↓ PLAYABLE GAME ↓ PERSISTENT PLAYER PROGRESS
+CONTACT INFORMATION
+Email: RealMrOcto@outlook.com
+TikTok: realmrocto
+Snapchat: realmrocto1
+THE ULTIMATE RULE
+Acquire the actual game.
+Preserve the actual game.
+Store the actual game inside the repository whenever technically feasible.
+Self-host the actual game.
+Make the actual game playable.
+Automatically preserve the player's progress.
+Allow the player to return and continue.
+Integrate the game throughout Octo Industries.
+Verify every important feature.
+Never mistake an external website, iframe, redirect, or wrapper for actual acquisition.
+OCTO INDUSTRIES IS NOT JUST A GAME CATALOG.
+IT IS A LOCALLY PRESERVED, PLAYABLE, AUTOMATICALLY SAVED AND FULLY INTEGRATED GAME LIBRARY.
