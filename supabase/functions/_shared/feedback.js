@@ -7,11 +7,16 @@ export const feedbackPriorities = ['low', 'medium', 'high', 'critical'];
 const legacyStatuses = { seen: 'under_review', working: 'in_progress', important: 'under_review', archived: 'closed' };
 
 const maximumMessageLength = 5000;
+const invisibleCharacters = /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f\u200b-\u200f\u2028\u2029\u202a-\u202e\u2060\ufeff]/g;
 const deviceValues = {
   deviceType: new Set(['Desktop', 'Mobile', 'Tablet', 'Unknown']),
   operatingSystem: new Set(['Windows', 'Android', 'iOS', 'macOS', 'Linux', 'Unknown']),
   browser: new Set(['Edge', 'Opera', 'Samsung Internet', 'Firefox', 'Chrome', 'Safari', 'Unknown']),
 };
+
+function sanitizeText(value) {
+  return typeof value === 'string' ? value.replace(/\r\n?/g, '\n').replace(invisibleCharacters, '').trim() : '';
+}
 
 export function validateFeedbackSubmission(body, games) {
   if (!['suggestion', 'issue'].includes(body.type)) {
@@ -20,8 +25,7 @@ export function validateFeedbackSubmission(body, games) {
   if (typeof body.message !== 'string') {
     throw Object.assign(new Error('Message is required and must be 5,000 characters or fewer.'), { status: 400 });
   }
-  const message = body.message.replace(/\r\n?/g, '\n')
-    .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, '').trim();
+  const message = sanitizeText(body.message);
   if (!message || message.length > maximumMessageLength) {
     throw Object.assign(new Error('Message is required and must be 5,000 characters or fewer.'), { status: 400 });
   }
@@ -48,6 +52,24 @@ export function validateFeedbackSubmission(body, games) {
 }
 
 export function normalizeFeedback(row) {
+  let deviceInfo = {};
+  if (typeof row.device_info === 'string') {
+    try {
+      const parsed = JSON.parse(row.device_info || '{}');
+      deviceInfo = parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+    } catch {
+      deviceInfo = {};
+    }
+  } else if (row.device_info && typeof row.device_info === 'object' && !Array.isArray(row.device_info)) {
+    deviceInfo = row.device_info;
+  }
+  const folder = typeof row.folder === 'string' && row.folder.trim() ? row.folder.trim() : 'inbox';
+  const assignedTo = typeof row.assigned_admin === 'string' && row.assigned_admin.trim()
+    ? row.assigned_admin.trim()
+    : typeof row.assignee === 'string' && row.assignee.trim() ? row.assignee.trim() : null;
+  const isRead = Boolean(row.is_read || row.read_at);
+  const isPinned = Boolean(row.is_pinned || row.pinned_at);
+  const isStarred = Boolean(row.is_starred || row.starred_at);
   return {
     id: row.id,
     ticketNumber: row.ticket_number || null,
@@ -55,11 +77,16 @@ export function normalizeFeedback(row) {
     type: row.type,
     gameId: row.game_id,
     message: row.message,
-    deviceInfo: typeof row.device_info === 'string' ? JSON.parse(row.device_info || '{}') : row.device_info || {},
+    deviceInfo,
     status: legacyStatuses[row.status] || row.status,
     priority: row.priority || 'medium',
     archived: Boolean(row.archived_at),
     deleted: Boolean(row.deleted_at),
+    read: isRead,
+    pinned: isPinned,
+    starred: isStarred,
+    folder,
+    assignedTo,
     adminNotes: row.admin_notes || '',
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -74,9 +101,7 @@ export function validateFeedbackPriority(priority) {
 }
 
 export function validateConversationMessage(value) {
-  const message = typeof value === 'string'
-    ? value.replace(/\r\n?/g, '\n').replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, '').trim()
-    : '';
+  const message = sanitizeText(value);
   if (!message || message.length > maximumMessageLength) {
     throw Object.assign(new Error('A reply is required and must be 5,000 characters or fewer.'), { status: 400 });
   }
@@ -94,5 +119,5 @@ export function validateAdminNotes(value) {
   if (typeof value !== 'string' || value.length > 5000) {
     throw Object.assign(new Error('Admin notes must be 5,000 characters or fewer.'), { status: 400 });
   }
-  return value.trim();
+  return sanitizeText(value);
 }

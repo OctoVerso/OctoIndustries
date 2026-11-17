@@ -1,0 +1,14 @@
+{
+  "id": "angry-birds-epic",
+  "addedAt": "2026-11-17T00:00:00.000Z",
+  "title": "Angry Birds Epic",
+  "description": "Lead the Angry Birds into turn-based RPG battles against the pigs. Craft weapons, choose class abilities and fight across Piggy Island.",
+  "version": "1.0.0",
+  "category": "Rpg",
+  "tags": ["rpg", "strategy", "angry-birds", "turn-based"],
+  "launch": "index.html",
+  "thumbnail": "angrybirdsepic.png",
+  "bannerSource": "angrybirdsepic.png",
+  "bannerFit": "cover",
+  "featured": true
+}

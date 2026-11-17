@@ -43,6 +43,26 @@ window.OCTO_GAMES = Object.freeze([
     "screenshots": []
   },
   {
+    "id": "angry-birds-epic",
+    "addedAt": "2026-11-17T00:00:00.000Z",
+    "title": "Angry Birds Epic",
+    "description": "Lead the Angry Birds into turn-based RPG battles against the pigs. Craft weapons, choose class abilities and fight across Piggy Island.",
+    "version": "1.0.0",
+    "category": "Rpg",
+    "tags": [
+      "rpg",
+      "strategy",
+      "angry-birds",
+      "turn-based"
+    ],
+    "launch": "/Octo-Industries/Angry-Birds-Epic/index.html",
+    "thumbnail": "/Octo-Industries/Angry-Birds-Epic/hub-banner.svg?v=594e4dd51d0d416e",
+    "featured": true,
+    "sourceFile": "Octo-Industries/Angry-Birds-Epic/game.json",
+    "banner": "/Octo-Industries/Angry-Birds-Epic/hub-banner.svg?v=594e4dd51d0d416e",
+    "screenshots": []
+  },
+  {
     "id": "baggio-magical-kicks",
     "title": "Baggio Magical Kicks",
     "description": "Take free kicks as Roberto Baggio. Adjust height, direction, and swerve while accounting for distance, the wall, and wind.",

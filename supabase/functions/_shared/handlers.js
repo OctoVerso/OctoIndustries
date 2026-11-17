@@ -29,12 +29,80 @@ export const catalog = serve('catalog', async ({ db, method }) => {
 });
 
 const closedTicketStatuses = ['closed', 'rejected', 'implemented'];
+const validInboxFolders = ['inbox', 'starred', 'pinned', 'archived', 'trash', 'team'];
+
+function normalizeInboxFolder(value) {
+  if (typeof value !== 'string') return 'inbox';
+  const folder = value.trim().toLowerCase();
+  return validInboxFolders.includes(folder) ? folder : 'inbox';
+}
+
+function normalizeInboxAssignment(value) {
+  if (value === undefined || value === null || value === '') return null;
+  const next = String(value).trim();
+  return next ? next.slice(0, 120) : null;
+}
+
+function normalizeBooleanFlag(value, fallback = false) {
+  if (typeof value === 'boolean') return value;
+  if (typeof value === 'string') {
+    const normalized = value.trim().toLowerCase();
+    if (['true', '1', 'yes', 'y', 'on'].includes(normalized)) return true;
+    if (['false', '0', 'no', 'n', 'off'].includes(normalized)) return false;
+  }
+  if (typeof value === 'number') return value === 1;
+  return fallback;
+}
+
+function buildInboxUpdate(body, updatedAt) {
+  const update = {};
+  if (Object.prototype.hasOwnProperty.call(body, 'folder')) {
+    update.folder = normalizeInboxFolder(body.folder);
+  }
+  if (Object.prototype.hasOwnProperty.call(body, 'read')) {
+    const read = normalizeBooleanFlag(body.read, false);
+    update.is_read = read;
+    update.read_at = read ? updatedAt : null;
+  }
+  if (Object.prototype.hasOwnProperty.call(body, 'pinned')) {
+    const pinned = normalizeBooleanFlag(body.pinned, false);
+    update.is_pinned = pinned;
+    update.pinned_at = pinned ? updatedAt : null;
+  }
+  if (Object.prototype.hasOwnProperty.call(body, 'starred')) {
+    const starred = normalizeBooleanFlag(body.starred, false);
+    update.is_starred = starred;
+    update.starred_at = starred ? updatedAt : null;
+  }
+  if (Object.prototype.hasOwnProperty.call(body, 'assignedTo') || Object.prototype.hasOwnProperty.call(body, 'assignee')
+    || Object.prototype.hasOwnProperty.call(body, 'assigned_to')) {
+    const assignedTo = normalizeInboxAssignment(body.assignedTo ?? body.assignee ?? body.assigned_to ?? null);
+    update.assigned_admin = assignedTo;
+  }
+  if (Object.prototype.hasOwnProperty.call(body, 'archived')) {
+    update.archived_at = body.archived ? updatedAt : null;
+  }
+  if (Object.prototype.hasOwnProperty.call(body, 'deleted')) {
+    update.deleted_at = body.deleted ? updatedAt : null;
+  }
+  return update;
+}
 
 async function recordTicketActivity(db, ids, action, actorType) {
   const createdAt = new Date().toISOString();
   must(await db.from('feedback_activity').insert([ids].flat().map((id) => ({
     feedback_id: id, action, actor_type: actorType, created_at: createdAt,
   }))), 'Could not record ticket activity.');
+}
+
+async function applyInboxAction(db, id, action, body = {}, extra = {}) {
+  const updatedAt = new Date().toISOString();
+  const update = buildInboxUpdate(body, updatedAt);
+  if (Object.keys(extra).length) Object.assign(update, extra);
+  const payload = { ...update, updated_at: updatedAt };
+  must(await db.from('feedback').update(payload).eq('id', id));
+  await recordTicketActivity(db, id, action, 'admin');
+  return { id, updatedAt, ...body };
 }
 
 async function ticketMessages(db, id) {
@@ -416,17 +484,30 @@ export const admin = serve('admin', async (context) => {
       || body.ids.some((id) => typeof id !== 'string' || !feedbackId.test(id))) {
       throw httpError('Select between 1 and 50 valid feedback submissions.', 400);
     }
-    const status = validateFeedbackStatus(body.status);
     const ids = [...new Set(body.ids)];
-    must(await db.from('feedback').update({ status, updated_at: new Date().toISOString() }).in('id', ids));
-    await noteTicketActivity(ids, `status_${status}`, 'admin');
-    return json({ updated: ids.length, status });
+    const updatedAt = new Date().toISOString();
+    const update = buildInboxUpdate(body, updatedAt);
+    const status = Object.prototype.hasOwnProperty.call(body, 'status') ? validateFeedbackStatus(body.status) : null;
+    if (status) update.status = status;
+    const priority = Object.prototype.hasOwnProperty.call(body, 'priority') ? validateFeedbackPriority(body.priority) : null;
+    if (priority) update.priority = priority;
+    if (Object.keys(update).length === 0 && !status && !priority) {
+      throw httpError('Choose a supported bulk action for the selected inquiries.', 400);
+    }
+    must(await db.from('feedback').update({ ...update, updated_at: updatedAt }).in('id', ids));
+    if (status) await noteTicketActivity(ids, `status_${status}`, 'admin');
+    if (priority) await noteTicketActivity(ids, `priority_${priority}`, 'admin');
+    if (Object.prototype.hasOwnProperty.call(body, 'archived') || Object.prototype.hasOwnProperty.call(body, 'deleted')) {
+      await noteTicketActivity(ids, body.archived ? 'bulk_archive' : body.deleted ? 'bulk_trash' : 'bulk_update', 'admin');
+    }
+    return json({ updated: ids.length, status, priority, folder: update.folder, archived: body.archived, deleted: body.deleted });
   }
-  const ticketAdminRoute = /^\/feedback\/([a-f\d]{32})(?:\/(status|notes|priority|conversation|reply|archive|unarchive))?$/.exec(path);
+  const ticketAdminRoute = /^\/feedback\/([a-f\d]{32})(?:\/(status|notes|priority|conversation|reply|archive|unarchive|read|unread|pin|unpin|star|unstar|folder|assign|trash|restore))?$/.exec(path);
   if (ticketAdminRoute) {
     const [, id, action] = ticketAdminRoute;
     const row = must(await db.from('feedback').select('*').eq('id', id).maybeSingle());
-    if (!row || row.deleted_at) throw httpError('Feedback submission not found.', 404);
+    if (!row) throw httpError('Feedback submission not found.', 404);
+    if (row.deleted_at && !['restore', 'trash'].includes(action)) throw httpError('Feedback submission not found.', 404);
     const updatedAt = new Date().toISOString();
     if (method === 'GET' && action === 'conversation') {
       const activity = must(await db.from('feedback_activity').select('action, actor_type, created_at')
@@ -445,6 +526,35 @@ export const admin = serve('admin', async (context) => {
       must(await db.from('feedback').update({ archived_at: action === 'archive' ? updatedAt : null, updated_at: updatedAt }).eq('id', id));
       await recordTicketActivity(db, id, action, 'admin');
       return json({ id, archived: action === 'archive', updatedAt });
+    }
+    if (method === 'POST' && (action === 'trash' || action === 'restore')) {
+      const deleted = action === 'trash';
+      const next = { deleted_at: deleted ? updatedAt : null, updated_at: updatedAt };
+      must(await db.from('feedback').update(next).eq('id', id));
+      await recordTicketActivity(db, id, deleted ? 'deleted' : 'restored', 'admin');
+      return json({ id, deleted, updatedAt, folder: row.folder || 'inbox' });
+    }
+    if (method === 'POST' && (action === 'read' || action === 'unread')) {
+      const active = action === 'read';
+      return json(await applyInboxAction(db, id, active ? 'read' : 'unread', { read: active }, { folder: row.folder || 'inbox' }));
+    }
+    if (method === 'POST' && (action === 'pin' || action === 'unpin')) {
+      const active = action === 'pin';
+      return json(await applyInboxAction(db, id, active ? 'pinned' : 'unpinned', { pinned: active }, { folder: row.folder || 'inbox' }));
+    }
+    if (method === 'POST' && (action === 'star' || action === 'unstar')) {
+      const active = action === 'star';
+      return json(await applyInboxAction(db, id, active ? 'starred' : 'unstarred', { starred: active }, { folder: row.folder || 'inbox' }));
+    }
+    if (method === 'PATCH' && action === 'folder') {
+      const body = await bodyJson(request);
+      const folder = normalizeInboxFolder(body.folder ?? body.value);
+      return json(await applyInboxAction(db, id, `folder_${folder}`, { folder }, { folder }));
+    }
+    if (method === 'PATCH' && action === 'assign') {
+      const body = await bodyJson(request);
+      const assignedTo = normalizeInboxAssignment(body.assignedTo ?? body.assignee ?? body.assigned_to ?? body.admin ?? null);
+      return json(await applyInboxAction(db, id, assignedTo ? 'assigned' : 'unassigned', { assignedTo }, { assigned_admin: assignedTo }));
     }
     if (method === 'DELETE' && !action) {
       must(await db.from('feedback').update({ deleted_at: updatedAt, updated_at: updatedAt }).eq('id', id));

@@ -6,10 +6,11 @@ import {
 } from './handlers.js';
 
 function createDb(seed = {}) {
-  const tables = { games: [], jobs: [], activity: [], roadmap: [], feedback: [], proposals: [], admin_sessions: [], ...seed };
+  const tables = { games: [], jobs: [], activity: [], roadmap: [], feedback: [], proposals: [], admin_sessions: [], feedback_activity: [], feedback_conversations: [], ...seed };
   const limits = new Map();
   let activityId = 1;
   const builder = (name) => {
+    if (!tables[name]) tables[name] = [];
     const state = { op: 'select', filters: [], lessThan: [], order: null, range: null, payload: null, count: false, head: false };
     const run = () => {
       const rows = tables[name];
@@ -128,6 +129,49 @@ test('feedback is validated, stored in Supabase and rate limited', async () => {
   let last;
   for (let index = 0; index < 5; index += 1) last = await call(feedback, 'feedback', '', { method: 'POST', body: { type: 'suggestion', message: 'More' } });
   assert.equal(last.status, 429);
+});
+
+test('feedback normalization tolerates malformed device metadata and invisible characters', async () => {
+  const { normalizeFeedback, validateConversationMessage, validateAdminNotes } = await import('./feedback.js');
+  const row = {
+    id: 'a'.repeat(32), ticket_number: null, access_token_hash: null, type: 'issue', game_id: 'alpha',
+    message: 'Hello\u200b there', device_info: '{broken', status: 'new', priority: 'medium', archived_at: null,
+    deleted_at: null, admin_notes: '\u200b.sensitive\ufeff', created_at: '2026-01-01T00:00:00Z', updated_at: '2026-01-01T00:00:00Z',
+  };
+  const normalized = normalizeFeedback(row);
+  assert.deepEqual(normalized.deviceInfo, {});
+  assert.equal(normalized.message, 'Hello\u200b there');
+  assert.equal(validateConversationMessage('  Hi\u200b there  '), 'Hi there');
+  assert.equal(validateAdminNotes('  private\ufeff note  '), 'private note');
+});
+
+test('admin inbox state persists read, pin, star, folder, assignment, trash and restore actions', async () => {
+  const id = 'd'.repeat(32);
+  db = createDb({ feedback: [{
+    id, type: 'suggestion', game_id: null, message: 'Need a follow-up', device_info: {}, status: 'new', priority: 'medium',
+    archived_at: null, deleted_at: null, folder: 'inbox', is_read: false, is_pinned: false, is_starred: false,
+    assigned_admin: null, admin_notes: null, created_at: '2026-01-01T00:00:00Z', updated_at: '2026-01-01T00:00:00Z',
+  }] });
+  const { body: { token } } = await signIn();
+  assert.equal((await call(admin, 'admin', `/feedback/${id}/read`, { method: 'POST', token })).status, 200);
+  assert.equal((await call(admin, 'admin', `/feedback/${id}/pin`, { method: 'POST', token })).status, 200);
+  assert.equal((await call(admin, 'admin', `/feedback/${id}/star`, { method: 'POST', token })).status, 200);
+  assert.equal((await call(admin, 'admin', `/feedback/${id}/folder`, { method: 'PATCH', token, body: { folder: 'team' } })).status, 200);
+  assert.equal((await call(admin, 'admin', `/feedback/${id}/assign`, { method: 'PATCH', token, body: { assignedTo: 'ops-admin' } })).status, 200);
+  assert.equal(db.tables.feedback[0].is_read, true);
+  assert.equal(db.tables.feedback[0].is_pinned, true);
+  assert.equal(db.tables.feedback[0].is_starred, true);
+  assert.equal(db.tables.feedback[0].folder, 'team');
+  assert.equal(db.tables.feedback[0].assigned_admin, 'ops-admin');
+  assert.equal((await call(admin, 'admin', `/feedback/${id}/trash`, { method: 'POST', token })).status, 200);
+  assert.equal((await call(admin, 'admin', `/feedback/${id}/restore`, { method: 'POST', token })).status, 200);
+  assert.equal(db.tables.feedback[0].deleted_at, null);
+  const normalized = (await (await call(admin, 'admin', '/feedback', { token })).json())[0];
+  assert.equal(normalized.read, true);
+  assert.equal(normalized.pinned, true);
+  assert.equal(normalized.starred, true);
+  assert.equal(normalized.folder, 'team');
+  assert.equal(normalized.assignedTo, 'ops-admin');
 });
 
 test('admin endpoints reject missing and forged tokens', async () => {

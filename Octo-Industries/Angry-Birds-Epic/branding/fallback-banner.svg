@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" role="img" aria-labelledby="title description">
+  <title id="title">Octo Industries game artwork fallback</title>
+  <desc id="description">A dark branded banner shown when game artwork cannot be loaded.</desc>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#101d25"/>
+      <stop offset="1" stop-color="#071019"/>
+    </linearGradient>
+    <radialGradient id="glow">
+      <stop stop-color="#f28b87" stop-opacity=".3"/>
+      <stop offset="1" stop-color="#f28b87" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse">
+      <path d="M48 0H0V48" fill="none" stroke="#c9e2db" stroke-opacity=".055"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="675" fill="url(#background)"/>
+  <rect width="1200" height="675" fill="url(#grid)"/>
+  <circle cx="930" cy="330" r="350" fill="url(#glow)"/>
+  <path d="M755 410a150 150 0 1 1 0-145m0 0 66-1m-66 1 1 65" fill="none" stroke="#f28b87" stroke-linecap="round" stroke-linejoin="round" stroke-width="10" opacity=".72"/>
+  <text x="76" y="492" fill="#e8efed" font-family="Arial, sans-serif" font-size="28" font-weight="700">OCTO INDUSTRIES</text>
+  <text x="76" y="542" fill="#aabbb8" font-family="Arial, sans-serif" font-size="18">GAME ART TEMPORARILY UNAVAILABLE</text>
+</svg>

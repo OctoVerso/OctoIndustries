@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#10151c">
+    <title>Angry Birds Epic</title>
+    <link rel="icon" href="branding/favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="branding/favicon.ico">
+    <link rel="stylesheet" href="branding/game-branding.css">
+    <script defer src="branding/game-branding.js"></script>
+    <link rel="stylesheet" href="branding/game-loader.css">
+    <script src="branding/game-loader.js"></script>
+    <link rel="preload" href="Build/EpicWeb.loader.js" as="script">
+    <link rel="preload" href="Build/EpicWeb.framework.js" as="script">
+    <link rel="shortcut icon" href="TemplateData/favicon.ico">
+    <link rel="stylesheet" href="TemplateData/style.css">
+    <link rel="manifest" href="manifest.webmanifest">
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #000;
+      }
+      #unity-loading-bar, #loading-cover, #loading-screen { display: none !important; }
+      #unity-container {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+      }
+      #unity-canvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+        background: #000;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="unity-container">
+      <canvas id="unity-canvas" width="960" height="600" tabindex="-1" aria-label="Angry Birds Epic gameplay"></canvas>
+      <div id="unity-loading-bar">
+        <div id="unity-logo"></div>
+        <div id="unity-progress-bar-empty">
+          <div id="unity-progress-bar-full"></div>
+        </div>
+      </div>
+      <div id="unity-warning"></div>
+    </div>
+
+    <script>
+      const canvas = document.querySelector('#unity-canvas');
+      const warningBanner = document.querySelector('#unity-warning');
+      const buildUrl = 'Build';
+      const nativeFetch = window.fetch.bind(window);
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistration().then((registration) => {
+          const worker = registration && (registration.active || registration.waiting || registration.installing);
+          if (worker && new URL(worker.scriptURL).pathname === new URL('ServiceWorker.js', document.baseURI).pathname) {
+            registration.unregister().catch((error) => {
+              console.warn('The previous game cache worker could not be removed.', error);
+            });
+          }
+        }).catch((error) => {
+          console.warn('The previous game cache worker could not be checked.', error);
+        });
+      }
+      const dataParts = [
+        `${buildUrl}/EpicWeb.data.gz.part1`,
+        `${buildUrl}/EpicWeb.data.gz.part2`,
+      ];
+      const wasmPart = `${buildUrl}/EpicWeb.wasm.gz`;
+
+      async function fetchCompressedAsset(path) {
+        const url = new URL(path, document.baseURI).href;
+        const response = await nativeFetch(url, { cache: 'force-cache' });
+        if (!response.ok) {
+          throw new Error(`Could not load local game asset ${path} (${response.status}).`);
+        }
+        return response;
+      }
+
+      async function decompressAssets(paths, contentType, contentLength, validators = {}) {
+        if (typeof DecompressionStream !== 'function') {
+          throw new Error('This browser does not support compressed local game assets.');
+        }
+        const responses = await Promise.all(paths.map(fetchCompressedAsset));
+        const readers = responses.map((response) => response.body.getReader());
+        let currentReader = 0;
+        const joined = new ReadableStream({
+          async pull(controller) {
+            while (currentReader < readers.length) {
+              const { done, value } = await readers[currentReader].read();
+              if (!done) {
+                controller.enqueue(value);
+                return;
+              }
+              currentReader += 1;
+            }
+            controller.close();
+          },
+          async cancel(reason) {
+            await Promise.all(readers.map((reader) => reader.cancel(reason)));
+          },
+        });
+        const body = joined.pipeThrough(new DecompressionStream('gzip'));
+        return new Response(body, {
+          headers: {
+            'Content-Length': String(contentLength),
+            'Content-Type': contentType,
+            ...validators,
+          },
+        });
+      }
+
+      window.fetch = (input, init) => {
+        const requestUrl = typeof input === 'string' ? input : input.url;
+        const method = (init && init.method) || (typeof input === 'string' ? 'GET' : input.method);
+        const path = new URL(requestUrl, document.baseURI).pathname;
+        if (path.endsWith('/Build/EpicWeb.data') && method === 'HEAD') {
+          return Promise.resolve(new Response(null, {
+            headers: {
+              ETag: '"epic-web-data-3.0.1"',
+              'Last-Modified': 'Tue, 17 Nov 2026 06:18:00 GMT',
+            },
+          }));
+        }
+        if (method === 'GET' && path.endsWith('/Build/EpicWeb.data')) {
+          return decompressAssets(dataParts, 'application/octet-stream', 139744225, {
+            ETag: '"epic-web-data-3.0.1"',
+            'Last-Modified': 'Tue, 17 Nov 2026 06:18:00 GMT',
+          });
+        }
+        if (method === 'GET' && path.endsWith('/Build/EpicWeb.wasm')) {
+          return decompressAssets([wasmPart], 'application/wasm', 34414432);
+        }
+        return nativeFetch(input, init);
+      };
+
+      const config = {
+        arguments: [],
+        dataUrl: `${buildUrl}/EpicWeb.data`,
+        frameworkUrl: `${buildUrl}/EpicWeb.framework.js`,
+        codeUrl: `${buildUrl}/EpicWeb.wasm`,
+        streamingAssetsUrl: 'StreamingAssets',
+        autoSyncPersistentDataPath: true,
+        companyName: 'Rovio Entertainment Ltd.',
+        productName: 'Epic',
+        productVersion: '3.0.1',
+        cacheControl(url) {
+          const path = new URL(url, document.baseURI).pathname;
+          return path.endsWith('/Build/EpicWeb.data') || path.endsWith('/Build/EpicWeb.wasm') || path.includes('/StreamingAssets/')
+            ? 'must-revalidate'
+            : 'no-store';
+        },
+        showBanner(msg, type) {
+          const div = document.createElement('div');
+          div.innerHTML = msg;
+          warningBanner.appendChild(div);
+          if (type === 'error') {
+            div.style = 'background: red; padding: 10px;';
+          } else if (type === 'warning') {
+            div.style = 'background: yellow; padding: 10px;';
+          }
+          setTimeout(() => {
+            warningBanner.removeChild(div);
+            warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
+          }, 5000);
+          warningBanner.style.display = 'block';
+        },
+      };
+
+      function makeFallbackLoader() {
+        const wrapper = document.createElement('div');
+        wrapper.style.position = 'fixed';
+        wrapper.style.inset = '0';
+        wrapper.style.display = 'grid';
+        wrapper.style.placeItems = 'center';
+        wrapper.style.background = '#101722';
+        wrapper.style.color = '#f5f3f7';
+        wrapper.style.fontFamily = 'system-ui, sans-serif';
+        wrapper.style.zIndex = '2147483645';
+        wrapper.innerHTML = '<div style="display:grid;gap:12px;justify-items:center;text-align:center"><img src="angrybirdsepic.png" alt="Angry Birds Epic" style="width:min(60vw,260px);max-height:26vh;object-fit:contain;border-radius:18px" /><div style="font-size:clamp(18px,4vw,28px);font-weight:700">Angry Birds Epic</div><div style="font-size:14px;letter-spacing:.12em;text-transform:uppercase;color:#d0c7d3">Loading…</div><div id="fallback-loader-bar" style="width:min(52vmin,300px);height:4px;border-radius:999px;background:rgba(255,255,255,0.12);overflow:hidden"><i style="display:block;height:100%;width:0%;background:linear-gradient(90deg,#e85a9b,#8a4fd6,#f28b44)"></i></div></div>';
+        document.body.appendChild(wrapper);
+        return {
+          progress(value) {
+            const bar = wrapper.querySelector('i');
+            const clamped = Math.max(0, Math.min(100, Number(value) || 0));
+            bar.style.width = `${clamped}%`;
+          },
+          finish() {
+            wrapper.remove();
+          },
+        };
+      }
+
+      const octoLoader = window.OctoLoader ? window.OctoLoader.show({ title: 'Angry Birds Epic', artwork: 'angrybirdsepic.png' }) : makeFallbackLoader();
+      const script = document.createElement('script');
+      script.src = `${buildUrl}/EpicWeb.loader.js`;
+      script.onload = () => {
+        createUnityInstance(canvas, config, (progress) => {
+          octoLoader.progress(progress * 100);
+        }).then(() => {
+          octoLoader.finish(200);
+        }).catch((error) => {
+          console.error('Angry Birds Epic failed to initialize.', error);
+          octoLoader.finish(200);
+          alert('Angry Birds Epic could not start from the local files.');
+        });
+      };
+      script.onerror = () => {
+        octoLoader.finish(200);
+        alert('The Angry Birds Epic loader could not be found in the local Build folder.');
+      };
+      document.body.appendChild(script);
+
+      document.addEventListener('pointerdown', () => canvas.focus({ preventScroll: true }));
+    </script>
+  </body>
+</html>
