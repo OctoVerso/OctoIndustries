@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="initial-scale=1, width=device-width, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#071019">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' data: blob:; connect-src 'self'; worker-src 'self' blob:; object-src 'none'; frame-src 'none'; base-uri 'self'; form-action 'self'">
+  <title>Ballistic | Octo Industries</title>
+  <link rel="stylesheet" href="../branding/game-branding.css">
+  <style>
+    html,
+    body,
+    #gamePlace {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+    }
+
+    body {
+      overflow: hidden;
+      background: #071019;
+      touch-action: none;
+    }
+
+    #gamePlace {
+      position: fixed;
+      inset: 0;
+    }
+  </style>
+  <script defer src="../branding/game-branding.js"></script>
+</head>
+<body style="padding: 0; border: 0;">
+  <main id="gamePlace" aria-label="Ballistic"></main>
+  <script src="pixi.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>

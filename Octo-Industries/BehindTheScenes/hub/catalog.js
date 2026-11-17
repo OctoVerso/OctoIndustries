@@ -64,6 +64,34 @@ window.OCTO_GAMES = Object.freeze([
     "screenshots": []
   },
   {
+    "id": "ballistic",
+    "title": "Ballistic",
+    "description": "Aim and shoot balls at numbered blocks, clearing them before the stack reaches the launcher.",
+    "addedAt": "2026-11-16T00:00:00.000Z",
+    "version": "1.0.0",
+    "category": "Shooting",
+    "status": "Live",
+    "multiplayer": false,
+    "featured": false,
+    "platform": "Web",
+    "mobileOptimized": true,
+    "touchControls": true,
+    "tags": [
+      "shooting",
+      "arcade",
+      "puzzle",
+      "physics",
+      "high score"
+    ],
+    "launch": "/Octo-Industries/Ballistic/index.html",
+    "thumbnail": "/Octo-Industries/Ballistic/screenshots/01-gameplay.png?v=2227d21ce71b7c72",
+    "sourceFile": "Octo-Industries/Ballistic/game.json",
+    "banner": "/Octo-Industries/Ballistic/hub-banner.svg?v=e4508ee8a500ecfd",
+    "screenshots": [
+      "/Octo-Industries/Ballistic/screenshots/01-gameplay.png?v=2227d21ce71b7c72"
+    ]
+  },
+  {
     "id": "block-blast",
     "addedAt": "2026-10-06T12:00:00.000Z",
     "title": "Block Blast",

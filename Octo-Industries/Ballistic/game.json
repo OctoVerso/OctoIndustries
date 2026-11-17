@@ -1,0 +1,28 @@
+{
+  "id": "ballistic",
+  "title": "Ballistic",
+  "description": "Aim and shoot balls at numbered blocks, clearing them before the stack reaches the launcher.",
+  "addedAt": "2026-11-16T00:00:00.000Z",
+  "version": "1.0.0",
+  "category": "Shooting",
+  "status": "Live",
+  "multiplayer": false,
+  "featured": false,
+  "platform": "Web",
+  "mobileOptimized": true,
+  "touchControls": true,
+  "tags": [
+    "shooting",
+    "arcade",
+    "puzzle",
+    "physics",
+    "high score"
+  ],
+  "launch": "index.html",
+  "thumbnail": "screenshots/01-gameplay.png",
+  "thumbnailDirect": true,
+  "bannerSource": "screenshots/01-gameplay.png",
+  "screenshots": [
+    "screenshots/01-gameplay.png"
+  ]
+}

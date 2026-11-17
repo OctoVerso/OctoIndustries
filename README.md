@@ -1,3 +1,4 @@
+
 ![Octo Industries](./Octo-Industries/branding/horizontal-logo.png)
 
 # Octo Industries™ Game Hub
@@ -22,6 +23,7 @@ Add a game directory directly beneath `Octo-Industries/` with an `index.html`; t
 ## Game projects
 
 - `Octo-Industries/Monkey-Mart/` — locally hosted supermarket management game.
+- `Octo-Industries/Ballistic/` — locally hosted PixiJS browser game with its runtime, image atlases, fonts, and sound assets.
 - `Octo-Industries/Block-Blast/` — Unity WebGL puzzle game.
 - `Octo-Industries/PvZ2/` — locally hosted PvZ2 Gardendless web game, with persistent saves and offline support.
 - `Octo-Industries/Endless-Siege/` — HTML5 tower defense game.
