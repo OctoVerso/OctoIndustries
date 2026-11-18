@@ -32,6 +32,7 @@ Add a game directory directly beneath `Octo-Industries/` with an `index.html`; t
 - `Octo-Industries/Red-Ball-4/` — locally hosted original Unity WebGL platform game, with offline caching and a local screenshot gallery.
 - `Octo-Industries/Subway-Surfers/` — locally hosted original Subway Surfers: New York browser game, with locally stored assets and offline caching.
 - `Octo-Industries/Ragdoll-Archers/` — Unity WebGL archery game.
+- `Octo-Industries/Ragdoll-Drop/` — locally hosted original Unity WebGL physics game.
 - `Octo-Industries/Stickman-Hook/` — browser-based swinging platform game.
 - `Octo-Industries/Tiny-Fishing/` — hub wrapper for the online game at `tiny-fishing.bitbucket.io`; an internet connection is required.
 - `Octo-Industries/Toss-The-Turtle/` — Flash game launched locally by the bundled Ruffle player.

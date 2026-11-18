@@ -362,6 +362,29 @@ window.OCTO_GAMES = Object.freeze([
     "screenshots": []
   },
   {
+    "id": "ragdoll-drop",
+    "title": "Ragdoll Drop",
+    "description": "Send a ragdoll tumbling down the stairs in a physics-driven challenge.",
+    "addedAt": "2026-11-18T00:00:00.000Z",
+    "version": "0.1",
+    "category": "Physics",
+    "tags": [
+      "physics",
+      "comedy",
+      "ragdoll"
+    ],
+    "featured": false,
+    "launch": "/Octo-Industries/Ragdoll-Drop/index.html",
+    "thumbnail": "/Octo-Industries/Ragdoll-Drop/hub-banner.svg?v=de4c7b86999ef64e",
+    "accent": "#e9ab6e",
+    "sourceFile": "Octo-Industries/Ragdoll-Drop/game.json",
+    "banner": "/Octo-Industries/Ragdoll-Drop/hub-banner.svg?v=de4c7b86999ef64e",
+    "screenshots": [
+      "/Octo-Industries/Ragdoll-Drop/screenshots/1.jpg?v=d087c9ce43f89eb5",
+      "/Octo-Industries/Ragdoll-Drop/screenshots/2.jpg?v=ce78301b12f86c47"
+    ]
+  },
+  {
     "id": "ragdoll-hit",
     "title": "Ragdoll Hit",
     "description": "Fight through unpredictable ragdoll duels, use weapons, and knock opponents out of the arena.",
