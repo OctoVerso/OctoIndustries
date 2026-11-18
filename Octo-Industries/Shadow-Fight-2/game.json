@@ -1,0 +1,14 @@
+{
+  "id": "shadow-fight-2",
+  "addedAt": "2026-11-18T06:27:58.652Z",
+  "title": "Shadow Fight 2",
+  "description": "Fight through six demon acts in the official Shadow Fight 2 browser build, with martial arts combat, weapons, armour and RPG progression.",
+  "version": "1.1.33",
+  "category": "Fighting",
+  "tags": ["fighting", "rpg", "martial arts", "shadow", "bosses"],
+  "launch": "Shadow-Fight-2/index.html",
+  "thumbnail": "Shadow-Fight-2/hub/banner-source.png",
+  "accent": "#d3ad56",
+  "bannerSource": "hub/banner-source.png",
+  "bannerFit": "contain"
+}

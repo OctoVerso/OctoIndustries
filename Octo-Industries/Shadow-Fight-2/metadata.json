@@ -1,0 +1,13 @@
+{
+  "artifact": {
+    "name": "Shadow Fight 2",
+    "publisher": "Nekki",
+    "source": "https://shadowfight2.com/play/",
+    "entry": "index.html",
+    "runtime": "Haxe 4.3.7",
+    "gameVersion": "1.1.33",
+    "buildTimestamp": "2026-10-05 10:17:37",
+    "verification": "Official browser-delivered payload. Core HTML, JavaScript and initially discovered resources are stored locally; live third-party ad and service integrations remain external.",
+    "saveSystem": "The original GameInterface storage backend uses browser localStorage for automatic save data."
+  }
+}

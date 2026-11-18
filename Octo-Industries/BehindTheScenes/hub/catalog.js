@@ -225,6 +225,32 @@ window.OCTO_GAMES = Object.freeze([
     "screenshots": []
   },
   {
+    "id": "head-soccer",
+    "title": "Head Soccer",
+    "description": "Play Head Soccer 2023 in arcade mode against the CPU or challenge a friend in two-player mode.",
+    "version": "2023.1",
+    "category": "Sports",
+    "tags": [
+      "soccer",
+      "football",
+      "arcade",
+      "sports",
+      "two-player"
+    ],
+    "launch": "/Octo-Industries/Head-Soccer/index.html",
+    "thumbnail": "/Octo-Industries/Head-Soccer/icons/icon-256.png?v=f29677b74dbd4d42",
+    "accent": "#36b5f5",
+    "author": "Fabbox Studios",
+    "engine": "Scirra Construct",
+    "sourceUrl": "https://github.com/freeonlinewebtools/gamelist7.github.io/tree/345c032e7a76c8a0021201f9ddeb7d9bc5646cca/Head-Soccer",
+    "sourcePage": "https://ubghyper.github.io/games/Head-Soccer.html",
+    "sourceFile": "Octo-Industries/Head-Soccer/game.json",
+    "banner": "/Octo-Industries/Head-Soccer/hub-banner.svg?v=2106cfcaa5600060",
+    "addedAt": "2026-11-17T09:55:42.130Z",
+    "screenshots": [],
+    "featured": false
+  },
+  {
     "id": "idle-mining-empire",
     "addedAt": "2026-10-06T12:00:00.000Z",
     "title": "Idle Mining Empire",
@@ -383,6 +409,28 @@ window.OCTO_GAMES = Object.freeze([
       "/Octo-Industries/Red-Ball-4/screenshots/3.jpg?v=778bc0cb043b7699",
       "/Octo-Industries/Red-Ball-4/screenshots/4.jpg?v=c3d32c251e13a9ce"
     ]
+  },
+  {
+    "id": "shadow-fight-2",
+    "addedAt": "2026-11-18T06:27:58.652Z",
+    "title": "Shadow Fight 2",
+    "description": "Fight through six demon acts in the official Shadow Fight 2 browser build, with martial arts combat, weapons, armour and RPG progression.",
+    "version": "1.1.33",
+    "category": "Fighting",
+    "tags": [
+      "fighting",
+      "rpg",
+      "martial arts",
+      "shadow",
+      "bosses"
+    ],
+    "launch": "/Octo-Industries/Shadow-Fight-2/index.html",
+    "thumbnail": "/Octo-Industries/Shadow-Fight-2/hub-banner.svg?v=8cbfd3dbefc56dd5",
+    "accent": "#d3ad56",
+    "sourceFile": "Octo-Industries/Shadow-Fight-2/game.json",
+    "banner": "/Octo-Industries/Shadow-Fight-2/hub-banner.svg?v=8cbfd3dbefc56dd5",
+    "screenshots": [],
+    "featured": false
   },
   {
     "id": "stickman-hook",

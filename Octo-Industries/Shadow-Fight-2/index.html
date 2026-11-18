@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+    <!-- microsite-play-head:start -->
+    <title>Shadow Fight 2 - Play Online</title>
+    <meta charset="utf-8" />
+    <meta name="description" content="Shadow Fight 2 is a nail-biting mix of classical Fighting and RPG. This game lets you equip countless lethal weapons and rare armor sets, and features dozens of lifelike-animated Martial Arts techniques! As the thrilling Fantasy storyline unfolds, you will fight numerous unique enemies and defeat evil demon bosses." />
+    <meta name="robots" content="index,follow,max-image-preview:large" />
+    <meta name="viewport" content="initial-scale=1, width=device-width, interactive-widget=resizes-content" />
+    <link rel="canonical" href="https://shadowfight2.com/play/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Shadow Fight 2 - Play Online" />
+    <meta property="og:description" content="Shadow Fight 2 is a nail-biting mix of classical Fighting and RPG. This game lets you equip countless lethal weapons and rare armor sets, and features dozens of lifelike-animated Martial Arts techniques! As the thrilling Fantasy storyline unfolds, you will fight numerous unique enemies and defeat evil demon bosses." />
+    <meta property="og:url" content="https://shadowfight2.com/play/" />
+    <meta property="og:image" content="https://shadowfight2.com/images/logored.png" />
+    <meta property="og:image:alt" content="Shadow Fight 2" />
+
+    <link rel="icon" href="https://shadowfight2.com/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" href="https://shadowfight2.com/favicon.png" />
+    <link rel="apple-touch-icon" href="https://shadowfight2.com/apple-touch-icon.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Shadow Fight 2 - Play Online" />
+    <meta name="twitter:description" content="Shadow Fight 2 is a nail-biting mix of classical Fighting and RPG. This game lets you equip countless lethal weapons and rare armor sets, and features dozens of lifelike-animated Martial Arts techniques! As the thrilling Fantasy storyline unfolds, you will fight numerous unique enemies and defeat evil demon bosses." />
+    <script data-measurement-id="G-XWDG5MR6KK" data-page-title="Shadow Fight 2 - Play Online">
+(function () {
+  var currentScript = document.currentScript;
+  var scriptDataset = currentScript ? currentScript.dataset : {};
+  var analyticsConfig = {
+    measurementId: scriptDataset.measurementId || '',
+    config: {
+      page_title: scriptDataset.pageTitle || document.title || 'Play Game',
+      page_path: window.location.pathname || '/play/'
+    }
+  };
+  var documentElement = document.documentElement;
+  var launchUrl = new URL(window.location.href);
+  var fullscreenEvents = ['fullscreenchange', 'webkitfullscreenchange', 'MSFullscreenChange'];
+  var activationEvents = ['pointerdown', 'touchend', 'click', 'keydown'];
+  var hasCleanUrl = false;
+
+  function cleanupLaunchUrl() {
+    if (hasCleanUrl) {
+      return;
+    }
+
+    launchUrl.searchParams.delete('autofs');
+    var nextUrl = launchUrl.pathname + launchUrl.search + launchUrl.hash;
+    window.history.replaceState({}, '', nextUrl);
+    hasCleanUrl = true;
+  }
+
+  function resolveMeasurementId() {
+    var measurementId = analyticsConfig.measurementId || '';
+
+    if (!measurementId || measurementId === '__SHF2_GA_MEASUREMENT_ID__') {
+      return '';
+    }
+
+    return measurementId;
+  }
+
+  function initAnalytics() {
+    var measurementId = resolveMeasurementId();
+
+    if (!measurementId) {
+      return;
+    }
+
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = function () {
+      window.dataLayer.push(arguments);
+    };
+
+    window.gtag('js', new Date());
+
+    var gaConfig = analyticsConfig.config || {};
+    window.gtag('config', measurementId, gaConfig);
+
+    var gaScript = document.createElement('script');
+    gaScript.async = true;
+    gaScript.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(measurementId);
+    document.head.appendChild(gaScript);
+  }
+
+  function isMobileLaunch() {
+    var userAgent = navigator.userAgent || '';
+    var hasMobileUserAgent = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(userAgent);
+    var isTouchMac = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+    var hasCoarsePointer = typeof window.matchMedia === 'function' && window.matchMedia('(pointer: coarse)').matches;
+    var hasSmallViewport = typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 1024px)').matches;
+
+    return hasMobileUserAgent || isTouchMac || (hasCoarsePointer && hasSmallViewport);
+  }
+
+  function shouldRequestFullscreen() {
+    return launchUrl.searchParams.get('autofs') === '1';
+  }
+
+  function isFullscreenActive() {
+    return Boolean(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
+  }
+
+  function getRequestFullscreen() {
+    return (
+      documentElement.requestFullscreen ||
+      documentElement.webkitRequestFullscreen ||
+      documentElement.msRequestFullscreen ||
+      null
+    );
+  }
+
+  function removeActivationListeners() {
+    for (var index = 0; index < activationEvents.length; index += 1) {
+      document.removeEventListener(activationEvents[index], onUserActivation, true);
+    }
+  }
+
+  function removeFullscreenListeners() {
+    for (var index = 0; index < fullscreenEvents.length; index += 1) {
+      document.removeEventListener(fullscreenEvents[index], onFullscreenChange, true);
+    }
+  }
+
+  function finalizeFullscreenLaunch() {
+    removeActivationListeners();
+    removeFullscreenListeners();
+    cleanupLaunchUrl();
+  }
+
+  function onFullscreenChange() {
+    if (isFullscreenActive()) {
+      finalizeFullscreenLaunch();
+    }
+  }
+
+  function requestFullscreen() {
+    if (isFullscreenActive()) {
+      finalizeFullscreenLaunch();
+      return;
+    }
+
+    var requestMethod = getRequestFullscreen();
+
+    if (!requestMethod) {
+      finalizeFullscreenLaunch();
+      return;
+    }
+
+    try {
+      var requestResult = requestMethod.call(documentElement);
+
+      if (requestResult && typeof requestResult.then === 'function') {
+        requestResult
+          .then(function () {
+            finalizeFullscreenLaunch();
+          })
+          .catch(function () {
+          });
+      }
+    } catch (error) {
+    }
+  }
+
+  function onUserActivation() {
+    requestFullscreen();
+  }
+
+  function initFullscreenLaunch() {
+    if (!shouldRequestFullscreen()) {
+      return;
+    }
+
+    if (!isMobileLaunch()) {
+      cleanupLaunchUrl();
+      return;
+    }
+
+    for (var index = 0; index < fullscreenEvents.length; index += 1) {
+      document.addEventListener(fullscreenEvents[index], onFullscreenChange, true);
+    }
+
+    for (var activationIndex = 0; activationIndex < activationEvents.length; activationIndex += 1) {
+      document.addEventListener(activationEvents[activationIndex], onUserActivation, true);
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', requestFullscreen, { once: true });
+    } else {
+      requestFullscreen();
+    }
+  }
+
+  window.SitePlayBootstrap = {
+    requestFullscreen: requestFullscreen,
+    track: function () {
+      if (typeof window.gtag !== 'function') {
+        return;
+      }
+
+      window.gtag.apply(null, arguments);
+    }
+  };
+
+  initAnalytics();
+  initFullscreenLaunch();
+})();
+
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "VideoGame",
+        "name": "Shadow Fight 2",
+        "url": "https://shadowfight2.com/play/",
+        "image": "https://shadowfight2.com/images/logored.png",
+        "description": "Shadow Fight 2 is a fighting RPG with online play, cinematic battles, martial arts combat, and extensive weapon and armor progression.",
+        "genre": [
+          "Fighting",
+          "RPG"
+        ],
+        "gamePlatform": "Web Browser",
+        "publisher": {
+          "@type": "Organization",
+          "name": "Nekki"
+        }
+      }
+    </script>
+    <!-- microsite-play-head:end -->
+  <script>
+    console.log("A/B Test Snippet Active");
+    if (Math.random() >= 0.5) {
+      console.log("A/B Test: Experiement group (ReklamUp)");
+      window.EOS_SDK_GAM_OVERRIDE = {
+        parentNetworkCode: "90851098",
+        childNetworkCode: "23356687927",
+        interstitialUnit: "interstitial",
+        rewardedUnit: "rewarded",
+        bannerUnit: "banner"
+      }
+    } else {
+      console.log("A/B Test: Control group (Famobi)");
+      window.EOS_SDK_GAM_OVERRIDE = {
+        parentNetworkCode: "37336410",
+        interstitialUnit: "eos/default-h5-game-interstitial",
+        rewardedUnit: "eos/default-h5-game-rewarded",
+        bannerUnit: "eos/default-h5-game-banner"
+      }
+    }
+  </script>  
+  <script src="./game-interface.js"></script>
+		<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+		<meta http-equiv="Pragma" content="no-cache">
+		<meta http-equiv="Expires" content="0">
+		<link rel="stylesheet" href="../branding/game-branding.css">
+		<script>window.OCTO_GAME_BRANDING_CONFIG = { hubButtonPosition: 'top-left', watermarkPosition: 'bottom-right' };</script>
+		<script defer src="../branding/game-branding.js"></script>
+		<style>
+			body {
+				margin: 0px;
+				overflow: hidden;
+				background-color: black;
+			}
+		</style>
+		</style>
+
+		<script>
+			window.GameInterface.init([
+        "bnr-test-inject-261010.js",
+				"fflate.303bdba2.js",
+				"lzstring.4a13d534.js",
+				"imageloader.f1250ad7.js",
+				"support.af64392b.js",
+				"sf2.331cd20c.hotfix1.js"
+			]).then(() => SF2.main());
+		</script>
+	</head>
+	<body>
+    <!-- microsite-play-body:start -->
+    <noscript>
+      <p>Play Shadow Fight 2 online in your browser. Enable JavaScript to start the game.</p>
+    </noscript>
+    <!-- microsite-play-body:end -->
+
+	</body>
+</html>

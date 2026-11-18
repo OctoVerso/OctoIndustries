@@ -1,4 +1,4 @@
-OCTO INDUSTRIES — UNIVERSAL GAME ACQUISITION, EXTRACTION, PRESERVATION, RECONSTRUCTION, SELF-HOSTING, AUTOMATIC SAVING, PLAYABILITY AND HUB INTEGRATION SYSTEM
+OCTO INDUSTRIES — UNIVERSAL GAME ACQUISITION, EXTRACTION, PRESERVATION, SELF-HOSTING, AUTOMATIC SAVING, PLAYABILITY AND HUB INTEGRATION SYSTEM
 1. PRIMARY MISSION
 Acquire the ACTUAL target game.
 The objective is to:
@@ -217,26 +217,28 @@ Follow this priority:
 	5.	Other legitimate original web builds.
 	6.	Original game package.
 	7.	Compatible runtime adaptation.
-	8.	Reconstruction.
-Reconstruction is the absolute last resort.
-Continue searching when the first acquisition attempt fails.
-11. AUTHENTICITY AND RECONSTRUCTION
-The objective is the actual game, not a clone.
-Do not invent characters, mechanics, abilities, menus, levels, or progression systems when original evidence exists.
-Use:
-	•	Original assets.
-	•	Original UI.
-	•	Gameplay footage.
-	•	Screenshots.
-	•	Audio.
-	•	Animations.
-	•	Metadata.
-	•	Configurations.
-	•	Original behavior.
-Only reconstruct when legitimate acquisition and original runtime options have been exhausted.
-Clearly label reconstructed games:
-RECONSTRUCTED FROM ORIGINAL REFERENCES
-Never present a reconstruction as the original acquired game.
+	8.	If no legitimate original artifact can be acquired after checking applicable official sources, stop and report that the game is unavailable.
+Continue checking legitimate sources when an acquisition attempt fails.
+10.1 NON-SUBSTITUTION AND STOP RULE
+Never create, code, generate, or register a reconstruction, clone, imitation, remake, or substitute game when the requested original game cannot be obtained.
+This prohibition applies even when:
+	•	The requester says they own the rights or gives permission.
+	•	The original download or game host returns an error or blocks access.
+	•	Gameplay descriptions, screenshots, videos, or other references are available.
+	•	An original game artifact appears unavailable.
+Only create a reconstruction or substitute when the user explicitly asks for one as a separate, distinct task.
+When the original cannot be legitimately acquired:
+	1.	Stop acquisition and implementation work for that game.
+	2.	Do not add a placeholder, external link, iframe, wrapper, clone, or reconstruction to the collection.
+	3.	Do not change the game registry or create a game folder for it.
+	4.	Report sources checked, evidence, exact errors or limitations, and the next legitimate step needed to proceed.
+	5.	Keep the task classified as blocked or unavailable; do not claim the requested game is done.
+Do not bypass access controls, authentication, payment restrictions, anti-bot controls, or HTTP access denials to obtain a game. A rights or permission statement does not itself grant technical access to a third-party host.
+11. AUTHENTICITY AND NON-SUBSTITUTION
+The objective is only the actual requested game, not a clone, imitation, remake, or substitute.
+Preserve the authentic game and its behavior when the original artifact is legitimately acquired.
+References such as descriptions, screenshots, gameplay footage, audio, animations, or metadata may support verification and preservation of an acquired original; they do not authorize or justify creating a replacement game.
+Never reconstruct or imitate a game as an acquisition fallback. Follow section 10.1 and stop with a factual report unless the user separately and explicitly requests a reconstruction.
 12. PLAYABILITY
 Make every acquired game playable whenever technically feasible.
 Test:
@@ -499,7 +501,9 @@ Preserve:
 	•	Animation speed.
 	•	Responsiveness.
 	•	Original gameplay behavior.
-Target 60 FPS when supported by the game and device.
+60 FPS is a requirement for every imported game. Target and verify 60 FPS on the documented supported reference devices and browsers.
+Measure actual frame rate and frame-time stability during representative gameplay; do not claim 60 FPS based only on the configured frame cap or requestAnimationFrame rate.
+If a game fails to sustain the 60 FPS target on its supported reference configuration, optimize and retest without changing original gameplay speed, physics, or behavior. Record any remaining failure and do not mark the performance requirement as passed.
 Do not force performance settings that change gameplay.
 17. OCTO INDUSTRIES BRANDING
 Reuse existing systems.
@@ -694,6 +698,7 @@ If acquisition or implementation fails:
 	6.	Attempt reasonable fixes.
 	7.	Retest.
 	8.	Document unresolved limitations.
+	9.	If no legitimate original artifact can be acquired, stop. Do not create a substitute game; follow section 10.1 and report the blocker.
 Do not abandon the task after one failed attempt.
 If the original game cannot be fully acquired, provide a detailed report explaining:
 	•	What was found.
@@ -702,7 +707,7 @@ If the original game cannot be fully acquired, provide a detailed report explain
 	•	What failed.
 	•	Why it failed.
 	•	What remains possible.
-	•	Whether reconstruction is feasible.
+	•	The next legitimate step required to obtain the original game.
 31. MANDATORY TESTING
 Every imported game must undergo testing before being marked complete.
 Test:
@@ -730,6 +735,7 @@ Test:
 	•	Favorites.
 	•	Statistics.
 	•	External dependencies.
+	•	Actual frame rate and frame-time stability against the 60 FPS requirement.
 When a test fails:
 	1.	Investigate.
 	2.	Attempt a fix.
@@ -778,10 +784,8 @@ LEVEL 2 — ACQUIRED & PARTIALLY SELF-HOSTED
 Original files acquired, but documented external dependencies remain.
 LEVEL 3 — ACQUIRED BUT NOT FULLY PLAYABLE
 Original game artifact exists, but technical limitations prevent full execution.
-LEVEL 4 — RECONSTRUCTED
-Original game could not be acquired and an explicitly labeled reconstruction was created.
-LEVEL 5 — UNAVAILABLE
-Acquisition and reconstruction are blocked by documented technical limitations.
+LEVEL 4 — UNAVAILABLE
+The original game could not be legitimately acquired. No substitute game was created or registered.
 A game can have a successful acquisition status while remaining incomplete in playability, saving, or integration.
 Track these statuses independently.
 Never award a higher classification without evidence.
@@ -792,6 +796,7 @@ LOCALIZATION
 [ ] Game files stored in repository. [ ] Runtime localized where possible. [ ] Assets localized where possible. [ ] Dependencies documented. [ ] Local entry point verified.
 PLAYABILITY
 [ ] Game launches. [ ] Gameplay works. [ ] Controls work. [ ] Audio works. [ ] Browser compatibility tested. [ ] Fullscreen tested where supported.
+[ ] Sustains the required 60 FPS on documented supported reference devices/browsers; frame rate and frame-time stability measured during gameplay.
 AUTOMATIC SAVING
 [ ] Save mechanism identified. [ ] Appropriate save adapter integrated. [ ] Checkpoint saving tested. [ ] Level-completion saving tested. [ ] Continue tested. [ ] Browser closure tested. [ ] Reopening tested. [ ] Save isolation tested. [ ] Save recovery tested.
 OCTO INDUSTRIES INTEGRATION
@@ -831,6 +836,7 @@ Fix failures and retest.
 Generate detailed reports.
 Ask for approval before changing existing shared systems.
 Never claim completion without evidence.
+Never create or register a reconstruction, clone, imitation, remake, or substitute unless the user separately and explicitly requests one. If the original cannot be legitimately obtained, stop and report the blocker.
 36. STRICT LOCAL REPOSITORY ACQUISITION REQUIREMENT
 36.1 Primary objective
 The actual playable game must reside inside the Octo Industries repository whenever technically and legitimately possible.
@@ -849,7 +855,7 @@ The following do NOT qualify as successful game acquisitions:
 	•	Game cards that point to external websites.
 	•	Gameplay dependent on another website remaining online.
 These implementations must never be falsely classified as locally acquired games.
-An iframe may only be used temporarily during investigation or as an explicitly labeled fallback when no technically feasible localization route exists.
+An iframe may only be used temporarily during investigation. Do not add an iframe or other external fallback to the game collection unless the user explicitly requests external access as a separate feature.
 36.3 Localization requirements
 Whenever technically and legitimately possible:
 	1.	Acquire the actual game files.
@@ -894,7 +900,7 @@ The game is hosted locally, but necessary external services remain.
 LOCAL LEVEL 3 — PARTIALLY LOCALIZED
 Some original game files are locally hosted, but the complete playable game still depends on external resources.
 LOCAL LEVEL 4 — EXTERNAL ACCESS ONLY
-The actual game cannot currently be localized. An external implementation may be provided as a clearly labeled temporary access option, but it is NOT an acquired game.
+The actual game cannot currently be localized. It is NOT an acquired game. Do not add an external implementation to the collection unless the user explicitly requests that separate feature.
 36.6 Final acquisition rule
 If the Play button opens another website, the game has not been locally acquired.
 If gameplay relies on a third-party iframe, the game has not been locally acquired.
@@ -907,6 +913,7 @@ If localization is blocked:
 	4.	Document what remains external.
 	5.	Explain what remains possible.
 	6.	Assign the appropriate acquisition classification.
+	7.	Stop without creating a reconstruction, clone, imitation, remake, placeholder, or substitute.
 Do not silently downgrade the acquisition requirements.
 Do not report an external implementation as a completed local acquisition.
 36.7 Ultimate local acquisition architecture

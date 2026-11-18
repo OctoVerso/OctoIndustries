@@ -1,0 +1,24 @@
+{
+  "id": "head-soccer",
+  "title": "Head Soccer",
+  "description": "Play Head Soccer 2023 in arcade mode against the CPU or challenge a friend in two-player mode.",
+  "version": "2023.1",
+  "category": "Sports",
+  "tags": [
+    "soccer",
+    "football",
+    "arcade",
+    "sports",
+    "two-player"
+  ],
+  "launch": "index.html",
+  "thumbnail": "icons/icon-256.png",
+  "thumbnailDirect": true,
+  "bannerSource": "icons/icon-256.png",
+  "bannerFit": "contain",
+  "accent": "#36b5f5",
+  "author": "Fabbox Studios",
+  "engine": "Scirra Construct",
+  "sourceUrl": "https://github.com/freeonlinewebtools/gamelist7.github.io/tree/345c032e7a76c8a0021201f9ddeb7d9bc5646cca/Head-Soccer",
+  "sourcePage": "https://ubghyper.github.io/games/Head-Soccer.html"
+}
