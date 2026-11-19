@@ -205,6 +205,28 @@ window.OCTO_GAMES = Object.freeze([
     "screenshots": []
   },
   {
+    "id": "eaglercraft-26-2",
+    "addedAt": "2026-11-19T00:00:00.000Z",
+    "title": "Eaglercraft 26.2",
+    "description": "Build and survive in the locally hosted Eaglercraft 26.2 browser version with singleplayer worlds and multiplayer support.",
+    "version": "26.2",
+    "category": "Sandbox",
+    "tags": [
+      "minecraft",
+      "sandbox",
+      "survival",
+      "building",
+      "multiplayer"
+    ],
+    "launch": "/Octo-Industries/Eaglercraft-1-8-8/index.html",
+    "accent": "#79a94b",
+    "sourceFile": "Octo-Industries/Eaglercraft-1-8-8/game.json",
+    "banner": "/Octo-Industries/Eaglercraft-1-8-8/hub-banner.svg?v=624a7c8027a256cf",
+    "thumbnail": "/Octo-Industries/Eaglercraft-1-8-8/hub-banner.svg?v=624a7c8027a256cf",
+    "screenshots": [],
+    "featured": false
+  },
+  {
     "id": "endless-siege",
     "addedAt": "2026-10-06T12:00:00.000Z",
     "title": "Endless Siege",
