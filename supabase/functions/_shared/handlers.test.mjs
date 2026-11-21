@@ -339,6 +339,8 @@ test('password hash secret tolerates a pasted NAME=value line and quotes', async
   assert.ok(parsePasswordHash(value));
   assert.ok(parsePasswordHash(`OCTO_ADMIN_PASSWORD_HASH=${value}`));
   assert.ok(parsePasswordHash(` "${value}" \n`));
+  assert.ok(parsePasswordHash(value.replace('$10000$', '$500000$')));
+  assert.equal(parsePasswordHash(value.replace('$10000$', '$500001$')), null);
   assert.equal(parsePasswordHash(value.replace('pbkdf2$', () => 'pbkdf2$$')), null);
   assert.equal(parsePasswordHash('pbkdf2$'), null);
 });

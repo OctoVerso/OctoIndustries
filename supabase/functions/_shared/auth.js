@@ -26,7 +26,10 @@ export function parsePasswordHash(value) {
   // Tolerate a pasted "NAME=value" line, surrounding quotes and whitespace from the admin:hash output.
   const cleaned = String(value || '').replace(invisible, '').trim().replace(/^OCTO_ADMIN_PASSWORD_HASH\s*=\s*/, '').replace(/^(['"])(.*)\1$/, '$2').trim();
   const match = /^pbkdf2\$(\d{5,7})\$([a-f\d]{32})\$([a-f\d]{128})$/.exec(cleaned);
-  return match ? { iterations: Number(match[1]), salt: match[2], expected: hexToBytes(match[3]) } : null;
+  if (!match) return null;
+  const iterations = Number(match[1]);
+  if (iterations < 10000 || iterations > 500000) return null;
+  return { iterations, salt: match[2], expected: hexToBytes(match[3]) };
 }
 
 // Names the failed validation using only shape and lengths, never the secret itself.
@@ -38,7 +41,9 @@ export function describePasswordHashProblem(value) {
   const [, iterations, salt, hash] = parts;
   const nonHex = (text) => text.replace(/[a-f\d]/g, '').length;
   const shape = ` [raw length ${String(value).length}, cleaned length ${cleaned.length}, iterations ${iterations.length}, salt ${salt.length} (${nonHex(salt)} non-hex), hash ${hash.length} (${nonHex(hash)} non-hex)]`;
-  if (!/^\d{5,7}$/.test(iterations)) return { code: 'iterations_invalid', detail: `iterations must be 5-7 digits, found length ${iterations.length}${shape}` };
+  if (!/^\d{5,7}$/.test(iterations) || Number(iterations) < 10000 || Number(iterations) > 500000) {
+    return { code: 'iterations_invalid', detail: `iterations must be between 10000 and 500000${shape}` };
+  }
   if (salt.length !== 32) return { code: 'salt_length_invalid', detail: `salt must be 32 characters, found ${salt.length}${shape}` };
   if (!/^[a-f\d]{32}$/.test(salt)) return { code: 'salt_characters_invalid', detail: 'salt must be lowercase hex' + shape };
   if (hash.length !== 128) return { code: 'hash_length_invalid', detail: `hash must be 128 characters, found ${hash.length}${shape}` };
