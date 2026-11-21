@@ -7,8 +7,8 @@
   "tags": ["ragdoll", "fighting", "physics", "stickman"],
   "featured": false,
   "launch": "index.html",
-  "thumbnail": "screenshots/1.jpg",
-  "bannerSource": "screenshots/1.jpg",
+  "thumbnail": "screenshots/2.jpg",
+  "bannerSource": "screenshots/2.jpg",
   "bannerFit": "cover",
   "accent": "#4d4d4d",
   "screenshots": ["screenshots/1.jpg", "screenshots/2.jpg"]

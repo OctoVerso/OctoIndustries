@@ -9,7 +9,7 @@
   "launch": "index.html",
   "thumbnail": "hub/banner-source.jpg",
   "bannerSource": "hub/banner-source.jpg",
-  "bannerFit": "contain",
+  "bannerFit": "cover",
   "accent": "#46a8e6",
   "screenshots": []
 }

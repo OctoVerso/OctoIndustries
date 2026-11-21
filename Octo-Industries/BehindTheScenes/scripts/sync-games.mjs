@@ -140,12 +140,13 @@ function bannerSvg(game, gameDirectory) {
   const source = assetReference(gameDirectory, game.bannerSource || game.thumbnail || '');
   const fit = game.bannerFit === 'contain' ? 'xMidYMid meet' : 'xMidYMid slice';
   const artwork = source
-    ? `<rect width="1200" height="675" fill="#000"/><image href="${xmlEscape(source)}" x="0" y="0" width="1200" height="675" preserveAspectRatio="${fit}"/>`
-    : `<rect width="1200" height="675" fill="#08111a"/><circle cx="900" cy="330" r="330" fill="${accent}" fill-opacity=".13"/>`;
+    ? `<rect width="1200" height="675" fill="#071019"/><image href="${xmlEscape(source)}" x="-180" y="-100" width="1560" height="875" preserveAspectRatio="xMidYMid slice" filter="url(#backdrop)"/><rect width="1200" height="675" fill="#071019" fill-opacity=".18"/><image href="${xmlEscape(source)}" x="0" y="0" width="1200" height="675" preserveAspectRatio="${fit}"/>`
+    : `<rect width="1200" height="675" fill="#08111a"/><circle cx="900" cy="330" r="330" fill="${accent}" fill-opacity=".13"/><text x="600" y="355" fill="#eaf3ef" font-family="Georgia, serif" font-size="84" font-weight="700" text-anchor="middle">${title}</text>`;
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" role="img" aria-label="${title} game artwork">
   <defs>
     <linearGradient id="vignette" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#071019" stop-opacity=".16"/><stop offset=".5" stop-color="#071019" stop-opacity="0"/><stop offset="1" stop-color="#071019" stop-opacity=".22"/></linearGradient>
+    <filter id="backdrop" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="28"/><feColorMatrix type="saturate" values=".82"/></filter>
   </defs>
   ${artwork}
   <rect width="1200" height="675" fill="url(#vignette)"/>

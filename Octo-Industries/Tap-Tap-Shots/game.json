@@ -7,9 +7,9 @@
   "category": "Sports",
   "tags": ["basketball", "arcade", "timing", "sports"],
   "launch": "index.html",
-  "thumbnail": "screenshots/01-gameplay.jpg",
+  "thumbnail": "hub/octo-banner.jpg",
   "accent": "#f5c95b",
-  "bannerSource": "screenshots/01-gameplay.jpg",
-  "bannerFit": "cover",
+  "bannerSource": "hub/octo-banner.jpg",
+  "bannerFit": "contain",
   "screenshots": ["screenshots/01-gameplay.jpg"]
 }

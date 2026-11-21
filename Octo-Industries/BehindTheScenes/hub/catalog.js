@@ -13,9 +13,9 @@ window.OCTO_GAMES = Object.freeze([
       "arcade"
     ],
     "launch": "/Octo-Industries/8-Ball-Pool-Online/index.html",
-    "thumbnail": "/Octo-Industries/8-Ball-Pool-Online/hub-banner.svg?v=3e233d9cc17acdaf",
+    "thumbnail": "/Octo-Industries/8-Ball-Pool-Online/hub-banner.svg?v=aaaebc8812e7b6cb",
     "sourceFile": "Octo-Industries/8-Ball-Pool-Online/game.json",
-    "banner": "/Octo-Industries/8-Ball-Pool-Online/hub-banner.svg?v=3e233d9cc17acdaf",
+    "banner": "/Octo-Industries/8-Ball-Pool-Online/hub-banner.svg?v=aaaebc8812e7b6cb",
     "screenshots": [],
     "featured": false
   },
@@ -36,10 +36,10 @@ window.OCTO_GAMES = Object.freeze([
     ],
     "featured": true,
     "launch": "/Octo-Industries/Age-of-War/index.html",
-    "thumbnail": "/Octo-Industries/Age-of-War/hub-banner.svg?v=1f806b7c8cf9f494",
+    "thumbnail": "/Octo-Industries/Age-of-War/hub-banner.svg?v=7e9b750e3031714a",
     "accent": "#7ab4ff",
     "sourceFile": "Octo-Industries/Age-of-War/game.json",
-    "banner": "/Octo-Industries/Age-of-War/hub-banner.svg?v=1f806b7c8cf9f494",
+    "banner": "/Octo-Industries/Age-of-War/hub-banner.svg?v=7e9b750e3031714a",
     "screenshots": []
   },
   {
@@ -56,10 +56,10 @@ window.OCTO_GAMES = Object.freeze([
       "turn-based"
     ],
     "launch": "/Octo-Industries/Angry-Birds-Epic/index.html",
-    "thumbnail": "/Octo-Industries/Angry-Birds-Epic/hub-banner.svg?v=594e4dd51d0d416e",
+    "thumbnail": "/Octo-Industries/Angry-Birds-Epic/hub-banner.svg?v=fa3aba423e048a43",
     "featured": true,
     "sourceFile": "Octo-Industries/Angry-Birds-Epic/game.json",
-    "banner": "/Octo-Industries/Angry-Birds-Epic/hub-banner.svg?v=594e4dd51d0d416e",
+    "banner": "/Octo-Industries/Angry-Birds-Epic/hub-banner.svg?v=fa3aba423e048a43",
     "screenshots": []
   },
   {
@@ -77,10 +77,10 @@ window.OCTO_GAMES = Object.freeze([
     ],
     "featured": false,
     "launch": "/Octo-Industries/Baggio-Magical-Kicks/index.html",
-    "thumbnail": "/Octo-Industries/Baggio-Magical-Kicks/hub-banner.svg?v=7d64c846aff93721",
+    "thumbnail": "/Octo-Industries/Baggio-Magical-Kicks/hub-banner.svg?v=4379be29dc9ed6d4",
     "accent": "#46a8e6",
     "sourceFile": "Octo-Industries/Baggio-Magical-Kicks/game.json",
-    "banner": "/Octo-Industries/Baggio-Magical-Kicks/hub-banner.svg?v=7d64c846aff93721",
+    "banner": "/Octo-Industries/Baggio-Magical-Kicks/hub-banner.svg?v=4379be29dc9ed6d4",
     "screenshots": []
   },
   {
@@ -106,7 +106,7 @@ window.OCTO_GAMES = Object.freeze([
     "launch": "/Octo-Industries/Ballistic/index.html",
     "thumbnail": "/Octo-Industries/Ballistic/screenshots/01-gameplay.png?v=2227d21ce71b7c72",
     "sourceFile": "Octo-Industries/Ballistic/game.json",
-    "banner": "/Octo-Industries/Ballistic/hub-banner.svg?v=e4508ee8a500ecfd",
+    "banner": "/Octo-Industries/Ballistic/hub-banner.svg?v=5540fa0f2eb259cd",
     "screenshots": [
       "/Octo-Industries/Ballistic/screenshots/01-gameplay.png?v=2227d21ce71b7c72"
     ]
@@ -124,10 +124,10 @@ window.OCTO_GAMES = Object.freeze([
       "high score"
     ],
     "launch": "/Octo-Industries/Block-Blast/index.html",
-    "thumbnail": "/Octo-Industries/Block-Blast/hub-banner.svg?v=c3a35fd8a5e4890a",
+    "thumbnail": "/Octo-Industries/Block-Blast/hub-banner.svg?v=06cd6ad08443f308",
     "accent": "#f6d36b",
     "sourceFile": "Octo-Industries/Block-Blast/game.json",
-    "banner": "/Octo-Industries/Block-Blast/hub-banner.svg?v=c3a35fd8a5e4890a",
+    "banner": "/Octo-Industries/Block-Blast/hub-banner.svg?v=06cd6ad08443f308",
     "screenshots": [],
     "featured": false
   },
@@ -145,10 +145,10 @@ window.OCTO_GAMES = Object.freeze([
       "flash"
     ],
     "launch": "/Octo-Industries/Bloons-TD-5/index.html",
-    "thumbnail": "/Octo-Industries/Bloons-TD-5/hub-banner.svg?v=b28b17fadc59f674",
+    "thumbnail": "/Octo-Industries/Bloons-TD-5/hub-banner.svg?v=a2a39fbe92155e28",
     "featured": false,
     "sourceFile": "Octo-Industries/Bloons-TD-5/game.json",
-    "banner": "/Octo-Industries/Bloons-TD-5/hub-banner.svg?v=b28b17fadc59f674",
+    "banner": "/Octo-Industries/Bloons-TD-5/hub-banner.svg?v=a2a39fbe92155e28",
     "screenshots": []
   },
   {
@@ -166,10 +166,10 @@ window.OCTO_GAMES = Object.freeze([
       "management"
     ],
     "launch": "/Octo-Industries/Cookie-Clicker/index.html",
-    "thumbnail": "/Octo-Industries/Cookie-Clicker/hub-banner.svg?v=033b9b94d1bf23f5",
+    "thumbnail": "/Octo-Industries/Cookie-Clicker/hub-banner.svg?v=d83bc741e02ac083",
     "accent": "#f4c856",
     "sourceFile": "Octo-Industries/Cookie-Clicker/game.json",
-    "banner": "/Octo-Industries/Cookie-Clicker/hub-banner.svg?v=033b9b94d1bf23f5",
+    "banner": "/Octo-Industries/Cookie-Clicker/hub-banner.svg?v=d83bc741e02ac083",
     "screenshots": [
       "/Octo-Industries/Cookie-Clicker/screenshots/cookie-clicker-gameplay.png?v=808d7b228eff2dba"
     ],
@@ -201,7 +201,7 @@ window.OCTO_GAMES = Object.freeze([
     "thumbnail": "/Octo-Industries/Drive-Mad/webapp/cover.jpg?v=be97b0404863a572",
     "accent": "#40a8ff",
     "sourceFile": "Octo-Industries/Drive-Mad/game.json",
-    "banner": "/Octo-Industries/Drive-Mad/hub-banner.svg?v=35168c0b38811f2b",
+    "banner": "/Octo-Industries/Drive-Mad/hub-banner.svg?v=50fbbf667ec95064",
     "screenshots": []
   },
   {
@@ -221,8 +221,8 @@ window.OCTO_GAMES = Object.freeze([
     "launch": "/Octo-Industries/Eaglercraft-1-8-8/index.html",
     "accent": "#79a94b",
     "sourceFile": "Octo-Industries/Eaglercraft-1-8-8/game.json",
-    "banner": "/Octo-Industries/Eaglercraft-1-8-8/hub-banner.svg?v=624a7c8027a256cf",
-    "thumbnail": "/Octo-Industries/Eaglercraft-1-8-8/hub-banner.svg?v=624a7c8027a256cf",
+    "banner": "/Octo-Industries/Eaglercraft-1-8-8/hub-banner.svg?v=c7dbdd382d59b69b",
+    "thumbnail": "/Octo-Industries/Eaglercraft-1-8-8/hub-banner.svg?v=c7dbdd382d59b69b",
     "screenshots": [],
     "featured": false
   },
@@ -240,10 +240,10 @@ window.OCTO_GAMES = Object.freeze([
     ],
     "featured": true,
     "launch": "/Octo-Industries/Endless-Siege/index.html",
-    "thumbnail": "/Octo-Industries/Endless-Siege/hub-banner.svg?v=4e36796c1cac0165",
+    "thumbnail": "/Octo-Industries/Endless-Siege/hub-banner.svg?v=a4b7e6606086b545",
     "accent": "#9cc77d",
     "sourceFile": "Octo-Industries/Endless-Siege/game.json",
-    "banner": "/Octo-Industries/Endless-Siege/hub-banner.svg?v=4e36796c1cac0165",
+    "banner": "/Octo-Industries/Endless-Siege/hub-banner.svg?v=a4b7e6606086b545",
     "screenshots": []
   },
   {
@@ -267,7 +267,7 @@ window.OCTO_GAMES = Object.freeze([
     "sourceUrl": "https://github.com/freeonlinewebtools/gamelist7.github.io/tree/345c032e7a76c8a0021201f9ddeb7d9bc5646cca/Head-Soccer",
     "sourcePage": "https://ubghyper.github.io/games/Head-Soccer.html",
     "sourceFile": "Octo-Industries/Head-Soccer/game.json",
-    "banner": "/Octo-Industries/Head-Soccer/hub-banner.svg?v=2106cfcaa5600060",
+    "banner": "/Octo-Industries/Head-Soccer/hub-banner.svg?v=a2d41a573a5e9fad",
     "addedAt": "2026-11-17T09:55:42.130Z",
     "screenshots": [],
     "featured": false
@@ -286,10 +286,10 @@ window.OCTO_GAMES = Object.freeze([
       "management"
     ],
     "launch": "/Octo-Industries/Idle-Mining-Empire/index.html",
-    "thumbnail": "/Octo-Industries/Idle-Mining-Empire/hub-banner.svg?v=0a97f7104047a52c",
+    "thumbnail": "/Octo-Industries/Idle-Mining-Empire/hub-banner.svg?v=c8144b2a1cd8a7d0",
     "accent": "#d99b42",
     "sourceFile": "Octo-Industries/Idle-Mining-Empire/game.json",
-    "banner": "/Octo-Industries/Idle-Mining-Empire/hub-banner.svg?v=0a97f7104047a52c",
+    "banner": "/Octo-Industries/Idle-Mining-Empire/hub-banner.svg?v=c8144b2a1cd8a7d0",
     "screenshots": [],
     "featured": false
   },
@@ -308,10 +308,10 @@ window.OCTO_GAMES = Object.freeze([
       "flash"
     ],
     "launch": "/Octo-Industries/Miragine-War/index.html",
-    "thumbnail": "/Octo-Industries/Miragine-War/hub-banner.svg?v=504959d79714eae3",
+    "thumbnail": "/Octo-Industries/Miragine-War/hub-banner.svg?v=15fad0ff11e7c3ba",
     "accent": "#e8a33a",
     "sourceFile": "Octo-Industries/Miragine-War/game.json",
-    "banner": "/Octo-Industries/Miragine-War/hub-banner.svg?v=504959d79714eae3",
+    "banner": "/Octo-Industries/Miragine-War/hub-banner.svg?v=15fad0ff11e7c3ba",
     "screenshots": [
       "/Octo-Industries/Miragine-War/screenshots/01-battle.png?v=c835e586c50c4f7c",
       "/Octo-Industries/Miragine-War/screenshots/02-main-menu.png?v=aeca42a8798a1931",
@@ -335,10 +335,10 @@ window.OCTO_GAMES = Object.freeze([
       "business"
     ],
     "launch": "/Octo-Industries/Monkey-Mart/index.html",
+    "thumbnail": "/Octo-Industries/Monkey-Mart/hub-banner.svg?v=e995c27cb0847106",
     "accent": "#4acb82",
     "sourceFile": "Octo-Industries/Monkey-Mart/game.json",
-    "banner": "/Octo-Industries/Monkey-Mart/hub-banner.svg?v=aa45d0285e43fc28",
-    "thumbnail": "/Octo-Industries/Monkey-Mart/hub-banner.svg?v=aa45d0285e43fc28",
+    "banner": "/Octo-Industries/Monkey-Mart/hub-banner.svg?v=e995c27cb0847106",
     "screenshots": [],
     "featured": false
   },
@@ -358,8 +358,8 @@ window.OCTO_GAMES = Object.freeze([
     "launch": "/Octo-Industries/PvZ2/docs/index.html",
     "accent": "#8fcb4a",
     "sourceFile": "Octo-Industries/PvZ2/game.json",
-    "banner": "/Octo-Industries/PvZ2/hub-banner.svg?v=82cf82448ad7d4c3",
-    "thumbnail": "/Octo-Industries/PvZ2/hub-banner.svg?v=82cf82448ad7d4c3",
+    "banner": "/Octo-Industries/PvZ2/hub-banner.svg?v=19538a0a59ddcd61",
+    "thumbnail": "/Octo-Industries/PvZ2/hub-banner.svg?v=19538a0a59ddcd61",
     "screenshots": [],
     "featured": false
   },
@@ -377,10 +377,10 @@ window.OCTO_GAMES = Object.freeze([
     ],
     "featured": true,
     "launch": "/Octo-Industries/Ragdoll-Archers/index.html",
-    "thumbnail": "/Octo-Industries/Ragdoll-Archers/hub-banner.svg?v=87ece7ea84efe817",
+    "thumbnail": "/Octo-Industries/Ragdoll-Archers/hub-banner.svg?v=753864435430a3b0",
     "accent": "#efab72",
     "sourceFile": "Octo-Industries/Ragdoll-Archers/game.json",
-    "banner": "/Octo-Industries/Ragdoll-Archers/hub-banner.svg?v=87ece7ea84efe817",
+    "banner": "/Octo-Industries/Ragdoll-Archers/hub-banner.svg?v=753864435430a3b0",
     "screenshots": []
   },
   {
@@ -397,10 +397,10 @@ window.OCTO_GAMES = Object.freeze([
     ],
     "featured": false,
     "launch": "/Octo-Industries/Ragdoll-Drop/index.html",
-    "thumbnail": "/Octo-Industries/Ragdoll-Drop/hub-banner.svg?v=de4c7b86999ef64e",
+    "thumbnail": "/Octo-Industries/Ragdoll-Drop/hub-banner.svg?v=d69e6b8bbfa47207",
     "accent": "#e9ab6e",
     "sourceFile": "Octo-Industries/Ragdoll-Drop/game.json",
-    "banner": "/Octo-Industries/Ragdoll-Drop/hub-banner.svg?v=de4c7b86999ef64e",
+    "banner": "/Octo-Industries/Ragdoll-Drop/hub-banner.svg?v=d69e6b8bbfa47207",
     "screenshots": [
       "/Octo-Industries/Ragdoll-Drop/screenshots/1.jpg?v=d087c9ce43f89eb5",
       "/Octo-Industries/Ragdoll-Drop/screenshots/2.jpg?v=ce78301b12f86c47"
@@ -420,10 +420,10 @@ window.OCTO_GAMES = Object.freeze([
     ],
     "featured": false,
     "launch": "/Octo-Industries/Ragdoll-Hit/index.html",
-    "thumbnail": "/Octo-Industries/Ragdoll-Hit/hub-banner.svg?v=3f504afdb7c5e041",
+    "thumbnail": "/Octo-Industries/Ragdoll-Hit/hub-banner.svg?v=2a023a966809a8d0",
     "accent": "#4d4d4d",
     "sourceFile": "Octo-Industries/Ragdoll-Hit/game.json",
-    "banner": "/Octo-Industries/Ragdoll-Hit/hub-banner.svg?v=3f504afdb7c5e041",
+    "banner": "/Octo-Industries/Ragdoll-Hit/hub-banner.svg?v=2a023a966809a8d0",
     "screenshots": [
       "/Octo-Industries/Ragdoll-Hit/screenshots/1.jpg?v=d4064b7ae6dcda44",
       "/Octo-Industries/Ragdoll-Hit/screenshots/2.jpg?v=9001eb640b2e841f"
@@ -444,10 +444,10 @@ window.OCTO_GAMES = Object.freeze([
     ],
     "featured": true,
     "launch": "/Octo-Industries/Red-Ball-4/index.html",
-    "thumbnail": "/Octo-Industries/Red-Ball-4/hub-banner.svg?v=c6cea0688a0ea4b4",
+    "thumbnail": "/Octo-Industries/Red-Ball-4/hub-banner.svg?v=1ca8dade1444ebce",
     "accent": "#ff554c",
     "sourceFile": "Octo-Industries/Red-Ball-4/game.json",
-    "banner": "/Octo-Industries/Red-Ball-4/hub-banner.svg?v=c6cea0688a0ea4b4",
+    "banner": "/Octo-Industries/Red-Ball-4/hub-banner.svg?v=1ca8dade1444ebce",
     "screenshots": [
       "/Octo-Industries/Red-Ball-4/screenshots/1.jpg?v=953b237fcfd8d9d3",
       "/Octo-Industries/Red-Ball-4/screenshots/2.jpg?v=b378c35aebdcdbec",
@@ -470,10 +470,10 @@ window.OCTO_GAMES = Object.freeze([
       "bosses"
     ],
     "launch": "/Octo-Industries/Shadow-Fight-2/index.html",
-    "thumbnail": "/Octo-Industries/Shadow-Fight-2/hub-banner.svg?v=8cbfd3dbefc56dd5",
+    "thumbnail": "/Octo-Industries/Shadow-Fight-2/hub-banner.svg?v=c4e1cab2909b9e45",
     "accent": "#d3ad56",
     "sourceFile": "Octo-Industries/Shadow-Fight-2/game.json",
-    "banner": "/Octo-Industries/Shadow-Fight-2/hub-banner.svg?v=8cbfd3dbefc56dd5",
+    "banner": "/Octo-Industries/Shadow-Fight-2/hub-banner.svg?v=c4e1cab2909b9e45",
     "screenshots": [],
     "featured": false
   },
@@ -490,10 +490,10 @@ window.OCTO_GAMES = Object.freeze([
       "timing"
     ],
     "launch": "/Octo-Industries/Stickman-Hook/index.html",
-    "thumbnail": "/Octo-Industries/Stickman-Hook/hub-banner.svg?v=a0f33a160e09305d",
+    "thumbnail": "/Octo-Industries/Stickman-Hook/hub-banner.svg?v=0d0e870545dc9d74",
     "accent": "#f3a39a",
     "sourceFile": "Octo-Industries/Stickman-Hook/game.json",
-    "banner": "/Octo-Industries/Stickman-Hook/hub-banner.svg?v=a0f33a160e09305d",
+    "banner": "/Octo-Industries/Stickman-Hook/hub-banner.svg?v=0d0e870545dc9d74",
     "screenshots": [],
     "featured": false
   },
@@ -511,10 +511,10 @@ window.OCTO_GAMES = Object.freeze([
     ],
     "featured": false,
     "launch": "/Octo-Industries/Subway-Surfers/index.html",
-    "thumbnail": "/Octo-Industries/Subway-Surfers/hub-banner.svg?v=a2c4caafd79649b3",
+    "thumbnail": "/Octo-Industries/Subway-Surfers/hub-banner.svg?v=ec5f3e12071a8a4d",
     "accent": "#ffb3d0",
     "sourceFile": "Octo-Industries/Subway-Surfers/game.json",
-    "banner": "/Octo-Industries/Subway-Surfers/hub-banner.svg?v=a2c4caafd79649b3",
+    "banner": "/Octo-Industries/Subway-Surfers/hub-banner.svg?v=ec5f3e12071a8a4d",
     "screenshots": [
       "/Octo-Industries/Subway-Surfers/screenshots/title-screen.png?v=d8bcb5e0dc951086"
     ]
@@ -533,10 +533,10 @@ window.OCTO_GAMES = Object.freeze([
       "sports"
     ],
     "launch": "/Octo-Industries/Tap-Tap-Shots/index.html",
-    "thumbnail": "/Octo-Industries/Tap-Tap-Shots/hub-banner.svg?v=163c05d577a3631b",
+    "thumbnail": "/Octo-Industries/Tap-Tap-Shots/hub-banner.svg?v=19d7131d0ea0e577",
     "accent": "#f5c95b",
     "sourceFile": "Octo-Industries/Tap-Tap-Shots/game.json",
-    "banner": "/Octo-Industries/Tap-Tap-Shots/hub-banner.svg?v=163c05d577a3631b",
+    "banner": "/Octo-Industries/Tap-Tap-Shots/hub-banner.svg?v=19d7131d0ea0e577",
     "screenshots": [
       "/Octo-Industries/Tap-Tap-Shots/screenshots/01-gameplay.jpg?v=6992bf4f2310fdfc"
     ],
@@ -554,9 +554,9 @@ window.OCTO_GAMES = Object.freeze([
       "idle"
     ],
     "launch": "/Octo-Industries/Tiny-Fishing/index.html",
-    "thumbnail": "/Octo-Industries/Tiny-Fishing/hub-banner.svg?v=1f5df1774134063f",
+    "thumbnail": "/Octo-Industries/Tiny-Fishing/hub-banner.svg?v=8ae121a6b737f829",
     "sourceFile": "Octo-Industries/Tiny-Fishing/game.json",
-    "banner": "/Octo-Industries/Tiny-Fishing/hub-banner.svg?v=1f5df1774134063f",
+    "banner": "/Octo-Industries/Tiny-Fishing/hub-banner.svg?v=8ae121a6b737f829",
     "screenshots": [],
     "featured": false
   },
@@ -574,10 +574,10 @@ window.OCTO_GAMES = Object.freeze([
     ],
     "featured": true,
     "launch": "/Octo-Industries/Toss-The-Turtle/index.html",
-    "thumbnail": "/Octo-Industries/Toss-The-Turtle/hub-banner.svg?v=d7d95bfd66576254",
+    "thumbnail": "/Octo-Industries/Toss-The-Turtle/hub-banner.svg?v=6d01e69e7dbf1074",
     "accent": "#9bc8d6",
     "sourceFile": "Octo-Industries/Toss-The-Turtle/game.json",
-    "banner": "/Octo-Industries/Toss-The-Turtle/hub-banner.svg?v=d7d95bfd66576254",
+    "banner": "/Octo-Industries/Toss-The-Turtle/hub-banner.svg?v=6d01e69e7dbf1074",
     "screenshots": []
   },
   {
@@ -595,10 +595,10 @@ window.OCTO_GAMES = Object.freeze([
       "casual"
     ],
     "launch": "/Octo-Industries/Turball/index.html",
-    "thumbnail": "/Octo-Industries/Turball/hub-banner.svg?v=12e07e6feaa5519e",
+    "thumbnail": "/Octo-Industries/Turball/hub-banner.svg?v=357f3e34e1ea87b7",
     "featured": false,
     "sourceFile": "Octo-Industries/Turball/game.json",
-    "banner": "/Octo-Industries/Turball/hub-banner.svg?v=12e07e6feaa5519e",
+    "banner": "/Octo-Industries/Turball/hub-banner.svg?v=357f3e34e1ea87b7",
     "screenshots": []
   },
   {
@@ -615,11 +615,11 @@ window.OCTO_GAMES = Object.freeze([
       "browser"
     ],
     "featured": false,
-    "thumbnail": "/Octo-Industries/Web-Dashers/hub-banner.svg?v=8fc22cdc0a69a756",
+    "thumbnail": "/Octo-Industries/Web-Dashers/hub-banner.svg?v=a18fbc71cec1dea9",
     "accent": "#c1fb3d",
     "launch": "/Octo-Industries/Web-Dashers/index.html",
     "sourceFile": "Octo-Industries/Web-Dashers/game.json",
-    "banner": "/Octo-Industries/Web-Dashers/hub-banner.svg?v=8fc22cdc0a69a756",
+    "banner": "/Octo-Industries/Web-Dashers/hub-banner.svg?v=a18fbc71cec1dea9",
     "addedAt": "2026-10-21T08:02:58.024Z",
     "screenshots": []
   }

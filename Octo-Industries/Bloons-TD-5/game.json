@@ -6,8 +6,8 @@
   "category": "Strategy",
   "tags": ["bloons", "tower-defense", "strategy", "ninja-kiwi", "flash"],
   "launch": "index.html",
-  "thumbnail": "hub/banner-source.jpg",
-  "bannerSource": "hub/banner-source.jpg",
-  "bannerFit": "cover",
+  "thumbnail": "hub/octo-banner.jpg",
+  "bannerSource": "hub/octo-banner.jpg",
+  "bannerFit": "contain",
   "featured": false
 }

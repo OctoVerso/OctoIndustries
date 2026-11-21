@@ -8,8 +8,8 @@
   "tags": ["physics", "comedy", "ragdoll"],
   "featured": false,
   "launch": "index.html",
-  "thumbnail": "ragdoll-drop.jpg",
-  "bannerSource": "ragdoll-drop.jpg",
+  "thumbnail": "hub/octo-banner.jpg",
+  "bannerSource": "hub/octo-banner.jpg",
   "bannerFit": "cover",
   "accent": "#e9ab6e",
   "screenshots": ["screenshots/1.jpg", "screenshots/2.jpg"]

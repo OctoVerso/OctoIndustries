@@ -7,6 +7,8 @@
   "category": "Simulation",
   "tags": ["management", "shop", "idle", "business"],
   "launch": "index.html",
+  "thumbnail": "bg_loading.png",
   "bannerSource": "bg_loading.png",
+  "bannerFit": "cover",
   "accent": "#4acb82"
 }

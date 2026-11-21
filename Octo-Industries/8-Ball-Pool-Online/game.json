@@ -8,6 +8,6 @@
   "tags": ["billiards", "pool", "sports", "arcade"],
   "launch": "index.html",
   "thumbnail": "8-ball-billiards-classic.png",
-  "bannerSource": "8-ball-billiards-classic.png",
+  "bannerSource": "assets/img/title-pool.png",
   "bannerFit": "contain"
 }

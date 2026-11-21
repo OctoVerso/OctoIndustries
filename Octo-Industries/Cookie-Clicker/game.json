@@ -7,9 +7,9 @@
   "category": "Idle",
   "tags": ["clicker", "incremental", "idle", "bakery", "management"],
   "launch": "index.html",
-  "thumbnail": "screenshots/cookie-clicker-gameplay.png",
+  "thumbnail": "img/perfectCookie.png",
   "accent": "#f4c856",
-  "bannerSource": "screenshots/cookie-clicker-gameplay.png",
-  "bannerFit": "cover",
+  "bannerSource": "img/perfectCookie.png",
+  "bannerFit": "contain",
   "screenshots": ["screenshots/cookie-clicker-gameplay.png"]
 }
