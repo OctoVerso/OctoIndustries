@@ -176,6 +176,36 @@ window.OCTO_GAMES = Object.freeze([
     "featured": false
   },
   {
+    "id": "dr-driving",
+    "title": "Dr. Driving",
+    "description": "Navigate city traffic, complete missions, and practice precise parking.",
+    "addedAt": "2026-11-19T19:21:34.892Z",
+    "version": "1.0.0",
+    "category": "Driving",
+    "status": "Live",
+    "multiplayer": true,
+    "featured": false,
+    "platform": "Web",
+    "mobileOptimized": true,
+    "touchControls": true,
+    "tags": [
+      "Driving",
+      "Parking",
+      "Traffic",
+      "Simulation",
+      "Mobile Classic"
+    ],
+    "launch": "/Octo-Industries/Dr-Driving/app.html",
+    "saveLevel": 3,
+    "sourceUrl": "https://quenq.com/apps/dr-driving/",
+    "sourceFile": "Octo-Industries/Dr-Driving/game.json",
+    "banner": "/Octo-Industries/Dr-Driving/hub-banner.svg?v=ca3abe991b11b283",
+    "thumbnail": "/Octo-Industries/Dr-Driving/hub-banner.svg?v=ca3abe991b11b283",
+    "screenshots": [
+      "/Octo-Industries/Dr-Driving/screenshots/01-gameplay.jpg?v=5facd93b99297de5"
+    ]
+  },
+  {
     "id": "drive-mad",
     "title": "Drive Mad",
     "description": "Take control of a car and navigate physics-driven obstacle courses in Drive Mad.",
@@ -247,6 +277,66 @@ window.OCTO_GAMES = Object.freeze([
     "screenshots": []
   },
   {
+    "id": "gta-3",
+    "title": "Grand Theft Auto III",
+    "description": "Explore Liberty City in the complete Grand Theft Auto III browser port.",
+    "addedAt": "2026-11-19T19:21:34.892Z",
+    "version": "1.2.6",
+    "category": "Action",
+    "status": "Live",
+    "multiplayer": false,
+    "featured": false,
+    "platform": "Web",
+    "mobileOptimized": true,
+    "touchControls": true,
+    "tags": [
+      "GTA",
+      "Open World",
+      "Action",
+      "Classic",
+      "Driving"
+    ],
+    "launch": "/Octo-Industries/GTA-3/index.html",
+    "saveLevel": 1,
+    "sourceUrl": "https://quenq.com/apps/gta-3/",
+    "sourceFile": "Octo-Industries/GTA-3/game.json",
+    "banner": "/Octo-Industries/GTA-3/hub-banner.svg?v=cb01d8e78970dd94",
+    "thumbnail": "/Octo-Industries/GTA-3/hub-banner.svg?v=cb01d8e78970dd94",
+    "screenshots": [
+      "/Octo-Industries/GTA-3/screenshots/01-gameplay.jpg?v=e4ff0f772af267c3"
+    ]
+  },
+  {
+    "id": "gta-vice-city",
+    "title": "Grand Theft Auto: Vice City",
+    "description": "Cruise neon-lit Vice City in the complete browser port.",
+    "addedAt": "2026-11-19T19:21:34.892Z",
+    "version": "1.0.0",
+    "category": "Action",
+    "status": "Live",
+    "multiplayer": false,
+    "featured": false,
+    "platform": "Web",
+    "mobileOptimized": true,
+    "touchControls": true,
+    "tags": [
+      "GTA",
+      "Open World",
+      "Action",
+      "Classic",
+      "Driving"
+    ],
+    "launch": "/Octo-Industries/GTA-Vice-City/index.html",
+    "saveLevel": 1,
+    "sourceUrl": "https://quenq.com/apps/vice-city/",
+    "sourceFile": "Octo-Industries/GTA-Vice-City/game.json",
+    "banner": "/Octo-Industries/GTA-Vice-City/hub-banner.svg?v=8cabd3c2944adc20",
+    "thumbnail": "/Octo-Industries/GTA-Vice-City/hub-banner.svg?v=8cabd3c2944adc20",
+    "screenshots": [
+      "/Octo-Industries/GTA-Vice-City/screenshots/01-gameplay.jpg?v=f39a876d5d4eb2d7"
+    ]
+  },
+  {
     "id": "head-soccer",
     "title": "Head Soccer",
     "description": "Play Head Soccer 2023 in arcade mode against the CPU or challenge a friend in two-player mode.",
@@ -271,6 +361,36 @@ window.OCTO_GAMES = Object.freeze([
     "addedAt": "2026-11-17T09:55:42.130Z",
     "screenshots": [],
     "featured": false
+  },
+  {
+    "id": "hill-climb-racing",
+    "title": "Hill Climb Racing",
+    "description": "Conquer hills and earn upgrades in the 2012 physics-racing classic.",
+    "addedAt": "2026-11-19T19:21:34.892Z",
+    "version": "1.0.0",
+    "category": "Racing",
+    "status": "Live",
+    "multiplayer": false,
+    "featured": false,
+    "platform": "Web",
+    "mobileOptimized": true,
+    "touchControls": true,
+    "tags": [
+      "Racing",
+      "Physics",
+      "Hill Climb",
+      "Upgrades",
+      "Mobile Classic"
+    ],
+    "launch": "/Octo-Industries/Hill-Climb-Racing/app.html",
+    "saveLevel": 3,
+    "sourceUrl": "https://quenq.com/apps/hill-climb-racing/",
+    "sourceFile": "Octo-Industries/Hill-Climb-Racing/game.json",
+    "banner": "/Octo-Industries/Hill-Climb-Racing/hub-banner.svg?v=f7ddf55063bf05ad",
+    "thumbnail": "/Octo-Industries/Hill-Climb-Racing/hub-banner.svg?v=f7ddf55063bf05ad",
+    "screenshots": [
+      "/Octo-Industries/Hill-Climb-Racing/screenshots/01-gameplay.jpg?v=1a5aaa837657759d"
+    ]
   },
   {
     "id": "idle-mining-empire",

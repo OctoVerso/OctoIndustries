@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>VC Web</title>
+    <style>
+      #desktop-controls-help {
+        position: fixed;
+        z-index: 10000;
+        bottom: 12px;
+        left: 50%;
+        max-width: calc(100vw - 24px);
+        padding: 8px 12px;
+        transform: translateX(-50%);
+        border-radius: 6px;
+        background: rgba(0, 0, 0, 0.75);
+        color: #fff;
+        font: 12px/1.4 system-ui, sans-serif;
+        text-align: center;
+        pointer-events: none;
+      }
+
+      @media (pointer: coarse) {
+        #desktop-controls-help {
+          display: none;
+        }
+      }
+    </style>
+    <link rel="stylesheet" href="../branding/game-branding.css">
+    <script defer src="../branding/game-branding.js"></script>
+    <script>
+      if (/\/index\.html$/.test(location.pathname)) {
+        history.replaceState(null, '', location.pathname.replace(/index\.html$/, '') + location.search + location.hash);
+      }
+    </script>
+    <script type="module" crossorigin src="assets/index-DXYOUMLJ.js"></script>
+    <link rel="stylesheet" crossorigin href="assets/index-CQGgxoQI.css">
+  </head>
+  <body data-is-touch="0" data-state-car="0" data-state-car-gun="0" data-state-gun="0" data-state-bike="0"
+    data-state-menu="1" data-state-cutscene="0" data-state-mobring="0" data-state-job="0"
+    data-state-disable-controls="0" data-state-panzer="0" data-state-car-with-weapon="0" data-state-hunter="0"
+    data-state-scope-mode="0" data-state-scope-gun="0">
+    <div id="app"></div>
+    <div id="desktop-controls-help" role="note">
+      Controls: Arrow keys or W/A/S/D to move; Enter or F to enter/exit vehicles; Right Ctrl or Space to jump; left-click to fire.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,19 @@
+{
+  "id": "dr-driving",
+  "title": "Dr. Driving",
+  "description": "Navigate city traffic, complete missions, and practice precise parking.",
+  "addedAt": "2026-11-19T19:21:34.892Z",
+  "version": "1.0.0",
+  "category": "Driving",
+  "status": "Live",
+  "multiplayer": true,
+  "featured": false,
+  "platform": "Web",
+  "mobileOptimized": true,
+  "touchControls": true,
+  "tags": ["Driving", "Parking", "Traffic", "Simulation", "Mobile Classic"],
+  "bannerSource": "screenshots/01-gameplay.jpg",
+  "launch": "app.html",
+  "saveLevel": 3,
+  "sourceUrl": "https://quenq.com/apps/dr-driving/"
+}

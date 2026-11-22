@@ -14,11 +14,24 @@ python3 -m http.server 8080                             # preview at http://loca
 
 The PvZ iPad game source is kept in the sibling `pvz-ipad/` checkout; the Pages workflow builds its optimized local copy into the site. For local preview, clone it with `git clone https://github.com/fakedummyfortestingthings-web/pvz-ipad.git pvz-ipad`. The preview calls the live Supabase Edge Functions configured in `Octo-Industries/BehindTheScenes/hub/config.js` (add your origin, e.g. `http://localhost:8080`, to the `ALLOWED_ORIGIN` function secret). Admin lives at `Octo-Industries/BehindTheScenes/admin/` (`/admin/` on the deployed site). Run the function tests with `npm test`.
 
+## Codespaces storage maintenance
+
+Run `npm run codespace:clean` weekly to preview cleanup candidates. Add `-- --apply` to remove only untracked, regenerable build outputs and the npm download cache; tracked files and game assets are always retained. The root `dist/` can be recreated with `npm run pages:build`.
+
+Maintenance checklist:
+
+- **Weekly:** run the cleanup preview; apply it when the listed generated outputs are no longer needed. Check `df -h` and `du -sh .git Octo-Industries offline_exports .cloudflare-dist`.
+- **Monthly:** review the largest files and caches; use `npm cache clean --force` (included by `--apply`) and `python3 -m pip cache purge` if Python downloads are taking space. Do not remove `.git`, Git LFS objects, or active game directories.
+- **Before major imports:** check free space first (`df -h .`) and inspect the incoming archive before extracting; avoid keeping both the archive and extracted copy.
+- **Before a Codespace rebuild:** push or back up intended changes, then run the cleanup preview and remove only regenerable outputs. Reinstall dependencies from the lockfile if you choose to remove `node_modules`.
+
+`offline_exports/` and `.cloudflare-dist/` are currently tracked and together use about 1.5 GB. They are intentionally excluded from the automated cleanup because they may be used as deliverables; review their hosting and retention needs before changing their Git tracking. Never delete or rewrite Git history as a disk-cleanup measure.
+
 ## Discover and add games
 
 `npm --prefix Octo-Industries/BehindTheScenes run sync` reads `game.json` metadata when available and automatically detects top-level game folders with an `index.html`. It validates launch paths and regenerates `Octo-Industries/BehindTheScenes/hub/catalog.js`. Manifest metadata supplies its title, description, category, tags, thumbnail, launch path, optional featured status, and optional screenshot list. If `screenshots` is omitted, supported image files in the game's `screenshots/` folder are added to its hub gallery automatically. Invalid launch or screenshot paths stop the sync with an error.
 
-Add a game directory directly beneath `Octo-Industries/` with an `index.html`; the catalog sync automatically creates a title from the directory name, an `Other` category, basic tags, and a description. For banner art, it prefers the first original screenshot in `screenshots/`, then looks for promotional artwork named `logo`, `cover`, `title`, or `icon` (SVG, PNG, WebP, JPEG). Add `game.json` with a curated `bannerSource` when needed; `bannerFit: "contain"` preserves transparent logo artwork, while the default cover fit fills the shared 16:9 banner. The hub provides a browsable screenshot gallery when local screenshots are available. Generated `hub-banner.svg` files embed their source art, so they load offline at a consistent aspect ratio; games without local artwork use the hub's no-image treatment instead of a fabricated banner. The sync runs locally with `npm --prefix Octo-Industries/BehindTheScenes run sync` and automatically by the GitHub Pages build.
+Add a game directory directly beneath `Octo-Industries/` with an `index.html`; the catalog sync automatically creates a title from the directory name, an `Other` category, basic tags, and a description. Every registered game must declare `bannerSource` in `game.json`, pointing to authentic artwork from that game or its logo. The sync rejects missing or invalid banner art before catalog generation. Use `bannerFit: "contain"` for logos; the default cover fit fills the shared 16:9 banner. The hub provides a browsable screenshot gallery when local screenshots are available. Generated `hub-banner.svg` files embed their source art, so they load offline at a consistent aspect ratio.
 
 ## Game projects
 
@@ -36,6 +49,10 @@ Add a game directory directly beneath `Octo-Industries/` with an `index.html`; t
 - `Octo-Industries/Stickman-Hook/` — browser-based swinging platform game.
 - `Octo-Industries/Tiny-Fishing/` — hub wrapper for the online game at `tiny-fishing.bitbucket.io`; an internet connection is required.
 - `Octo-Industries/Toss-The-Turtle/` — Flash game launched locally by the bundled Ruffle player.
+- `Octo-Industries/GTA-3/` — locally hosted Grand Theft Auto III WebAssembly port.
+- `Octo-Industries/GTA-Vice-City/` — locally hosted Grand Theft Auto: Vice City WebAssembly port.
+- `Octo-Industries/Dr-Driving/` — locally hosted Dr. Driving WebAssembly port.
+- `Octo-Industries/Hill-Climb-Racing/` — locally hosted Hill Climb Racing WebAssembly port.
 
 The existing `Octo-Industries/BehindTheScenes/` folder contains the hub, scripts, and project configuration alongside the game folders. The playable project folders above are the current copies used by the hub.
 

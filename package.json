@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "pages:build": "node scripts/build-pages-site.mjs",
+    "codespace:clean": "node scripts/clean-codespace.mjs",
     "test": "node --test \"supabase/functions/_shared/*.test.mjs\""
   },
   "dependencies": {

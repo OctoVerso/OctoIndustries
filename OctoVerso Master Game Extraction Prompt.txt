@@ -688,6 +688,7 @@ Priority:
 	3.	Original menus.
 	4.	Original game assets.
 Never misrepresent generic or AI-generated artwork as authentic game imagery.
+Every registered game must have a banner built from authentic artwork from that game or its official logo. Set an explicit `bannerSource` in the game's `game.json` and verify that the local image exists before catalog generation. A real in-game screenshot is acceptable; generic, AI-generated, fan-made, or unrelated promotional artwork is not. Regenerate and audit banners for every existing game when this requirement is adopted. Catalog synchronization and publishing must fail when a game has no valid authentic banner source; never silently publish a text-only, generic, or fabricated fallback banner.
 30. IMPORT FAILURE HANDLING
 If acquisition or implementation fails:
 	1.	Identify the exact failure.

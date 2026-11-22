@@ -1,0 +1,19 @@
+{
+  "id": "hill-climb-racing",
+  "title": "Hill Climb Racing",
+  "description": "Conquer hills and earn upgrades in the 2012 physics-racing classic.",
+  "addedAt": "2026-11-19T19:21:34.892Z",
+  "version": "1.0.0",
+  "category": "Racing",
+  "status": "Live",
+  "multiplayer": false,
+  "featured": false,
+  "platform": "Web",
+  "mobileOptimized": true,
+  "touchControls": true,
+  "tags": ["Racing", "Physics", "Hill Climb", "Upgrades", "Mobile Classic"],
+  "bannerSource": "screenshots/01-gameplay.jpg",
+  "launch": "app.html",
+  "saveLevel": 3,
+  "sourceUrl": "https://quenq.com/apps/hill-climb-racing/"
+}

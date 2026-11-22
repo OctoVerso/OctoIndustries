@@ -1,0 +1,19 @@
+{
+  "id": "gta-3",
+  "title": "Grand Theft Auto III",
+  "description": "Explore Liberty City in the complete Grand Theft Auto III browser port.",
+  "addedAt": "2026-11-19T19:21:34.892Z",
+  "version": "1.2.6",
+  "category": "Action",
+  "status": "Live",
+  "multiplayer": false,
+  "featured": false,
+  "platform": "Web",
+  "mobileOptimized": true,
+  "touchControls": true,
+  "tags": ["GTA", "Open World", "Action", "Classic", "Driving"],
+  "bannerSource": "screenshots/01-gameplay.jpg",
+  "launch": "index.html",
+  "saveLevel": 1,
+  "sourceUrl": "https://quenq.com/apps/gta-3/"
+}

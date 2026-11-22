@@ -1,0 +1,19 @@
+{
+  "id": "gta-vice-city",
+  "title": "Grand Theft Auto: Vice City",
+  "description": "Cruise neon-lit Vice City in the complete browser port.",
+  "addedAt": "2026-11-19T19:21:34.892Z",
+  "version": "1.0.0",
+  "category": "Action",
+  "status": "Live",
+  "multiplayer": false,
+  "featured": false,
+  "platform": "Web",
+  "mobileOptimized": true,
+  "touchControls": true,
+  "tags": ["GTA", "Open World", "Action", "Classic", "Driving"],
+  "bannerSource": "screenshots/01-gameplay.jpg",
+  "launch": "index.html",
+  "saveLevel": 1,
+  "sourceUrl": "https://quenq.com/apps/vice-city/"
+}

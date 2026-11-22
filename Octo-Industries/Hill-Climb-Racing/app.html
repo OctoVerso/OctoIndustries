@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="robots" content="noindex, nofollow">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Hill Climb Racing</title>
+  <link rel="stylesheet" href="../branding/game-branding.css">
+  <script defer src="../branding/game-branding.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Zalando+Sans+Expanded&display=swap');
+
+    :root {
+      --bg-color: #171c20;
+      --dark-bg: #2d353e;
+      --accent: #a4b9be;
+      --text-main: #f0f0f0;
+    }
+
+    *, ::after, ::before {
+      box-sizing: border-box;
+    }
+
+    :focus {
+      outline: 0;
+      box-shadow: none;
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: "Zalando Sans Expanded", Geneva, Tahoma, sans-serif;
+      font-size: 15px;
+      overflow: hidden;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .screen-view {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 40px 20px;
+      background: var(--bg-color);
+      z-index: 50;
+      overflow-y: auto;
+    }
+
+    .center-content {
+      width: 100%;
+      max-width: 500px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      text-align: center;
+      margin: auto;
+    }
+
+    .logo-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .header-title {
+      font-size: 3.2rem;
+      margin: 0;
+      color: var(--text-main);
+      letter-spacing: 1px;
+      line-height: 1.1;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .menu-box {
+      background: var(--dark-bg);
+      border-radius: 5px;
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+    }
+
+    .action-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      gap: 8px;
+      padding: 10px 20px;
+      background: linear-gradient(to bottom, #5c6f82 0%, #43515e 50%, #2f3a44 100%);
+      border: 1px solid #1f262c;
+      border-radius: 5px;
+      color: #fff;
+      cursor: pointer;
+      text-shadow: 0 -1px 0 rgba(0, 0, 0, .5);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .2), 0 2px 3px rgba(0, 0, 0, .2);
+      transition: .2s ease-in-out;
+      text-transform: uppercase;
+      font-weight: 700;
+      font-family: inherit;
+    }
+
+    .action-btn:hover {
+      background: linear-gradient(to bottom, #6d8296 0%, #4e5e6d 50%, #3a4753 100%);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .3), 0 4px 6px rgba(0, 0, 0, .3);
+      transform: translateY(-2px);
+    }
+
+    .action-btn:active {
+      background: linear-gradient(to bottom, #2f3a44 0%, #43515e 100%);
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, .4);
+      transform: translateY(1px);
+    }
+
+    .action-btn:disabled {
+      opacity: .4;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .main-action-btn {
+      width: 100%;
+      padding: 15px;
+      font-size: 1.2rem;
+    }
+
+    .btn-green {
+      background: linear-gradient(to bottom, #5c8264 0%, #3a443a 100%);
+    }
+
+    .btn-green:hover {
+      background: linear-gradient(to bottom, #6d9876 0%, #485648 100%);
+    }
+
+    .btn-red {
+      background: linear-gradient(to bottom, #a34c4c 0%, #7e3636 100%);
+    }
+
+    .btn-red:hover {
+      background: linear-gradient(to bottom, #b95656 0%, #924040 100%);
+    }
+
+    .status-msg {
+      margin-top: 16px;
+      font-size: 0.88rem;
+      line-height: 1.4;
+      min-height: 1.2em;
+      color: var(--accent);
+      transition: opacity .2s;
+    }
+
+    .status-msg.success {
+      color: #6d9876;
+      font-weight: 700;
+    }
+
+    .status-msg.error {
+      color: #b95656;
+      font-weight: 700;
+    }
+
+    /* Modal Warning Dialog */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 20px;
+    }
+
+    .modal-box {
+      max-width: 440px;
+      width: 100%;
+      text-align: center;
+      gap: 16px;
+    }
+
+    .modal-title {
+      font-size: 1.5rem;
+      margin: 0;
+      color: var(--text-main);
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .modal-text {
+      color: var(--text-main);
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    .modal-warning {
+      color: #e5a45b;
+      font-size: 0.88rem;
+      background: rgba(229, 164, 91, 0.1);
+      border: 1px solid rgba(229, 164, 91, 0.3);
+      border-radius: 4px;
+      padding: 12px;
+      margin: 4px 0;
+      line-height: 1.4;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 6px;
+    }
+
+    .modal-actions button {
+      flex: 1;
+    }
+
+    /* Game and Loading Container */
+    #game-container {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      background: #000;
+      z-index: 1;
+      display: none;
+    }
+
+    #game {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: #000;
+    }
+
+    .status-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      background: var(--bg-color);
+      cursor: default;
+      pointer-events: auto;
+      padding: 20px;
+    }
+
+    .loading-container {
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .loading-text {
+      font-size: 2.5rem;
+      margin: 0 0 10px;
+      color: var(--text-main);
+      text-shadow: 2px 2px 0 #000;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .loading-subtext {
+      color: var(--accent);
+      font-size: .9rem;
+      margin: 0 0 20px;
+      line-height: 1.3;
+    }
+
+    .progress-bar-bg {
+      width: 100%;
+      height: 20px;
+      background: var(--bg-color);
+      border: 2px solid var(--dark-bg);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(to bottom, #5c6f82 0%, #43515e 50%, #2f3a44 100%);
+      border-right: 2px solid var(--accent);
+      transition: width .15s ease-out;
+    }
+
+    .progress-percent {
+      color: var(--accent);
+      margin-top: 8px;
+      font-weight: 700;
+    }
+
+    /* Settings Dialog */
+    .setting-row {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      text-align: left;
+    }
+
+    .setting-label {
+      color: var(--accent);
+      font-size: 0.8rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .setting-options {
+      display: flex;
+      gap: 8px;
+    }
+
+    .opt-btn {
+      flex: 1;
+      padding: 9px 10px;
+      font-size: 0.85rem;
+      background: #1f262c;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 4px;
+      color: #8898a6;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 700;
+      transition: all .15s ease-in-out;
+      text-align: center;
+    }
+
+    .opt-btn:hover {
+      background: #2b353e;
+      color: #fff;
+    }
+
+    .opt-btn.active {
+      background: linear-gradient(to bottom, #5c6f82 0%, #43515e 50%, #2f3a44 100%);
+      border-color: var(--accent);
+      color: #fff;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    @media (max-width: 768px) {
+      .header-title { font-size: 2.4rem; }
+      .loading-text { font-size: 1.8rem; }
+      .menu-box { padding: 22px 18px; }
+      .main-action-btn { padding: 13px; font-size: 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Home / Launcher Menu -->
+  <div id="home-view" class="screen-view">
+    <div class="center-content">
+      <div class="logo-area">
+        <h1 class="header-title">HCR</h1>
+      </div>
+      <div class="menu-box">
+        <button id="btn-play-game" class="action-btn main-action-btn">PLAY GAME</button>
+        <button id="btn-settings-game" class="action-btn main-action-btn" style="margin-top: 10px;">SETTINGS</button>
+        <button id="btn-mod-game" class="action-btn main-action-btn btn-green" style="margin-top: 10px;">MOD: UNLIMITED MONEY</button>
+        <button id="btn-reset-game" class="action-btn main-action-btn btn-red" style="margin-top: 10px;">RESET PROGRESS</button>
+        <div id="status-msg" class="status-msg"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Game Settings Modal -->
+  <div id="settings-overlay" class="modal-overlay">
+    <div class="menu-box modal-box" style="max-width: 460px; gap: 16px;">
+      <h2 class="modal-title">SETTINGS</h2>
+
+      <!-- Frame Rate Cap -->
+      <div class="setting-row">
+        <label class="setting-label">Frame Rate Cap</label>
+        <div class="setting-options" id="opt-cap-group">
+          <button type="button" class="opt-btn" data-val="30">30 FPS</button>
+          <button type="button" class="opt-btn" data-val="60">60 FPS</button>
+          <button type="button" class="opt-btn" data-val="120">120 FPS</button>
+          <button type="button" class="opt-btn" data-val="0">MAX</button>
+        </div>
+      </div>
+
+      <!-- VSync -->
+      <div class="setting-row">
+        <label class="setting-label">Vertical Sync (VSync)</label>
+        <div class="setting-options" id="opt-vsync-group">
+          <button type="button" class="opt-btn" data-val="0">OFF</button>
+          <button type="button" class="opt-btn" data-val="1">ON</button>
+        </div>
+      </div>
+
+      <!-- Sound -->
+      <div class="setting-row">
+        <label class="setting-label">Game Audio</label>
+        <div class="setting-options" id="opt-sound-group">
+          <button type="button" class="opt-btn" data-val="1">ENABLED</button>
+          <button type="button" class="opt-btn" data-val="0">MUTED</button>
+        </div>
+      </div>
+
+      <!-- FPS Counter -->
+      <div class="setting-row">
+        <label class="setting-label">FPS Overlay Counter</label>
+        <div class="setting-options" id="opt-fps-group">
+          <button type="button" class="opt-btn" data-val="0">HIDDEN</button>
+          <button type="button" class="opt-btn" data-val="1">SHOWN</button>
+        </div>
+      </div>
+
+      <!-- Fullscreen -->
+      <div class="setting-row">
+        <label class="setting-label">Display Mode</label>
+        <div class="setting-options">
+          <button type="button" id="btn-toggle-fullscreen" class="opt-btn" style="flex: 1; padding: 10px;">TOGGLE FULLSCREEN</button>
+        </div>
+      </div>
+
+      <div class="modal-actions" style="margin-top: 6px;">
+        <button id="btn-settings-close" class="action-btn main-action-btn">CLOSE</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirmation Warning Modal -->
+  <div id="modal-overlay" class="modal-overlay">
+    <div class="menu-box modal-box">
+      <h2 id="modal-title" class="modal-title">CONFIRM ACTION</h2>
+      <p id="modal-text" class="modal-text"></p>
+      <div id="modal-warning" class="modal-warning"></div>
+      <div class="modal-actions">
+        <button id="btn-modal-cancel" class="action-btn">CANCEL</button>
+        <button id="btn-modal-confirm" class="action-btn btn-red">CONFIRM</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Game Canvas & Single Loading View -->
+  <div id="game-container">
+    <iframe id="game" title="Hill Climb Racing" allow="autoplay; fullscreen; gamepad; screen-wake-lock" allowfullscreen></iframe>
+    <div id="status-overlay" class="status-overlay">
+      <div id="loading-box" class="loading-container">
+        <h2 class="loading-text">LOADING...</h2>
+        <div id="loading-subtext" class="loading-subtext">this may take some time on first load, be patient</div>
+        <div class="progress-bar-bg">
+          <div id="loading-bar-fill" class="progress-bar-fill"></div>
+        </div>
+        <div id="loading-percent" class="progress-percent">0%</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      // Filter out spammy engine debug logs in parent console as well
+      (() => {
+        const isSpamArg = a => {
+          if (a == null) return false;
+          const s = typeof a === "string" ? a : (a && a.message ? a.message : String(a));
+          const t = s.trim();
+          if (!t) return true;
+          return (
+            t.includes("[file]") || t.includes("[gles]") || t.includes("libpng warning") ||
+            t.includes("iCCP") || t.includes("[file_open]") || t.includes("[thread]") ||
+            t.includes("[winrt]") || t.includes("[uwp]") || t.includes("[web]") ||
+            t.includes("[settings]") || t.includes("GetProcAddress") || t.includes("[ads]") ||
+            t.includes("[http]") || t.includes("[store]") || t.includes("[xaudio2]") ||
+            t.includes("[dsound]") || t.includes("[audio]")
+          );
+        };
+        const filterFn = orig => function(...args) {
+          if (args.length === 0 || args.every(a => typeof a === "string" && !a.trim())) return;
+          if (args.some(isSpamArg)) return;
+          return orig.apply(console, args);
+        };
+        console.log = filterFn(console.log);
+        console.warn = filterFn(console.warn);
+        console.info = filterFn(console.info);
+        console.error = filterFn(console.error);
+      })();
+
+      const BASE = './';
+      const parts = {
+        'hcr.wasm': [15221492, 15221492, 15221492, 15221489],
+        'hcr.data': [17201818, 17201818, 17201818, 17201818, 17201818, 17201817],
+        'image.bin': [11042816, 11042816]
+      };
+
+      // Exact total bytes across all 12 asset chunks
+      const TOTAL_BYTES = 186182504;
+      let totalLoaded = 0;
+      let gameLaunched = false;
+
+      const $ = id => document.getElementById(id);
+
+      function showStatus(text, type = 'info') {
+        const el = $('status-msg');
+        el.textContent = text;
+        el.className = 'status-msg' + (type ? ' ' + type : '');
+      }
+
+      function updateProgressBar(loaded, total) {
+        const percent = Math.min(100, Math.max(0, Math.floor((loaded / total) * 100)));
+        $('loading-bar-fill').style.width = percent + '%';
+        $('loading-percent').textContent = percent + '%';
+      }
+
+      async function seedModSave() {
+        localStorage.setItem('hcrModUnlimitedMoney', '1');
+        const toHex = s => Array.from(s).map(c => c.charCodeAt(0).toString(16).padStart(4, '0')).join('');
+        const modLines = [
+          '4 ' + toHex('coins') + ' 999999999',
+          '4 ' + toHex('gems') + ' 999999',
+          '11 ' + toHex('adfree') + ' 1',
+          '11 ' + toHex('adFreeIAPPurchased') + ' 1',
+          '11 ' + toHex('jeep_unlocked') + ' 1'
+        ];
+        const contentStr = modLines.join('\n') + '\n';
+        const buf = new TextEncoder().encode(contentStr).buffer;
+        const key = 'c:\\users\\player\\appdata\\local\\packages\\fingersoft.hillclimbracing_r6rtpscs7gwyg\\settings\\local.userdefaults.txt';
+
+        try {
+          const db = await new Promise((resolve, reject) => {
+            const req = indexedDB.open('hcrwasm', 1);
+            req.onupgradeneeded = () => req.result.createObjectStore('files');
+            req.onsuccess = () => resolve(req.result);
+            req.onerror = () => reject(req.error);
+          });
+          await new Promise((resolve, reject) => {
+            const tx = db.transaction('files', 'readwrite');
+            const st = tx.objectStore('files');
+            st.put(buf, key);
+            tx.oncomplete = () => resolve();
+            tx.onerror = () => reject(tx.error);
+          });
+        } catch (e) {
+          console.warn('Failed to seed mod save in IndexedDB:', e);
+        }
+      }
+
+      async function resetSaveProgress() {
+        localStorage.removeItem('hcrModUnlimitedMoney');
+        return new Promise((resolve) => {
+          let pending = 2;
+          const done = () => { if (--pending === 0) resolve(); };
+          const r1 = indexedDB.deleteDatabase('hcrwasm');
+          r1.onsuccess = done;
+          r1.onerror = done;
+          r1.onblocked = done;
+          const r2 = indexedDB.deleteDatabase('sawasm');
+          r2.onsuccess = done;
+          r2.onerror = done;
+          r2.onblocked = done;
+        });
+      }
+
+      // Modal Dialog Logic
+      let modalConfirmAction = null;
+      function showModal(title, text, warning, btnText, btnClass, onConfirm) {
+        $('modal-title').textContent = title;
+        $('modal-text').textContent = text;
+        $('modal-warning').textContent = warning;
+        const confirmBtn = $('btn-modal-confirm');
+        confirmBtn.textContent = btnText;
+        confirmBtn.className = 'action-btn ' + btnClass;
+        modalConfirmAction = onConfirm;
+        $('modal-overlay').style.display = 'flex';
+      }
+
+      function hideModal() {
+        $('modal-overlay').style.display = 'none';
+        modalConfirmAction = null;
+      }
+
+      $('btn-modal-cancel').onclick = hideModal;
+      $('btn-modal-confirm').onclick = async () => {
+        if (modalConfirmAction) {
+          const fn = modalConfirmAction;
+          hideModal();
+          await fn();
+        }
+      };
+
+      // Mod button click
+      $('btn-mod-game').onclick = () => {
+        showModal(
+          'MOD: UNLIMITED MONEY',
+          'This will pre-seed your save file with 999,999,999 Coins and 999,999 Gems.',
+          '⚠️ WARNING: Modding will overwrite your current save progress!',
+          'APPLY MOD',
+          'btn-green',
+          async () => {
+            try {
+              await seedModSave();
+              showStatus('✓ Mod applied! 999M Coins & 999K Gems ready. Click PLAY GAME to start.', 'success');
+            } catch (e) {
+              console.error(e);
+              showStatus('Failed to apply mod: ' + e.message, 'error');
+            }
+          }
+        );
+      };
+
+      // Reset button click
+      $('btn-reset-game').onclick = () => {
+        showModal(
+          'RESET PROGRESS',
+          'This will wipe all local saved game data and restore clean defaults.',
+          '⚠️ WARNING: This will permanently delete your coins, garage upgrades, and level progress!',
+          'WIPE SAVE DATA',
+          'btn-red',
+          async () => {
+            try {
+              await resetSaveProgress();
+              showStatus('✓ Save progress wiped. Clean game restored.', 'success');
+            } catch (e) {
+              console.error(e);
+              showStatus('Failed to reset: ' + e.message, 'error');
+            }
+          }
+        );
+      };
+
+      // Settings Dialog Logic
+      function syncSettingButtons() {
+        const curCap = localStorage.getItem("hcrCap") || "60";
+        const curVsync = localStorage.getItem("hcrVsync") || "0";
+        const curSound = localStorage.getItem("hcrSound") !== "0" ? "1" : "0";
+        const curFps = localStorage.getItem("hcrShowFps") === "1" ? "1" : "0";
+
+        document.querySelectorAll("#opt-cap-group .opt-btn").forEach(btn => {
+          btn.classList.toggle("active", btn.dataset.val === curCap);
+        });
+        document.querySelectorAll("#opt-vsync-group .opt-btn").forEach(btn => {
+          btn.classList.toggle("active", btn.dataset.val === curVsync);
+        });
+        document.querySelectorAll("#opt-sound-group .opt-btn").forEach(btn => {
+          btn.classList.toggle("active", btn.dataset.val === curSound);
+        });
+        document.querySelectorAll("#opt-fps-group .opt-btn").forEach(btn => {
+          btn.classList.toggle("active", btn.dataset.val === curFps);
+        });
+      }
+
+      function syncSettingsToGame() {
+        const frame = $("game");
+        if (frame && frame.contentWindow) {
+          const curCap = Number(localStorage.getItem("hcrCap") || "60");
+          const curSound = localStorage.getItem("hcrSound") !== "0";
+          const curFps = localStorage.getItem("hcrShowFps") === "1";
+          frame.contentWindow.postMessage({ type: "hcr-update-cap", cap: curCap }, "*");
+          frame.contentWindow.postMessage({ type: "hcr-update-sound", sound: curSound }, "*");
+          frame.contentWindow.postMessage({ type: "hcr-update-fps-display", show: curFps }, "*");
+        }
+      }
+
+      function setupSettingGroup(groupId, key, msgType) {
+        document.querySelectorAll("#" + groupId + " .opt-btn").forEach(btn => {
+          btn.onclick = () => {
+            const val = btn.dataset.val;
+            localStorage.setItem(key, val);
+            syncSettingButtons();
+            syncSettingsToGame();
+          };
+        });
+      }
+
+      setupSettingGroup("opt-cap-group", "hcrCap", "cap");
+      setupSettingGroup("opt-vsync-group", "hcrVsync", "vsync");
+      setupSettingGroup("opt-sound-group", "hcrSound", "sound");
+      setupSettingGroup("opt-fps-group", "hcrShowFps", "fps");
+      syncSettingButtons();
+
+      $("btn-settings-game").onclick = () => {
+        syncSettingButtons();
+        $("settings-overlay").style.display = "flex";
+      };
+      $("btn-settings-close").onclick = () => {
+        $("settings-overlay").style.display = "none";
+      };
+      $("btn-toggle-fullscreen").onclick = () => {
+        if (document.fullscreenElement) {
+          if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+        } else {
+          const req = document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen;
+          if (req) req.call(document.documentElement).catch(() => {});
+        }
+      };
+
+      // Concurrent Streaming Downloader
+      async function downloadPartStream(name, file, expectedSize, targetBuffer, offset) {
+        const response = await fetch(BASE + file);
+        if (!response.ok) throw new Error(`${file}: HTTP ${response.status}`);
+        if (!response.body) {
+          const buf = await response.arrayBuffer();
+          if (expectedSize !== null && buf.byteLength !== expectedSize) {
+            throw new Error(`${file}: size mismatch`);
+          }
+          targetBuffer.set(new Uint8Array(buf), offset);
+          totalLoaded += buf.byteLength;
+          updateProgressBar(totalLoaded, TOTAL_BYTES);
+          return;
+        }
+
+        const reader = response.body.getReader();
+        let partLoaded = 0;
+        for (;;) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          targetBuffer.set(value, offset + partLoaded);
+          partLoaded += value.length;
+          totalLoaded += value.length;
+          updateProgressBar(totalLoaded, TOTAL_BYTES);
+        }
+        if (expectedSize !== null && partLoaded !== expectedSize) {
+          throw new Error(`${file}: expected ${expectedSize} bytes, got ${partLoaded}`);
+        }
+      }
+
+      async function downloadTextFile(name) {
+        const res = await fetch(BASE + name);
+        if (!res.ok) throw new Error(`${name}: HTTP ${res.status}`);
+        return await res.text();
+      }
+
+      function installBridge() {
+        const assets = (window.parent && window.parent.__hcrLoaderAssets) || window.__hcrLoaderAssets || (window.top && window.top.__hcrLoaderAssets);
+        
+        // Filter out spammy engine debug logs ([file], [gles] fps, libpng warnings, audio, ads, etc.)
+        const isSpamArg = a => {
+          if (a == null) return false;
+          const s = typeof a === "string" ? a : (a && a.message ? a.message : String(a));
+          const t = s.trim();
+          if (!t) return true;
+          return (
+            t.includes("[file]") || t.includes("[gles]") || t.includes("libpng warning") ||
+            t.includes("iCCP") || t.includes("[file_open]") || t.includes("[thread]") ||
+            t.includes("[winrt]") || t.includes("[uwp]") || t.includes("[web]") ||
+            t.includes("[settings]") || t.includes("GetProcAddress") || t.includes("[ads]") ||
+            t.includes("[http]") || t.includes("[store]") || t.includes("[xaudio2]") ||
+            t.includes("[dsound]") || t.includes("[audio]")
+          );
+        };
+        const filterFn = orig => function(...args) {
+          if (args.length === 0 || args.every(a => typeof a === "string" && !a.trim())) return;
+          if (args.some(isSpamArg)) return;
+          return orig.apply(console, args);
+        };
+        console.log = filterFn(console.log);
+        console.warn = filterFn(console.warn);
+        console.info = filterFn(console.info);
+        console.error = filterFn(console.error);
+
+        window.Module = window.Module || {};
+        window.Module.print = console.log;
+        window.Module.printErr = console.warn;
+
+        const origOpen = window.open ? window.open.bind(window) : null;
+        window.open = (url, target, features) => {
+          if (!url || url === 'about:blank' || !String(url).startsWith('http')) return null;
+          return origOpen ? origOpen(url, target, features) : null;
+        };
+        const originalFetch = window.fetch.bind(window);
+        window.fetch = (input, options) => {
+          const url = input instanceof Request ? input.url : String(input);
+          const name = new URL(url, document.baseURI).pathname.split('/').pop();
+          if (name === 'programs.txt' || url.includes('programs.txt')) {
+            return Promise.resolve(new Response('', { status: 200, headers: { 'Content-Type': 'text/plain' } }));
+          }
+          const blob = assets && assets[name];
+          if (!blob) return originalFetch(input, options);
+          const headers = new Headers(options && options.headers || (input instanceof Request ? input.headers : undefined));
+          const range = /^bytes=(\d+)-(\d*)$/.exec(headers.get('Range') || '');
+          if (range) {
+            const start = Number(range[1]);
+            const end = range[2] ? Math.min(Number(range[2]), blob.size - 1) : blob.size - 1;
+            if (start >= blob.size || end < start) return Promise.resolve(new Response(null, { status: 416, headers: { 'Content-Range': `bytes */${blob.size}` } }));
+            const slice = blob.slice(start, end + 1);
+            return Promise.resolve(new Response(slice, { status: 206, headers: {
+              'Content-Type': blob.type, 'Content-Length': String(slice.size),
+              'Content-Range': `bytes ${start}-${end}/${blob.size}`, 'Accept-Ranges': 'bytes'
+            } }));
+          }
+          return Promise.resolve(new Response(blob, { status: 200, headers: {
+            'Content-Type': blob.type, 'Content-Length': String(blob.size), 'Accept-Ranges': 'bytes'
+          } }));
+        };
+      }
+
+      async function launchGame() {
+        if (gameLaunched) return;
+        gameLaunched = true;
+
+        $('home-view').style.display = 'none';
+        $('game-container').style.display = 'block';
+        $('status-overlay').style.display = 'flex';
+        updateProgressBar(0, TOTAL_BYTES);
+
+        try {
+          if (!('Suspending' in WebAssembly)) {
+            throw new Error('This game requires Chrome or Edge 137 or newer with WebAssembly JSPI.');
+          }
+
+          // Pre-allocate memory buffers
+          const buffers = {};
+          const downloadPromises = [];
+
+          const htmlPromise = downloadTextFile('game.html');
+          const scriptPromise = downloadTextFile('hcr.js');
+
+          // Launch all 12 part downloads in parallel
+          for (const [name, sizes] of Object.entries(parts)) {
+            const totalAssetBytes = sizes.reduce((a, b) => a + b, 0);
+            buffers[name] = new Uint8Array(totalAssetBytes);
+            let partOffset = 0;
+            for (let i = 0; i < sizes.length; i++) {
+              const file = `${name}.part${i + 1}`;
+              const size = sizes[i];
+              downloadPromises.push(downloadPartStream(name, file, size, buffers[name], partOffset));
+              partOffset += size;
+            }
+          }
+
+          const [html, script] = await Promise.all([
+            htmlPromise,
+            scriptPromise,
+            ...downloadPromises
+          ]);
+
+          $('loading-subtext').textContent = 'Starting engine...';
+          updateProgressBar(TOTAL_BYTES, TOTAL_BYTES);
+
+          // Apply Unlimited Money & Gems mod to IndexedDB save file
+          const modActive = localStorage.getItem('hcrModUnlimitedMoney') === '1';
+          if (modActive) {
+            try {
+              await (async () => {
+                const toHex = s => Array.from(s).map(c => c.charCodeAt(0).toString(16).padStart(4, '0')).join('');
+                const key = 'c:\\users\\player\\appdata\\local\\packages\\fingersoft.hillclimbracing_r6rtpscs7gwyg\\settings\\local.userdefaults.txt';
+                const db = await new Promise((res, rej) => {
+                  const r = indexedDB.open('hcrwasm', 1);
+                  r.onupgradeneeded = () => r.result.createObjectStore('files');
+                  r.onsuccess = () => res(r.result);
+                  r.onerror = () => rej(r.error);
+                });
+
+                let existingText = '';
+                try {
+                  const txRead = db.transaction('files', 'readonly');
+                  const stRead = txRead.objectStore('files');
+                  const existingBuf = await new Promise(r => {
+                    const g = stRead.get(key);
+                    g.onsuccess = () => r(g.result);
+                    g.onerror = () => r(null);
+                  });
+                  if (existingBuf) existingText = new TextDecoder().decode(new Uint8Array(existingBuf));
+                } catch (_) {}
+
+                const lines = existingText ? existingText.split('\n') : [];
+                const modPairs = {
+                  [toHex('coins')]: '4 ' + toHex('coins') + ' 999999999',
+                  [toHex('gems')]: '4 ' + toHex('gems') + ' 999999',
+                  [toHex('adfree')]: '11 ' + toHex('adfree') + ' 1',
+                  [toHex('adFreeIAPPurchased')]: '11 ' + toHex('adFreeIAPPurchased') + ' 1',
+                  [toHex('jeep_unlocked')]: '11 ' + toHex('jeep_unlocked') + ' 1'
+                };
+
+                const updatedLines = [];
+                const seen = new Set();
+                for (const line of lines) {
+                  const parts = line.trim().split(' ');
+                  if (parts.length >= 2 && modPairs[parts[1]]) {
+                    updatedLines.push(modPairs[parts[1]]);
+                    seen.add(parts[1]);
+                  } else if (line.trim()) {
+                    updatedLines.push(line);
+                  }
+                }
+                for (const [hexKey, fullLine] of Object.entries(modPairs)) {
+                  if (!seen.has(hexKey)) {
+                    updatedLines.push(fullLine);
+                  }
+                }
+                const finalBuf = new TextEncoder().encode(updatedLines.join('\n') + '\n').buffer;
+
+                await new Promise((res, rej) => {
+                  const txWrite = db.transaction('files', 'readwrite');
+                  const stWrite = txWrite.objectStore('files');
+                  stWrite.put(finalBuf, key);
+                  txWrite.oncomplete = () => res();
+                  txWrite.onerror = () => rej(txWrite.error);
+                });
+              })();
+            } catch (err) {
+              console.warn('Error applying mod save in startGame:', err);
+            }
+          }
+
+          const assets = {
+            'hcr.wasm': new Blob([buffers['hcr.wasm']], { type: 'application/wasm' }),
+            'hcr.data': new Blob([buffers['hcr.data']], { type: 'application/octet-stream' }),
+            'image.bin': new Blob([buffers['image.bin']], { type: 'application/octet-stream' })
+          };
+
+          const scriptTag = /<script\s+src=["']hcr\.js["']\s*><\/script>/;
+          if (!scriptTag.test(html)) throw new Error('The game page no longer has the expected hcr.js script tag.');
+
+          window.__hcrLoaderAssets = assets;
+          try { parent.__hcrLoaderAssets = assets; } catch (e) {}
+
+          let finalScript = script;
+const scriptUrl = URL.createObjectURL(new Blob([finalScript], { type: 'application/javascript' }));
+          const showFps = localStorage.getItem("hcrShowFps") === "1";
+          const capVal = Number(localStorage.getItem("hcrCap") || "60");
+          const soundVal = localStorage.getItem("hcrSound") !== "0";
+          const vsyncVal = localStorage.getItem("hcrVsync") === "1";
+
+          const initSettingsTag = '<script>window.__initialHcrSettings = { showFps: ' + showFps + ', cap: ' + capVal + ', sound: ' + soundVal + ', vsync: ' + vsyncVal + ' };<\/script>';
+          const bridgeTag = '<script>(' + installBridge.toString() + ')();<\/script>';
+          const replacement = initSettingsTag + bridgeTag + '<script src="' + scriptUrl + '"><\/script>';
+          
+          let page = html.replace(scriptTag, replacement)
+            .replace('</head>', '<style>#load-times{display:none!important}#hud{display:none!important}</style></head>');
+
+          // Seamless transition when game first frame renders
+          page = page.replace(
+            'onFirstFrame: () => {',
+            'onFirstFrame: () => { try { window.parent.postMessage({ type: "hcr-first-frame" }, "*"); } catch(e){} '
+          );
+
+          window.addEventListener('message', e => {
+            if (!e.data) return;
+            if (e.data.type === 'hcr-first-frame') {
+              $('status-overlay').style.display = 'none';
+              syncSettingsToGame();
+            } else if (e.data.type === 'hcr-fps-toggled') {
+              localStorage.setItem('hcrShowFps', e.data.show ? '1' : '0');
+              syncSettingButtons();
+            }
+          });
+
+          // Keyboard shortcut F8 in parent window
+          window.addEventListener('keydown', e => {
+            if (e.key === 'F8') {
+              e.preventDefault();
+              const next = localStorage.getItem('hcrShowFps') !== '1';
+              localStorage.setItem('hcrShowFps', next ? '1' : '0');
+              syncSettingButtons();
+              syncSettingsToGame();
+            }
+          });
+
+          const gameFrame = $('game');
+          gameFrame.addEventListener('load', () => {
+            syncSettingsToGame();
+            setTimeout(syncSettingsToGame, 300);
+            setTimeout(syncSettingsToGame, 1000);
+            // Fallback timeout in case onFirstFrame message was missed
+            setTimeout(() => {
+              $('status-overlay').style.display = 'none';
+            }, 3500);
+          }, { once: true });
+
+          gameFrame.srcdoc = page;
+        } catch (err) {
+          console.error(err);
+          $('loading-subtext').textContent = 'Error: ' + (err.message || String(err));
+          $('loading-subtext').style.color = '#ff6b6b';
+          $('loading-percent').textContent = 'Failed';
+        }
+      }
+
+      $('btn-play-game').onclick = launchGame;
+    })();
+  </script>
+</body>
+</html>

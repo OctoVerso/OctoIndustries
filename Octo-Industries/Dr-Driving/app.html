@@ -1,0 +1,692 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Dr. Driving</title>
+<link rel="stylesheet" href="../branding/game-branding.css">
+<script defer src="../branding/game-branding.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Zalando+Sans+Expanded&display=swap');
+  :root {
+    --bg-color: #171c20;
+    --dark-bg: #2d353e;
+    --accent: #a4b9be;
+    --text-main: #f0f0f0;
+  }
+  *, ::after, ::before {
+    box-sizing: border-box;
+  }
+  :focus {
+    outline: 0;
+    box-shadow: none;
+  }
+  html, body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    font-family: "Zalando Sans Expanded", Geneva, Tahoma, sans-serif;
+    font-size: 15px;
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  /* Launcher Home View */
+  .screen-view {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+    background: var(--bg-color);
+    z-index: 50;
+    overflow-y: auto;
+  }
+  .center-content {
+    width: 100%;
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    text-align: center;
+    margin: auto;
+  }
+  .logo-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .logo-area img {
+    max-width: 260px;
+    height: auto;
+    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5));
+  }
+  .header-title {
+    font-size: 3.2rem;
+    margin: 0;
+    color: var(--text-main);
+    letter-spacing: 1.5px;
+    line-height: 1.1;
+    text-transform: uppercase;
+    font-weight: 700;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+  }
+  .menu-box {
+    background: var(--dark-bg);
+    border-radius: 5px;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  }
+  .action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    gap: 8px;
+    padding: 10px 20px;
+    background: linear-gradient(to bottom, #5c6f82 0%, #43515e 50%, #2f3a44 100%);
+    border: 1px solid #1f262c;
+    border-radius: 5px;
+    color: #fff;
+    cursor: pointer;
+    text-shadow: 0 -1px 0 rgba(0, 0, 0, .5);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .2), 0 2px 3px rgba(0, 0, 0, .2);
+    transition: .2s ease-in-out;
+    text-transform: uppercase;
+    font-weight: 700;
+    font-family: inherit;
+  }
+  .action-btn:hover {
+    background: linear-gradient(to bottom, #6d8296 0%, #4e5e6d 50%, #3a4753 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .3), 0 4px 6px rgba(0, 0, 0, .3);
+    transform: translateY(-2px);
+  }
+  .action-btn:active {
+    background: linear-gradient(to bottom, #2f3a44 0%, #43515e 100%);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, .4);
+    transform: translateY(1px);
+  }
+  .main-action-btn {
+    width: 100%;
+    padding: 15px;
+    font-size: 1.2rem;
+  }
+  .btn-green {
+    background: linear-gradient(to bottom, #5c8264 0%, #3a443a 100%);
+  }
+  .btn-green:hover {
+    background: linear-gradient(to bottom, #6d9876 0%, #485648 100%);
+  }
+  .btn-red {
+    background: linear-gradient(to bottom, #a34c4c 0%, #7e3636 100%);
+  }
+  .btn-red:hover {
+    background: linear-gradient(to bottom, #b95656 0%, #924040 100%);
+  }
+  .status-msg {
+    margin-top: 16px;
+    font-size: 0.88rem;
+    line-height: 1.4;
+    min-height: 1.2em;
+    color: var(--accent);
+    transition: opacity .2s;
+  }
+  .status-msg.success {
+    color: #6d9876;
+    font-weight: 700;
+  }
+  .status-msg.error {
+    color: #b95656;
+    font-weight: 700;
+  }
+  /* Modals */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 20px;
+  }
+  .modal-box {
+    max-width: 440px;
+    width: 100%;
+    text-align: center;
+    gap: 16px;
+  }
+  .modal-title {
+    font-size: 1.5rem;
+    margin: 0;
+    color: var(--text-main);
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+  .modal-text {
+    color: var(--text-main);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin: 0;
+  }
+  .modal-warning {
+    color: #e5a45b;
+    font-size: 0.88rem;
+    background: rgba(229, 164, 91, 0.1);
+    border: 1px solid rgba(229, 164, 91, 0.3);
+    border-radius: 4px;
+    padding: 12px;
+    margin: 4px 0;
+    line-height: 1.4;
+  }
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 6px;
+  }
+  .modal-actions button {
+    flex: 1;
+  }  /* Game Canvas and Loading Overlay */
+  #game-container {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #000;
+    z-index: 1;
+    display: none;
+  }
+  canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    outline: none;
+    touch-action: none;
+  }
+  .status-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    background: var(--bg-color);
+    cursor: default;
+    pointer-events: auto;
+    padding: 20px;
+    transition: opacity 0.4s ease-out;
+  }
+  .loading-container {
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  .loading-text {
+    font-size: 2.5rem;
+    margin: 0 0 10px;
+    color: var(--text-main);
+    text-shadow: 2px 2px 0 #000;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+  .loading-subtext {
+    color: var(--accent);
+    font-size: .9rem;
+    margin: 0 0 20px;
+    line-height: 1.3;
+  }
+  .progress-bar-bg {
+    width: 100%;
+    height: 20px;
+    background: var(--bg-color);
+    border: 2px solid var(--dark-bg);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(to bottom, #5c6f82 0%, #43515e 50%, #2f3a44 100%);
+    border-right: 2px solid var(--accent);
+    transition: width .15s ease-out;
+  }
+  .progress-percent {
+    color: var(--accent);
+    margin-top: 8px;
+    font-weight: 700;
+  }
+  @media (max-width: 768px) {
+    .header-title { font-size: 2.4rem; }
+    .loading-text { font-size: 1.8rem; }
+    .menu-box { padding: 22px 18px; }
+    .main-action-btn { padding: 13px; font-size: 1rem; }
+  }
+</style>
+</head>
+<body>
+  <!-- Home / Launcher Menu -->
+  <div id="home-view" class="screen-view">
+    <div class="center-content">
+      <div class="logo-area">
+        <h1 class="header-title">DR. DRIVING</h1>
+      </div>
+      <div class="menu-box">
+        <button id="btn-play-game" class="action-btn main-action-btn">PLAY GAME</button>
+        <button id="btn-mod-game" class="action-btn main-action-btn btn-green" style="margin-top: 10px;">MOD: UNLIMITED MONEY</button>
+        <button id="btn-reset-game" class="action-btn main-action-btn btn-red" style="margin-top: 10px;">RESET PROGRESS</button>
+        <div id="status-msg" class="status-msg"></div>
+      </div>
+    </div>
+  </div>
+  <!-- Confirmation Warning Modal -->
+  <div id="modal-overlay" class="modal-overlay">
+    <div class="menu-box modal-box">
+      <h2 id="modal-title" class="modal-title">CONFIRM ACTION</h2>
+      <p id="modal-text" class="modal-text"></p>
+      <div id="modal-warning" class="modal-warning"></div>
+      <div class="modal-actions">
+        <button id="btn-modal-cancel" class="action-btn">CANCEL</button>
+        <button id="btn-modal-confirm" class="action-btn btn-red">CONFIRM</button>
+      </div>
+    </div>
+  </div>
+  <!-- Game Canvas & Loading Screen -->
+  <div id="game-container">
+    <canvas id="glcanvas" tabindex="1"></canvas>
+    <div id="status-overlay" class="status-overlay">
+      <div id="loading-box" class="loading-container">
+        <h2 class="loading-text">LOADING...</h2>
+        <div id="loading-subtext" class="loading-subtext">Streaming game assets...</div>
+        <div class="progress-bar-bg">
+          <div id="loading-bar-fill" class="progress-bar-fill"></div>
+        </div>
+        <div id="loading-percent" class="progress-percent">0%</div>
+      </div>
+    </div>
+  </div>
+<script>
+// ---- Asset downloader state -------------------------------------------------------------
+var drBundle = { chunks: [], loaded: 0, total: Number("10744038") || 10744038, state: 0, data: null };
+var assetDownloadStarted = false;
+function updateProgress(loaded, total) {
+  var t = total || drBundle.total || 10744038;
+  var pct = Math.min(100, Math.max(0, Math.floor((loaded / t) * 100)));
+  var bar = document.getElementById("loading-bar-fill");
+  var lbl = document.getElementById("loading-percent");
+  if (bar) bar.style.width = pct + "%";
+  if (lbl) lbl.textContent = pct + "%";
+}
+function startAssetDownload() {
+  if (assetDownloadStarted) return;
+  assetDownloadStarted = true;
+  fetch("assets.bin").then(function (res) {
+    if (!res.ok || !res.body) throw new Error("assets.bin: HTTP " + res.status);
+    if (!drBundle.total) drBundle.total = Number(res.headers.get("content-length")) || 10744038;
+    var reader = res.body.getReader();
+    function pump() {
+      return reader.read().then(function (r) {
+        if (r.done) {
+          drBundle.state = 1;
+          updateProgress(drBundle.total, drBundle.total);
+          return;
+        }
+        drBundle.chunks.push(r.value);
+        drBundle.loaded += r.value.length;
+        updateProgress(drBundle.loaded, drBundle.total);
+        return pump();
+      });
+    }
+    return pump();
+  }).catch(function (e) {
+    console.warn("asset bundle failed, falling back to per-file loading", e);
+    drBundle.state = -1;
+  });
+}
+// Prefetch assets immediately in background
+startAssetDownload();
+</script>
+<script>var register_plugin;</script>
+<script src="mq_js_bundle.js"></script>
+<script>
+// ---- Save Game & Preferences -------------------------------------------------------------
+var SAVE_KEY = "drdriving.save";
+function getDefaultSave() {
+  var s = {
+    version: "1.0",
+    bNotFirst: true,
+    musicDisabled: false,
+    soundDisabled: false,
+    bLeftWheel: false,
+    bAccelDisabled: true,
+    bRightDriver: false,
+    bShowYard: false,
+    iGuiSize: 2,
+    bRateRewarded: false,
+    iDriverLevel: 0,
+    iDriverExp: 0,
+    iWheelSensitivity: 0,
+    iCoin: 0,
+    iGold: 0,
+    iBoughtGold: 0,
+    iTravelDistance: 0,
+    iDriftDistance: 0,
+    iAccidentNo: 0,
+    iMissionsClearCount: 0,
+    iTravelSecond: 0,
+    iMaxSpeed: 0,
+    iPerfectTurn: 0,
+    iSubMission: 0,
+    iCS: 0,
+    iWin: 0,
+    iLose: 0,
+    iRating: 0,
+    iMB: 0
+  };
+  for (var i = 0; i < 32; i++) {
+    s["bHasCar" + i] = (i === 0); // Only starter car 0 is unlocked
+    s["iCarDamage" + i] = 0;
+    s["iUpgrade" + i] = 0;
+    s["iCarRent" + i] = 0;
+  }
+  for (var j = 0; j < 9; j++) {
+    s["iRecord" + j] = 0;
+    s["iMissionClear" + j] = 0;
+  }
+  for (var k = 0; k < 32; k++) {
+    s["bAchievement" + k] = false;
+  }
+  return s;
+}
+function getSave() {
+  try {
+    var raw = localStorage.getItem(SAVE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  return getDefaultSave();
+}
+function writeSave(s) {
+  try {
+    localStorage.setItem(SAVE_KEY, JSON.stringify(s));
+  } catch(e) {
+    console.warn("Failed to write save", e);
+  }
+}
+// ---- Launcher UI Logic -------------------------------------------------------------------
+(function () {
+  var $ = function(id) { return document.getElementById(id); };
+  function showStatus(text, type) {
+    var el = $('status-msg');
+    el.textContent = text;
+    el.className = 'status-msg' + (type ? ' ' + type : '');
+  }
+  // Confirmation Modal
+  var modalConfirmAction = null;
+  function showModal(title, text, warning, btnText, btnClass, onConfirm) {
+    $('modal-title').textContent = title;
+    $('modal-text').textContent = text;
+    $('modal-warning').textContent = warning;
+    var confirmBtn = $('btn-modal-confirm');
+    confirmBtn.textContent = btnText;
+    confirmBtn.className = 'action-btn ' + btnClass;
+    modalConfirmAction = onConfirm;
+    $('modal-overlay').style.display = 'flex';
+  }
+  function hideModal() {
+    $('modal-overlay').style.display = 'none';
+    modalConfirmAction = null;
+  }
+  $('btn-modal-cancel').onclick = hideModal;
+  $('btn-modal-confirm').onclick = function () {
+    if (modalConfirmAction) {
+      var fn = modalConfirmAction;
+      hideModal();
+      fn();
+    }
+  };
+  // Mod: Unlimited Money (Coins + Gold only, NO cars unlocked)
+  $('btn-mod-game').onclick = function () {
+    showModal(
+      'MOD: UNLIMITED MONEY',
+      'This will grant 999,999 Coins and 99,999 Gold to your save file.',
+      'ℹ️ Your car unlocks remain unchanged so you can purchase and upgrade cars on your own!',
+      'APPLY MOD',
+      'btn-green',
+      function () {
+        try {
+          var save = getSave();
+          save.iCoin = 999999;
+          save.iGold = 99999;
+          writeSave(save);
+          showStatus('✓ Mod applied! 999,999 Coins & 99,999 Gold added.', 'success');
+        } catch (e) {
+          showStatus('Failed to apply mod: ' + e.message, 'error');
+        }
+      }
+    );
+  };
+  // Reset Progress
+  $('btn-reset-game').onclick = function () {
+    showModal(
+      'RESET PROGRESS',
+      'This will wipe all local saved game data and restore clean defaults.',
+      '⚠️ WARNING: This will permanently delete your coins, gold, car upgrades, and records!',
+      'WIPE SAVE DATA',
+      'btn-red',
+      function () {
+        try {
+          localStorage.removeItem(SAVE_KEY);
+          for (var i = localStorage.length - 1; i >= 0; i--) {
+            var k = localStorage.key(i);
+            if (k && k.indexOf("drdriving.pref.") === 0) {
+              localStorage.removeItem(k);
+            }
+          }
+          showStatus('✓ Save progress wiped. Clean game restored.', 'success');
+        } catch (e) {
+          showStatus('Failed to reset save: ' + e.message, 'error');
+        }
+      }
+    );
+  };
+      
+  // Launch Game
+  var gameRunning = false;
+  $('btn-play-game').onclick = function () {
+    if (gameRunning) return;
+    gameRunning = true;
+    $('home-view').style.display = 'none';
+    $('game-container').style.display = 'block';
+    $('status-overlay').style.display = 'flex';
+    startAssetDownload();
+    updateProgress(drBundle.loaded, drBundle.total);
+    // Fade out overlay once first frame is drawn
+    var firstFrameReported = false;
+    var origRAF = window.requestAnimationFrame;
+    window.requestAnimationFrame = function(cb) {
+      return origRAF(function(time) {
+        if (!firstFrameReported && drBundle.state === 1) {
+          firstFrameReported = true;
+          setTimeout(function () {
+            var overlay = $('status-overlay');
+            if (overlay) {
+              overlay.style.opacity = '0';
+              setTimeout(function () { overlay.style.display = 'none'; }, 400);
+            }
+          }, 350);
+        }
+        return cb(time);
+      });
+    };
+    // Load WebAssembly
+    load("drdriving.wasm");
+  };
+})();
+// ---- Miniquad Plugins (Save, Preferences, Firebase HTTP, Text Input, Asset Bundle) -------
+(function () {
+  var KEY = "drdriving.save";
+  var enc = new TextEncoder();
+  miniquad_add_plugin({
+    name: "drdriving_web",
+    version: "0.2.0",
+    register_plugin: function (importObject) {
+      var env = importObject.env;
+      env.dr_storage_set = function (ptr, len) {
+        try {
+          localStorage.setItem(KEY, new TextDecoder().decode(new Uint8Array(wasm_memory.buffer, ptr, len)));
+        } catch (e) { console.warn("save failed", e); }
+      };
+      env.dr_storage_get = function (ptr, cap) {
+        var text = null;
+        try { text = localStorage.getItem(KEY); } catch (e) {}
+        if (!text) return 0;
+        var data = enc.encode(text);
+        if (data.length > cap) return -data.length;
+        new Uint8Array(wasm_memory.buffer, ptr, data.length).set(data);
+        return data.length;
+      };
+      function text(ptr, len) { return new TextDecoder().decode(new Uint8Array(wasm_memory.buffer, ptr, len)); }
+      env.dr_pref_set = function (kp, kl, vp, vl) {
+        try { localStorage.setItem("drdriving.pref." + text(kp, kl), text(vp, vl)); } catch (e) {}
+      };
+      env.dr_pref_get = function (kp, kl, dst, cap) {
+        var v = null;
+        try { v = localStorage.getItem("drdriving.pref." + text(kp, kl)); } catch (e) {}
+        if (!v) return 0;
+        var data = enc.encode(v);
+        if (data.length > cap) return 0;
+        new Uint8Array(wasm_memory.buffer, dst, data.length).set(data);
+        return data.length;
+      };
+      // multiplayer: default original Firebase Realtime Database
+      var http = { next: 1, reqs: {} };
+      env.dr_http_db = function (dst, cap) {
+        var v = new URLSearchParams(location.search).get("db");
+        if (!v) return 0;
+        var data = enc.encode(v);
+        if (data.length > cap) return 0;
+        new Uint8Array(wasm_memory.buffer, dst, data.length).set(data);
+        return data.length;
+      };
+      env.dr_http_start = function (mp, ml, up, ul, bp, bl, hp, hl) {
+        var id = http.next++, method = text(mp, ml), url = text(up, ul);
+        var r = http.reqs[id] = { state: 0, status: 0, body: new Uint8Array(0), etag: null };
+        var init = { method: method, headers: {}, cache: "no-store", keepalive: method === "DELETE" };
+        text(hp, hl).split("\n").forEach(function (l) {
+          var i = l.indexOf(":");
+          if (i > 0) init.headers[l.slice(0, i).trim()] = l.slice(i + 1).trim();
+        });
+        if (bl > 0) init.body = text(bp, bl);
+        function done(res, t) { r.status = res ? res.status : 0; r.etag = res ? res.headers.get("etag") : null; r.body = enc.encode(t || ""); r.state = 1; }
+        function go(u, i) {
+          return fetch(u, i).then(function (res) { return res.text().then(function (t) { done(res, t); }); });
+        }
+        go(url, init).catch(function () {
+          if (method !== "PATCH") return done(null, "");
+          var init2 = Object.assign({}, init, { method: "POST" });
+          return go(url + (url.indexOf("?") < 0 ? "?" : "&") + "x-http-method-override=PATCH", init2).catch(function () { done(null, ""); });
+        });
+        return id;
+      };
+      env.dr_http_state = function (id) { return http.reqs[id] ? http.reqs[id].state : 1; };
+      env.dr_http_status = function (id) { return http.reqs[id] ? http.reqs[id].status : 0; };
+      env.dr_http_body_len = function (id) { return http.reqs[id] ? http.reqs[id].body.length : 0; };
+      env.dr_http_body = function (id, dst) { if (http.reqs[id]) new Uint8Array(wasm_memory.buffer, dst, http.reqs[id].body.length).set(http.reqs[id].body); };
+      env.dr_http_etag_len = function (id) { return http.reqs[id] && http.reqs[id].etag ? enc.encode(http.reqs[id].etag).length : 0; };
+      env.dr_http_etag = function (id, dst) { var d = enc.encode(http.reqs[id].etag); new Uint8Array(wasm_memory.buffer, dst, d.length).set(d); };
+      env.dr_http_free = function (id) { delete http.reqs[id]; };
+      // text input helper
+      var tin = { el: null, state: 0 };
+      function tinClose() { if (tin.el) { tin.el.remove(); tin.el = null; } }
+      env.dr_text_close = function () { tinClose(); tin.state = 0; };
+      env.dr_text_open = function (vp, vl, max, numeric) {
+        tinClose();
+        tin.state = 0;
+        if (!document.getElementById("dr-text-style")) {
+          var st = document.createElement("style");
+          st.id = "dr-text-style";
+          st.textContent = "#dr-text::selection{background:transparent;color:transparent}";
+          document.head.appendChild(st);
+        }
+        var el = document.createElement("input");
+        el.id = "dr-text";
+        el.type = "text";
+        el.value = text(vp, vl);
+        el.maxLength = max;
+        el.autocomplete = "off"; el.autocapitalize = "off"; el.spellcheck = false;
+        if (numeric) { el.inputMode = "numeric"; el.pattern = "[0-9]*"; }
+        el.setAttribute("enterkeyhint", "done");
+        el.style.cssText = "position:fixed;left:0;top:0;width:10px;height:10px;z-index:30;margin:0;padding:0;border:0;outline:none;background:transparent;color:transparent;caret-color:transparent;font-size:16px;cursor:text;user-select:text;-webkit-user-select:text";
+        el.addEventListener("keydown", function (e) {
+          e.stopPropagation();
+          if (e.key === "Enter") { e.preventDefault(); tin.state = 1; }
+          else if (e.key === "Escape") { e.preventDefault(); tin.state = 2; }
+        });
+        ["keyup", "keypress"].forEach(function (n) { el.addEventListener(n, function (e) { e.stopPropagation(); }); });
+        el.addEventListener("touchstart", function (e) { e.stopPropagation(); }, { passive: true });
+        document.body.appendChild(el);
+        tin.el = el;
+        setTimeout(function () { try { el.focus(); el.select(); } catch (e) {} }, 60);
+      };
+      env.dr_text_pos = function (l, t, w, h) {
+        if (!tin.el) return;
+        var s = tin.el.style;
+        s.left = l + "px"; s.top = t + "px"; s.width = w + "px"; s.height = h + "px";
+      };
+      env.dr_text_state = function () { return tin.el ? tin.state : 0; };
+      env.dr_text_active = function () { return tin.el ? 1 : 0; };
+      env.dr_text_value = function (dst, cap) {
+        if (!tin.el) return 0;
+        var d = enc.encode(tin.el.value);
+        if (d.length > cap) return 0;
+        new Uint8Array(wasm_memory.buffer, dst, d.length).set(d);
+        return d.length;
+      };
+      env.dr_text_sel = function (which) {
+        if (!tin.el) return 0;
+        var v = tin.el.value;
+        var s = tin.el.selectionStart || 0, e = tin.el.selectionEnd == null ? s : tin.el.selectionEnd;
+        if (which === 2) return tin.el.selectionDirection === "backward" ? 1 : 0;
+        return Array.from(v.slice(0, which === 0 ? s : e)).length;
+      };
+      env.dr_text_set = function (vp, vl, start, end) {
+        if (!tin.el) return;
+        var v = text(vp, vl), c = Array.from(v);
+        tin.el.value = v;
+        try { tin.el.setSelectionRange(c.slice(0, start).join("").length, c.slice(0, end).join("").length); } catch (e) {}
+      };
+      // asset bundle access for wasm
+      env.dr_bundle_loaded = function () { return drBundle.loaded; };
+      env.dr_bundle_total = function () { return drBundle.total; };
+      env.dr_bundle_state = function () { return drBundle.state; };
+      env.dr_bundle_read = function (ptr) {
+        var dst = new Uint8Array(wasm_memory.buffer, ptr, drBundle.loaded), off = 0;
+        for (var i = 0; i < drBundle.chunks.length; i++) {
+          dst.set(drBundle.chunks[i], off);
+          off += drBundle.chunks[i].length;
+        }
+        drBundle.chunks = [];
+        return off;
+      };
+    }
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="robots" content="noindex, nofollow">
+  <title>III Web</title>
+  <link rel="icon" href="favicon.ico">
+  <link rel="stylesheet" href="../branding/game-branding.css">
+  <script defer src="../branding/game-branding.js"></script>
+  <script>
+    window.APP_VERSION = "1.2.6";
+    document.write(`
+      <link rel="stylesheet" href="main.css?v=${window.APP_VERSION}">
+      <link rel="stylesheet" href="touch.css?v=${window.APP_VERSION}">
+    `);
+  </script>
+</head>
+
+<body data-is-touch="0" data-state-menu="1" data-state-cutscene="0" data-state-car="0" data-state-gun="0"
+  data-state-car-gun="0" data-state-job="0" data-state-veh-gun="0" data-state-download="0">
+
+  <div id="home-view" class="screen-view">
+    <div class="center-content">
+      <div class="logo-area">
+        <h1 class="header-title">III Web</h1>
+      </div>
+      <div class="menu-box">
+        <button id="btn-play-game" class="action-btn main-action-btn">PLAY GAME</button>
+        <button id="btn-open-saves" class="action-btn main-action-btn" style="margin-top: 10px;">SAVE MANAGER</button>
+        <button id="btn-open-mods" class="action-btn main-action-btn" style="margin-top: 10px;">MOD MANAGER</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="save-view" class="screen-view" style="display: none;">
+    <div class="center-content save-page-content">
+      <h1 class="header-line1">Save Manager</h1>
+      <div class="global-actions">
+        <button id="btn-save-back" class="action-btn">BACK</button>
+        <button id="btn-save-refresh" class="action-btn">REFRESH</button>
+        <button id="btn-save-wipe" class="action-btn btn-red">WIPE DATABASE</button>
+      </div>
+      <input id="save-file-input" type="file" style="display:none;" accept=".b">
+      <div id="slots-container" class="slots-list">
+      </div>
+    </div>
+  </div>
+
+  <div id="mods-view" class="screen-view" style="display: none;">
+    <div class="center-content save-page-content">
+      <h1 class="header-line1">Mod Manager</h1>
+      <div class="global-actions">
+        <button id="btn-mods-back" class="action-btn">BACK</button>
+        <button id="btn-mods-upload" class="action-btn btn-green">UPLOAD MODS</button>
+        <button id="btn-mods-refresh" class="action-btn">REFRESH</button>
+        <button id="btn-mods-wipe" class="action-btn btn-red">UNINSTALL ALL</button>
+      </div>
+      <input id="mod-file-input" type="file" style="display:none;" accept=".dff,.txd,.col,.bmp,.png,.jpg" multiple>
+      <div id="mods-container" class="slots-list">
+      </div>
+
+      <div class="guide-box">
+        <h3>How to Install Mods (Beginner's Guide)</h3>
+
+        <div class="guide-section">
+          <h4>1. Where to download mods?</h4>
+          <p>We recommend <a href="https://gamemodding.com/en/gta-3/" target="_blank" class="official-link">GameModding.com</a> or <a href="https://www.gtainside.com/en/gta3/mods/" target="_blank" class="official-link">GTAinside</a>.</p>
+          <p class="warning-text">
+            ⚠️ <b>IMPORTANT:</b> DO NOT use "Auto-Installers" (<code>.exe</code> files). Always look for the <b>"Manual Download"</b> or <b>"ZIP Archive"</b> button. You need to extract the ZIP file to get the raw mod files.
+          </p>
+        </div>
+
+        <div class="guide-section">
+          <h4>2. ✅ What IS supported?</h4>
+          <p>Any mod that replaces existing game assets by modifying the <code>models/gta3.img</code> file can be installed here. This includes:</p>
+          <ul>
+            <li><b>Vehicles, Weapons, Peds, Buildings:</b> Upload the <code>.dff</code> (3D Model) and/or <code>.txd</code> (Textures) files.</li>
+            <li><b>Simple Player Skins:</b> Upload the skins in <code>.bmp</code> format.</li>
+          </ul>
+        </div>
+
+        <div class="guide-section">
+          <h4>3. ❌ What is NOT supported?</h4>
+          <ul>
+            <li><b>CLEO / Scripts:</b> Anything that modifies game logic or adds new features (e.g., trainers, CLEO scripts).</li>
+            <li><b>Graphics Mods (ENB):</b> Files like <code>d3d8.dll</code> or <code>enbseries.ini</code>.</li>
+            <li><b>Screens/Menus:</b> Any type of replacement outside <code>models/gta3.img</code> file (e.g., <code>hud.txd</code> or <code>intro.txd</code>).</li>
+            <li><b>Handling/Physics:</b> Modifying <code>handling.cfg</code> or <code>default.ide</code>. (Your custom car will drive like the car it replaced).</li>
+          </ul>
+        </div>
+
+        <div class="guide-section">
+          <h4>Special Note: Changing Claude's Character (e.g. custom skins / models)</h4>
+          <p>If you download a mod to replace Claude, it will usually have a <code>player.dff</code> and <code>player.txd</code>. To make it work:</p>
+          <ol>
+            <li>Upload the <code>player.dff</code> here.</li>
+            <li>You must extract the character's image from the <code>player.txd</code> file using a PC tool like <i>TXD Workshop</i>, and save it as a <code>.bmp</code> file.</li>
+            <li>Upload that image file here.</li>
+            <li>Start the game, press <b>ESC -&gt; Options -&gt; Player Setup</b>, and select your new skin!</li>
+          </ol>
+        </div>
+
+        <div class="guide-section">
+          <p> For a video guide, <a href="https://youtu.be/jSLsqqPua0w" target="_blank" class="official-link">click here</a>! </p>
+        </div>
+
+        <p style="text-align: center; margin-top: 15px; font-size: 0.9em; opacity: 0.8;">
+          <i>Mods are injected safely into RAM. If a mod breaks your game, just click "Uninstall" and refresh the page!</i>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div id="game-container">
+    <div id="wrap">
+      <canvas id="canvas" width="1280" height="720" tabindex="0"></canvas>
+      <input id="cheat-input" type="text" autocapitalize="none" autocomplete="off" autocorrect="off" spellcheck="false"
+        style="position: absolute; top: -100px; left: -100px; width: 1px; height: 1px; z-index: -1; opacity: 0;" />
+    </div>
+
+    <div id="status-overlay" class="status-overlay" style="display: none;">
+      <div id="loading-box" class="loading-container">
+        <h2 class="loading-text">LOADING...</h2>
+        <div id="loading-subtext" class="loading-subtext">this may take some time on first load, be patient</div>
+        <div class="progress-bar-bg">
+          <div id="loading-bar-fill" class="progress-bar-fill"></div>
+        </div>
+        <div id="loading-percent" class="progress-percent">0%</div>
+      </div>
+
+      <div id="start-prompt" class="start-prompt" style="display: none;">
+        <h1>CLICK ANYWHERE TO START</h1>
+      </div>
+    </div>
+
+    <div class="touch-controls-wrapper">
+      <div id="touch-move"></div>
+      <div id="touch-look"></div>
+
+      <div class="touch-control run"></div>
+      <div class="touch-control jump"></div>
+      <div class="touch-control fist"></div>
+      <div class="touch-control getIn"></div>
+      <div class="touch-control drift"></div>
+      <div class="touch-control menu"></div>
+      <div class="touch-control camera"></div>
+      <div class="touch-control horn"></div>
+      <div class="touch-control job"></div>
+      <div class="touch-control radio"></div>
+      <div class="touch-control weapon"></div>
+      <div class="touch-control fireLeft"></div>
+      <div class="touch-control fireRight"></div>
+      <div class="touch-control cheats"></div>
+    </div>
+  </div>
+
+  <progress id="progress" hidden value="0" max="1"></progress>
+  <div id="status" hidden aria-hidden="true"></div>
+  <div id="tap-hint" hidden aria-hidden="true"></div>
+
+  <script>
+    [
+      "packages.js",
+      "gamepad-emulator.js",
+      "index.js",
+      "game.js"
+    ].forEach(src => {
+      document.write(`<script src="${src}?v=${window.APP_VERSION}"><\/script>`);
+    });
+  </script>
+
+</body>
+
+</html>

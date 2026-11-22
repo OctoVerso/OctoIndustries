@@ -77,6 +77,7 @@ function inferGameMetadata(gameDirectory) {
     tags: folderName.split(/[-_]+/).filter(Boolean).map((tag) => tag.toLowerCase()),
     launch: 'index.html',
     thumbnail,
+    bannerSource: thumbnail,
   };
 }
 
@@ -137,7 +138,13 @@ function assetReference(gameDirectory, value) {
 function bannerSvg(game, gameDirectory) {
   const accent = /^#[\da-f]{6}$/i.test(game.accent || '') ? game.accent : '#65e6e3';
   const title = xmlEscape(game.title);
-  const source = assetReference(gameDirectory, game.bannerSource || game.thumbnail || '');
+  if (typeof game.bannerSource !== 'string' || !game.bannerSource.trim()) {
+    throw new Error(`${game.title} must define bannerSource with authentic game artwork or its logo.`);
+  }
+  const source = assetReference(gameDirectory, game.bannerSource);
+  if (!source) {
+    throw new Error(`${game.title} has no valid bannerSource: ${game.bannerSource}`);
+  }
   const fit = game.bannerFit === 'contain' ? 'xMidYMid meet' : 'xMidYMid slice';
   const artwork = source
     ? `<rect width="1200" height="675" fill="#071019"/><image href="${xmlEscape(source)}" x="-180" y="-100" width="1560" height="875" preserveAspectRatio="xMidYMid slice" filter="url(#backdrop)"/><rect width="1200" height="675" fill="#071019" fill-opacity=".18"/><image href="${xmlEscape(source)}" x="0" y="0" width="1200" height="675" preserveAspectRatio="${fit}"/>`

@@ -6,6 +6,13 @@ node_modules/
 .env.*
 !.env.example
 dist/
+coverage/
+**/__pycache__/
+*.py[cod]
+**/.cache/
+**/.next/
+**/.turbo/
+**/.vite/
 admin_state.json
 feedback.json
 d1-backup.sql
