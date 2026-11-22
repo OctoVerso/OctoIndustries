@@ -704,7 +704,7 @@ window.OCTO_GAMES = Object.freeze([
     "id": "turball",
     "title": "Turball",
     "description": "Drive, boost, and score in a 3D car-soccer arena with bot matches and free play.",
-    "version": "1.0.0",
+    "version": "8016d11bcb58-44956691996-1",
     "addedAt": "2026-10-21T10:34:00.000Z",
     "category": "Sports",
     "tags": [
@@ -717,6 +717,8 @@ window.OCTO_GAMES = Object.freeze([
     "launch": "/Octo-Industries/Turball/index.html",
     "thumbnail": "/Octo-Industries/Turball/hub-banner.svg?v=357f3e34e1ea87b7",
     "featured": false,
+    "offlineReady": false,
+    "sourceUrl": "https://turball.io/casual",
     "sourceFile": "Octo-Industries/Turball/game.json",
     "banner": "/Octo-Industries/Turball/hub-banner.svg?v=357f3e34e1ea87b7",
     "screenshots": []

@@ -1,0 +1,1 @@
+function m(n,u,e,{lower:l=!1}={}){if(!Number.isFinite(e)||e<=0)return null;let r="creative.best."+u;try{let i=n?.getItem(r),t=i==null?NaN:Number(i);return Number.isFinite(t)&&t>0&&(l?e>=t:e<=t)?{best:t,improved:!1}:(n?.setItem(r,String(e)),{best:e,improved:!0})}catch{return null}}export{m as a};

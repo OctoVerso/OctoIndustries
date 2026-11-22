@@ -1,0 +1,1 @@
+function i(o=globalThis){let e=o.navigator;return!!(e?.userAgentData?.mobile||/Android|iPhone|iPad|iPod/i.test(e?.userAgent||"")||/Mac/i.test(e?.platform||"")&&e?.maxTouchPoints>1||o.matchMedia?.("(pointer: coarse) and (hover: none)").matches)}function n(o,e=i()){return{remoteCars:e?0:2,crowd:!["low","very-low"].includes(o)}}export{i as a,n as b};

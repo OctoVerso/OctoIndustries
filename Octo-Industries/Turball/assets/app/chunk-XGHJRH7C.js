@@ -1,0 +1,1 @@
+function o(t,r,a=45e3){let e,i=new Promise((n,s)=>{e=setTimeout(()=>s(new Error(`${r} took too long. Check your connection and try again.`)),a)});return Promise.race([Promise.resolve().then(t),i]).finally(()=>clearTimeout(e))}export{o as a};

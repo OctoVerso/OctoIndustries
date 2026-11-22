@@ -881,6 +881,10 @@ async function refreshDashboardData() {
     api('/api/admin/dashboard'),
     api('/api/admin/feedback'),
   ]);
+  if (dashboardResult.status === 'rejected' && dashboardResult.reason?.status === 401) {
+    showLogin('Your admin session expired. Sign in again to continue.');
+    return;
+  }
   feedbackLoadError = feedbackResult.status === 'rejected'
     ? feedbackResult.reason
     : !Array.isArray(feedbackResult.value) || feedbackResult.value.some((entry) => !entry
@@ -998,7 +1002,8 @@ logoutButton.addEventListener('click', async () => {
     await api('/api/admin/logout', { method: 'POST', body: '{}' });
     showLogin();
   } catch (error) {
-    showToast(error.message);
+    if (error.status === 401) showLogin('Your admin session expired. Sign in again to continue.');
+    else showToast(error.message);
   }
 });
 

@@ -1,0 +1,1 @@
+var a=Object.freeze({gas:0,brake:0,steer:0});function s(e){let t=e?.value??+!!e?.pressed;return t>.05?Math.min(1,t):0}function o(e){if(!e)return a;let t=e.axes[0]||0,r=+!!e.buttons[15]?.pressed-+!!e.buttons[14]?.pressed,n=Math.abs(t)>.12?Math.sign(t)*(Math.min(1,Math.abs(t))-.12)/.88:r;return{gas:s(e.buttons[7]),brake:s(e.buttons[6]),steer:n}}export{o as a};
