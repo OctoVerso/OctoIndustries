@@ -11,13 +11,22 @@ function createDb(seed = {}) {
   let activityId = 1;
   const builder = (name) => {
     if (!tables[name]) tables[name] = [];
-    const state = { op: 'select', filters: [], lessThan: [], order: null, range: null, payload: null, count: false, head: false };
+    const state = { op: 'select', filters: [], lessThan: [], order: null, range: null, payload: null, count: false, head: false, ignoreDuplicates: false };
     const run = () => {
       const rows = tables[name];
       const matches = (row) => state.filters.every(([column, values]) => values.includes(row[column]))
         && state.lessThan.every(([column, value]) => row[column] < value);
       if (state.op === 'insert') {
         const added = [state.payload].flat().map((row) => (name === 'activity' ? { id: activityId++, ...row } : { ...row }));
+        rows.push(...added);
+        return { data: added, error: null };
+      }
+      if (state.op === 'upsert') {
+        const added = [state.payload].flat().filter((row) => {
+          const exists = rows.some((existing) => existing.id === row.id);
+          if (exists && !state.ignoreDuplicates) Object.assign(rows.find((existing) => existing.id === row.id), row);
+          return !exists;
+        }).map((row) => ({ ...row }));
         rows.push(...added);
         return { data: added, error: null };
       }
@@ -40,6 +49,7 @@ function createDb(seed = {}) {
     const api = {
       select(_columns, options = {}) { state.count = options.count; state.head = options.head; return api; },
       insert(payload) { state.op = 'insert'; state.payload = payload; return api; },
+      upsert(payload, options = {}) { state.op = 'upsert'; state.payload = payload; state.ignoreDuplicates = options.ignoreDuplicates; return api; },
       update(payload) { state.op = 'update'; state.payload = payload; return api; },
       delete() { state.op = 'delete'; return api; },
       eq(column, value) { state.filters.push([column, [value]]); return api; },
@@ -224,6 +234,43 @@ test('admin dashboard, game edits, publishing, jobs, and activity logging use Su
   const listed = await (await call(jobs, 'jobs', '', { token })).json();
   assert.equal(listed.some((job) => job.type === 'standalone'), true);
   assert.ok(db.tables.activity.some((row) => row.message === 'Published BETA'));
+});
+
+test('admin catalog sync adds new published games once and preserves existing records', async () => {
+  db = createDb({ games: [game('existing')] });
+  const { body: { token } } = await signIn();
+  const addition = {
+    id: 'new-game', title: 'New Game', description: 'A new game', category: 'Action',
+    tags: ['Action'], featured: false, launch: '/Octo-Industries/New-Game/index.html',
+    thumbnail: '/Octo-Industries/New-Game/hub-banner.svg?v=0123456789abcdef',
+  };
+  const first = await call(admin, 'admin', '/catalog/sync', { method: 'POST', token, body: { games: [addition] } });
+  assert.deepEqual(await first.json(), { synced: 1 });
+  assert.equal(db.tables.games.find((row) => row.id === 'new-game').status, 'published');
+  assert.equal(db.tables.games.find((row) => row.id === 'new-game').launch, 'Octo-Industries/New-Game/index.html');
+  assert.equal(db.tables.games.find((row) => row.id === 'new-game').thumbnail, 'Octo-Industries/New-Game/hub-banner.svg?v=0123456789abcdef');
+  const dashboard = await (await call(admin, 'admin', '/dashboard', { token })).json();
+  assert.equal(dashboard.counts.total, 2);
+  assert.equal(dashboard.counts.published, 2);
+
+  db.tables.games[0].title = 'Admin edited title';
+  const second = await call(admin, 'admin', '/catalog/sync', { method: 'POST', token, body: { games: [addition] } });
+  assert.deepEqual(await second.json(), { synced: 0 });
+  assert.equal(db.tables.games[0].title, 'Admin edited title');
+  assert.equal((await call(admin, 'admin', '/catalog/sync', { method: 'POST', body: { games: [addition] } })).status, 401);
+});
+
+test('admin catalog sync rejects external asset paths and duplicate IDs', async () => {
+  db = createDb();
+  const { body: { token } } = await signIn();
+  const addition = {
+    id: 'new-game', title: 'New Game', description: 'A new game', category: 'Action',
+    tags: [], featured: false, launch: 'https://example.com/game.html',
+    thumbnail: '/Octo-Industries/New-Game/hub-banner.svg',
+  };
+  assert.equal((await call(admin, 'admin', '/catalog/sync', { method: 'POST', token, body: { games: [addition] } })).status, 400);
+  addition.launch = '/Octo-Industries/New-Game/index.html';
+  assert.equal((await call(admin, 'admin', '/catalog/sync', { method: 'POST', token, body: { games: [addition, addition] } })).status, 400);
 });
 
 test('activity is trimmed to 100 rows', async () => {

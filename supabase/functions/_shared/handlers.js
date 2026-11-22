@@ -16,6 +16,46 @@ import {
 
 const gameFields = { title: 'title', description: 'description', category: 'category', tags: 'tags', featured: 'featured' };
 const feedbackId = /^[a-f\d]{32}$/;
+const catalogGameId = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+function catalogAssetPath(value, field, id) {
+  if (typeof value !== 'string' || value.length > 2048) {
+    throw httpError(`Game ${id} has an invalid ${field} path.`, 400);
+  }
+  const [assetPath, query, ...extra] = value.split('?');
+  const path = assetPath.replace(/^\/+/, '');
+  const version = query ? `?${query}` : '';
+  if (!path.startsWith('Octo-Industries/') || /(?:^|\/)\.\.?(?:\/|$)|[#]/.test(path)
+    || extra.length > 0 || (version && !/^\?v=[a-f\d]{16}$/.test(version))) {
+    throw httpError(`Game ${id} must use a local ${field} path beneath Octo-Industries/.`, 400);
+  }
+  return `${path}${version}`;
+}
+
+function catalogGameRow(game) {
+  if (!game || typeof game !== 'object' || Array.isArray(game)
+    || typeof game.id !== 'string' || !catalogGameId.test(game.id)
+    || typeof game.title !== 'string' || !game.title.trim() || game.title.length > 120
+    || typeof game.description !== 'string' || !game.description.trim() || game.description.length > 2000
+    || typeof game.category !== 'string' || !game.category.trim() || game.category.length > 120
+    || !Array.isArray(game.tags) || game.tags.length > 30
+    || game.tags.some((tag) => typeof tag !== 'string' || tag.length > 40)
+    || typeof game.featured !== 'boolean') {
+    throw httpError('Each catalog game must include a valid id, title, description, category, tags, and featured flag.', 400);
+  }
+  return {
+    id: game.id,
+    title: game.title.trim(),
+    description: game.description.trim(),
+    category: game.category.trim(),
+    tags: game.tags,
+    featured: game.featured,
+    launch: catalogAssetPath(game.launch, 'launch', game.id),
+    thumbnail: catalogAssetPath(game.thumbnail, 'thumbnail', game.id),
+    offline_ready: false,
+    status: 'published',
+  };
+}
 
 async function activityList(db, limit) {
   const rows = must(await db.from('activity').select('message, created_at').order('id', { ascending: false }).limit(limit));
@@ -444,6 +484,22 @@ export const admin = serve('admin', async (context) => {
     const { error } = await db.from('admin_sessions').delete().eq('session_id', session.id);
     if (error) throw new Error(`Could not revoke admin session: ${error.message}`);
     return json({ authenticated: true, ...(await createSession(env, db)) });
+  }
+
+  if (path === '/catalog/sync' && method === 'POST') {
+    const body = await bodyJson(request);
+    if (!Array.isArray(body.games) || body.games.length < 1 || body.games.length > 250) {
+      throw httpError('Send between 1 and 250 catalog games to sync.', 400);
+    }
+    const rows = body.games.map(catalogGameRow);
+    if (new Set(rows.map((game) => game.id)).size !== rows.length) {
+      throw httpError('Catalog sync cannot include duplicate game IDs.', 400);
+    }
+    const synced = must(await db.from('games')
+      .upsert(rows, { onConflict: 'id', ignoreDuplicates: true })
+      .select('id'), 'Could not sync games from the generated catalog.');
+    if (synced.length) await logActivity(db, `Synced ${synced.length} new game${synced.length === 1 ? '' : 's'} from the generated catalog`);
+    return json({ synced: synced.length });
   }
 
   if (path === '/dashboard' && method === 'GET') {

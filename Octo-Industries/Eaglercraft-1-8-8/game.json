@@ -6,6 +6,8 @@
   "version": "26.2",
   "category": "Sandbox",
   "tags": ["minecraft", "sandbox", "survival", "building", "multiplayer"],
+  "bannerSource": "icon.png",
+  "bannerFit": "contain",
   "launch": "Eaglercraft-1-8-8/index.html",
   "accent": "#79a94b"
 }

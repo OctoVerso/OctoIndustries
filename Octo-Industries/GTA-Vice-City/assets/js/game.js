@@ -44,64 +44,45 @@ async function loadData() {
         console.error('Failed to open cache:', e);
     }
 
-    let totalDownloaded = 0;
+    const finalBuffer = new Uint8Array(dataSize);
+    let offset = 0;
 
-    const processChunk = async (chunkName) => {
+    for (const chunkName of data_chunks) {
         const path = `${BASE_PATH}${chunkName}`;
+        let chunkBuffer;
         if (cache) {
             const cachedResponse = await cache.match(path);
             if (cachedResponse) {
-                const buffer = await cachedResponse.arrayBuffer();
-                totalDownloaded += buffer.byteLength;
-                const percent = Math.min(100, Math.floor((totalDownloaded / dataSize) * 100));
-                window.VCSKY.onProgress?.(percent);
-                return buffer;
+                chunkBuffer = await cachedResponse.arrayBuffer();
             }
         }
 
-        const response = await fetch(path);
-        if (!response.ok || !response.body) {
-            throw new Error(`Failed to fetch ${path}: ${response.statusText}`);
+        if (!chunkBuffer) {
+            const response = await fetch(path);
+            if (!response.ok) {
+                throw new Error(`Failed to fetch ${path}: ${response.status} ${response.statusText}`);
+            }
+            chunkBuffer = await response.arrayBuffer();
+            if (cache) await cache.put(path, new Response(chunkBuffer.slice(0)));
         }
 
-        const reader = response.body.getReader();
-        const chunks = [];
-        let receivedLength = 0;
-
-        while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            chunks.push(value);
-            receivedLength += value.length;
-            totalDownloaded += value.length;
-            const percent = Math.min(100, Math.floor((totalDownloaded / dataSize) * 100));
-            window.VCSKY.onProgress?.(percent);
+        if (offset + chunkBuffer.byteLength > finalBuffer.byteLength) {
+            throw new Error(`Game data exceeds the expected ${dataSize} bytes at ${chunkName}.`);
         }
+        finalBuffer.set(new Uint8Array(chunkBuffer), offset);
+        offset += chunkBuffer.byteLength;
+        window.VCSKY.onProgress?.(Math.min(100, Math.floor((offset / dataSize) * 100)));
+    }
 
-        const chunkBuffer = new Uint8Array(receivedLength);
-        let offset = 0;
-        for (const chunk of chunks) {
-            chunkBuffer.set(chunk, offset);
-            offset += chunk.length;
-        }
+    if (offset !== dataSize) {
+        throw new Error(`Game data is incomplete: expected ${dataSize} bytes but received ${offset}.`);
+    }
+    return finalBuffer.buffer;
+}
 
-        if (cache) {
-            await cache.put(path, new Response(chunkBuffer.buffer));
-        }
-        return chunkBuffer.buffer;
-    };
-
+async function loadDataWithStatus() {
     try {
-        const promises = data_chunks.map(chunk => processChunk(chunk));
-        const chunkBuffers = await Promise.all(promises);
-        const finalBuffer = new Uint8Array(dataSize);
-        let offset = 0;
-        for (const buffer of chunkBuffers) {
-            finalBuffer.set(new Uint8Array(buffer), offset);
-            offset += buffer.byteLength;
-        }
-        window.VCSKY.onProgress?.(100);
-        return finalBuffer;
+        return await loadData();
     } catch (error) {
         console.error("Failed to download one or more game data chunks.", error);
         setStatus("error");
@@ -112,7 +93,7 @@ async function loadData() {
 async function startGame(e) {
     if (e?.stopPropagation) e.stopPropagation();
 
-    const dataBuffer = await loadData();
+    const dataBuffer = await loadDataWithStatus();
 
     await new Promise(r => {
         let q = indexedDB.open('/vc-assets/local/userfiles', 21);

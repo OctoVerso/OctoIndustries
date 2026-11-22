@@ -902,7 +902,28 @@ async function refreshDashboardData() {
     return;
   }
   try {
-    dashboard = validateDashboardPayload(dashboardResult.value);
+    let payload = validateDashboardPayload(dashboardResult.value);
+    if (!Array.isArray(window.OCTO_GAMES) || !window.OCTO_GAMES.length) {
+      throw responseShapeError('/catalog.js', 'the generated game catalog is missing or empty');
+    }
+    const catalog = window.OCTO_GAMES;
+    const knownGameIds = new Set(payload.games.map((game) => game.id));
+    const missingGames = catalog.filter((game) => !knownGameIds.has(game.id));
+    if (missingGames.length) {
+      for (let index = 0; index < missingGames.length; index += 25) {
+        await api('/api/admin/catalog/sync', {
+          method: 'POST',
+          body: { games: missingGames.slice(index, index + 25) },
+        });
+      }
+      payload = validateDashboardPayload(await api('/api/admin/dashboard'));
+      const syncedIds = new Set(payload.games.map((game) => game.id));
+      const stillMissing = missingGames.filter((game) => !syncedIds.has(game.id));
+      if (stillMissing.length) {
+        throw responseShapeError('/api/admin/catalog/sync', `${stillMissing.length} catalog games are still missing after sync`);
+      }
+    }
+    dashboard = payload;
     dashboardError.hidden = true;
     roadmapItems = dashboard.roadmap;
     updateMetrics(dashboard.counts, dashboard.games, dashboard.activity);

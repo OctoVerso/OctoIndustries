@@ -199,8 +199,8 @@ window.OCTO_GAMES = Object.freeze([
     "saveLevel": 3,
     "sourceUrl": "https://quenq.com/apps/dr-driving/",
     "sourceFile": "Octo-Industries/Dr-Driving/game.json",
-    "banner": "/Octo-Industries/Dr-Driving/hub-banner.svg?v=ca3abe991b11b283",
-    "thumbnail": "/Octo-Industries/Dr-Driving/hub-banner.svg?v=ca3abe991b11b283",
+    "banner": "/Octo-Industries/Dr-Driving/hub-banner.svg?v=53a4851391554507",
+    "thumbnail": "/Octo-Industries/Dr-Driving/hub-banner.svg?v=53a4851391554507",
     "screenshots": [
       "/Octo-Industries/Dr-Driving/screenshots/01-gameplay.jpg?v=5facd93b99297de5"
     ]
@@ -251,8 +251,8 @@ window.OCTO_GAMES = Object.freeze([
     "launch": "/Octo-Industries/Eaglercraft-1-8-8/index.html",
     "accent": "#79a94b",
     "sourceFile": "Octo-Industries/Eaglercraft-1-8-8/game.json",
-    "banner": "/Octo-Industries/Eaglercraft-1-8-8/hub-banner.svg?v=c7dbdd382d59b69b",
-    "thumbnail": "/Octo-Industries/Eaglercraft-1-8-8/hub-banner.svg?v=c7dbdd382d59b69b",
+    "banner": "/Octo-Industries/Eaglercraft-1-8-8/hub-banner.svg?v=0d1f9da1b762423a",
+    "thumbnail": "/Octo-Industries/Eaglercraft-1-8-8/hub-banner.svg?v=0d1f9da1b762423a",
     "screenshots": [],
     "featured": false
   },
@@ -300,8 +300,8 @@ window.OCTO_GAMES = Object.freeze([
     "saveLevel": 1,
     "sourceUrl": "https://quenq.com/apps/gta-3/",
     "sourceFile": "Octo-Industries/GTA-3/game.json",
-    "banner": "/Octo-Industries/GTA-3/hub-banner.svg?v=cb01d8e78970dd94",
-    "thumbnail": "/Octo-Industries/GTA-3/hub-banner.svg?v=cb01d8e78970dd94",
+    "banner": "/Octo-Industries/GTA-3/hub-banner.svg?v=d828566ca47ca6d9",
+    "thumbnail": "/Octo-Industries/GTA-3/hub-banner.svg?v=d828566ca47ca6d9",
     "screenshots": [
       "/Octo-Industries/GTA-3/screenshots/01-gameplay.jpg?v=e4ff0f772af267c3"
     ]
@@ -330,8 +330,8 @@ window.OCTO_GAMES = Object.freeze([
     "saveLevel": 1,
     "sourceUrl": "https://quenq.com/apps/vice-city/",
     "sourceFile": "Octo-Industries/GTA-Vice-City/game.json",
-    "banner": "/Octo-Industries/GTA-Vice-City/hub-banner.svg?v=8cabd3c2944adc20",
-    "thumbnail": "/Octo-Industries/GTA-Vice-City/hub-banner.svg?v=8cabd3c2944adc20",
+    "banner": "/Octo-Industries/GTA-Vice-City/hub-banner.svg?v=970ed10d4b8700f7",
+    "thumbnail": "/Octo-Industries/GTA-Vice-City/hub-banner.svg?v=970ed10d4b8700f7",
     "screenshots": [
       "/Octo-Industries/GTA-Vice-City/screenshots/01-gameplay.jpg?v=f39a876d5d4eb2d7"
     ]
@@ -386,8 +386,8 @@ window.OCTO_GAMES = Object.freeze([
     "saveLevel": 3,
     "sourceUrl": "https://quenq.com/apps/hill-climb-racing/",
     "sourceFile": "Octo-Industries/Hill-Climb-Racing/game.json",
-    "banner": "/Octo-Industries/Hill-Climb-Racing/hub-banner.svg?v=f7ddf55063bf05ad",
-    "thumbnail": "/Octo-Industries/Hill-Climb-Racing/hub-banner.svg?v=f7ddf55063bf05ad",
+    "banner": "/Octo-Industries/Hill-Climb-Racing/hub-banner.svg?v=bc953d78a229b5e9",
+    "thumbnail": "/Octo-Industries/Hill-Climb-Racing/hub-banner.svg?v=bc953d78a229b5e9",
     "screenshots": [
       "/Octo-Industries/Hill-Climb-Racing/screenshots/01-gameplay.jpg?v=1a5aaa837657759d"
     ]
