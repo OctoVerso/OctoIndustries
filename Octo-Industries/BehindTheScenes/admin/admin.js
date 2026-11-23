@@ -886,20 +886,26 @@ function formatLoadError(label, endpoint, error) {
   return `Unable to load ${label.toLowerCase()}. Endpoint: GET ${endpoint}. Status: ${status}.${requestId} ${technical} Retry available.`;
 }
 
+function setText(selector, value) {
+  const element = document.querySelector(selector);
+  if (element) element.textContent = value;
+}
+
 function showDashboardError(error) {
   const endpoint = error.endpoint || 'GET /api/admin/dashboard';
   const status = error.displayStatus || (error.status ? `HTTP ${error.status}` : 'Network error');
-  dashboardErrorMessage.textContent =
-    `Unable to load dashboard statistics and operations data. Endpoint: ${endpoint}. Status: ${status}.${error.requestId ? ` Request ID: ${error.requestId}.` : ''}`;
-  document.querySelector('#dashboard-error-details').textContent =
-    error.details || error.message || 'The request did not return a response.';
-  dashboardError.hidden = false;
+  if (dashboardErrorMessage) {
+    dashboardErrorMessage.textContent =
+      `Unable to load dashboard statistics and operations data. Endpoint: ${endpoint}. Status: ${status}.${error.requestId ? ` Request ID: ${error.requestId}.` : ''}`;
+  }
+  setText('#dashboard-error-details', error.details || error.message || 'The request did not return a response.');
+  if (dashboardError) dashboardError.hidden = false;
   for (const selector of ['#metric-total', '#metric-published', '#metric-drafts', '#metric-failed',
     '#metric-offline', '#metric-categories', '#metric-activity-today', '#metric-open-feedback']) {
-    document.querySelector(selector).textContent = 'Unavailable';
+    setText(selector, 'Unavailable');
   }
   for (const selector of ['#nav-game-count', '#nav-feedback-count', '#nav-failed-count', '#nav-roadmap-count']) {
-    document.querySelector(selector).textContent = '!';
+    setText(selector, '!');
   }
   for (const selector of ['#overview-jobs', '#overview-activity']) {
     const content = document.querySelector(selector);
@@ -910,7 +916,7 @@ function showDashboardError(error) {
     content.append(message);
   }
   renderOverviewFeedback();
-  document.querySelector('#roadmap-summary').textContent = 'Roadmap data unavailable until dashboard data can be loaded.';
+  setText('#roadmap-summary', 'Roadmap data unavailable until dashboard data can be loaded.');
 }
 
 function responseShapeError(path, reason) {
@@ -922,11 +928,11 @@ function responseShapeError(path, reason) {
 
 function validateDashboardPayload(payload) {
   const counts = payload?.counts;
-  const arrays = ['games', 'jobs', 'activity', 'roadmap'];
+  const arrays = ['games', 'jobs', 'activity', 'roadmap', 'proposals'];
   if (!counts || typeof counts !== 'object'
     || !['total', 'published', 'drafts', 'offlineReady', 'failedJobs'].every((key) => Number.isFinite(counts[key]))
     || arrays.some((key) => !Array.isArray(payload[key]) || payload[key].some((entry) => !entry || typeof entry !== 'object'))) {
-    throw responseShapeError('/api/admin/dashboard', 'expected counts and games, jobs, activity, and roadmap arrays');
+    throw responseShapeError('/api/admin/dashboard', 'expected counts and games, jobs, activity, roadmap, and proposals arrays');
   }
   return payload;
 }
@@ -1675,15 +1681,6 @@ async function initialize() {
     if (error.message !== 'Admin authentication required.') showDashboardError(error);
   }
 }
-
-document.querySelector('#dashboard-retry').addEventListener('click', async (event) => {
-  event.currentTarget.disabled = true;
-  try {
-    await refreshDashboard();
-  } finally {
-    event.currentTarget.disabled = false;
-  }
-});
 
 initialize();
 
