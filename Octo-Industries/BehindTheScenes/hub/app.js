@@ -985,7 +985,7 @@ function browserDeviceInfo() {
 }
 
 const ticketStatuses = {
-  new: 'New', under_review: 'Under Review', planned: 'Planned', in_progress: 'In Progress',
+  new: 'New', under_review: 'Under Review', awaiting_user: 'Awaiting User', planned: 'Planned', in_progress: 'In Progress',
   awaiting_user_reply: 'Awaiting User Reply', implemented: 'Implemented', resolved: 'Resolved',
   rejected: 'Rejected', closed: 'Closed',
 };

@@ -344,6 +344,9 @@ test('inquiry tickets: users track replies with an access token and admins manag
   assert.equal('adminNotes' in view, false);
 
   const { body: { token } } = await signIn();
+  assert.equal((await call(admin, 'admin', `/feedback/${ticketId}/status`, {
+    method: 'PATCH', token, body: { status: 'awaiting_user' },
+  })).status, 200);
   const reply = await call(admin, 'admin', `/feedback/${ticketId}/reply`, { method: 'POST', token, body: { message: 'Thanks!' } });
   assert.equal(reply.status, 201);
   assert.equal(db.tables.feedback[0].status, 'awaiting_user_reply');

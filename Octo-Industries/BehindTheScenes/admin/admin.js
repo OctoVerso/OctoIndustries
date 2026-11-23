@@ -202,6 +202,21 @@ async function api(path, options = {}) {
   return body;
 }
 
+async function syncCatalogGames(games) {
+  let synced = 0;
+  for (let index = 0; index < games.length; index += 25) {
+    const result = await api('/api/admin/catalog/sync', {
+      method: 'POST',
+      body: JSON.stringify({ games: games.slice(index, index + 25) }),
+    });
+    if (!Number.isInteger(result?.synced) || result.synced < 0) {
+      throw responseShapeError('/api/admin/catalog/sync', 'expected a synced game count');
+    }
+    synced += result.synced;
+  }
+  return synced;
+}
+
 async function createLoginProof(password, challenge) {
   if (!Number.isInteger(challenge.iterations) || challenge.iterations < 10000 || challenge.iterations > 500000
     || !/^[a-f\d]{32}$/.test(challenge.salt)) {
@@ -601,6 +616,7 @@ function renderProposals() {
 const feedbackStatusLabels = {
   new: 'New',
   under_review: 'Under Review',
+  awaiting_user: 'Awaiting User',
   planned: 'Planned',
   in_progress: 'In Progress',
   awaiting_user_reply: 'Awaiting User Reply',
@@ -629,15 +645,27 @@ function renderFeedback() {
   if (feedbackLoadError) {
     const container = document.querySelector('#feedback-list');
     container.replaceChildren();
+    document.querySelector('#ticket-analytics-metrics').innerHTML =
+      '<p class="feedback-empty" role="status">Ticket statistics are unavailable.</p>';
+    document.querySelector('#ticket-status-breakdown').replaceChildren();
     const message = document.createElement('p');
     message.className = 'muted feedback-empty';
     message.textContent = formatLoadError('Inquiries', '/api/admin/feedback', feedbackLoadError);
     container.append(message);
     document.querySelector('#feedback-new-count').textContent = 'Unavailable';
     document.querySelector('#feedback-selection-count').textContent = `${selectedFeedback.size} selected`;
+    document.querySelector('#feedback-result-count').textContent = '';
+    document.querySelector('#feedback-active-filters').replaceChildren();
+    document.querySelector('#feedback-clear-filters').hidden = true;
     return;
   }
   const games = new Map((dashboard?.games || []).map((game) => [game.id, game.title]));
+  const gameFilter = document.querySelector('#feedback-game-filter');
+  const selectedGame = gameFilter.value;
+  gameFilter.replaceChildren(new Option('All games', 'all'), new Option('Not related to a game', 'none'));
+  for (const game of dashboard?.games || []) gameFilter.add(new Option(game.title, game.id));
+  if ([...gameFilter.options].some((option) => option.value === selectedGame)) gameFilter.value = selectedGame;
+
   const query = document.querySelector('#feedback-search').value.trim().toLocaleLowerCase();
   const type = document.querySelector('#feedback-type-filter').value;
   const status = document.querySelector('#feedback-status-filter').value;
@@ -648,11 +676,25 @@ function renderFeedback() {
   const dateTo = document.querySelector('#feedback-date-to').value;
   const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
   const activeTickets = feedbackEntries.filter((entry) => !entry.archived);
-  document.querySelector('#ticket-metric-open').textContent = activeTickets.filter((entry) =>
-    !['implemented', 'resolved', 'rejected', 'closed'].includes(entry.status)).length;
-  document.querySelector('#ticket-metric-awaiting').textContent = activeTickets.filter((entry) => entry.status === 'awaiting_user_reply').length;
-  document.querySelector('#ticket-metric-critical').textContent = activeTickets.filter((entry) => entry.priority === 'critical').length;
-  document.querySelector('#ticket-metric-recent').textContent = feedbackEntries.filter((entry) => Date.parse(entry.createdAt) >= cutoff).length;
+  const totalTickets = feedbackEntries.length;
+  const metrics = [
+    ...Object.entries(feedbackStatusLabels).map(([key, label]) => ({
+      key, label, count: activeTickets.filter((entry) => entry.status === key).length,
+    })),
+    { key: 'archived', label: 'Archived', count: feedbackEntries.filter((entry) => entry.archived).length },
+    { key: 'critical', label: 'Critical', count: activeTickets.filter((entry) => entry.priority === 'critical').length },
+    { key: 'created-recently', label: 'Created in 30 days', count: feedbackEntries.filter((entry) => {
+      const createdAt = Date.parse(entry.createdAt);
+      return Number.isFinite(createdAt) && createdAt >= cutoff;
+    }).length },
+  ];
+  document.querySelector('#ticket-analytics-metrics').innerHTML = metrics.map((metric) => `
+    <article class="ticket-stat-card" data-stat="${metric.key}" aria-label="${escapeHtml(metric.label)}: ${metric.count}">
+      <span>${escapeHtml(metric.label)}</span><strong>${metric.count}</strong>
+      <i role="meter" aria-valuemin="0" aria-valuemax="${Math.max(1, totalTickets)}" aria-valuenow="${metric.count}"
+        aria-label="${escapeHtml(metric.label)} share of tickets"
+        style="--ticket-stat-share:${totalTickets ? Math.round(metric.count / totalTickets * 100) : 0}%"></i>
+    </article>`).join('');
   const breakdown = [...Object.entries(feedbackStatusLabels).map(([key, label]) => ({
     key, label, count: activeTickets.filter((entry) => entry.status === key).length,
   })), { key: 'archived', label: 'Archived', count: feedbackEntries.filter((entry) => entry.archived).length }];
@@ -676,14 +718,17 @@ function renderFeedback() {
       && (!dateTo || createdDay <= dateTo)
       && (gameId === 'all' || (gameId === 'none' ? !entry.gameId : entry.gameId === gameId));
   });
-  const statusOrder = ['new', 'under_review', 'awaiting_user_reply', 'in_progress', 'planned', 'implemented', 'resolved', 'rejected', 'closed'];
+  const statusOrder = ['new', 'under_review', 'awaiting_user', 'awaiting_user_reply', 'in_progress', 'planned', 'implemented', 'resolved', 'rejected', 'closed'];
   filtered.sort((first, second) => {
-    if (sorting === 'oldest') return first.createdAt.localeCompare(second.createdAt);
-    if (sorting === 'updated') return second.updatedAt.localeCompare(first.updatedAt);
-    if (sorting === 'status') return statusOrder.indexOf(first.status) - statusOrder.indexOf(second.status);
-    if (sorting === 'type') return first.type.localeCompare(second.type) || second.createdAt.localeCompare(first.createdAt);
+    const firstCreated = Date.parse(first.createdAt) || 0;
+    const secondCreated = Date.parse(second.createdAt) || 0;
+    if (sorting === 'oldest') return firstCreated - secondCreated;
+    if (sorting === 'updated') return (Date.parse(second.updatedAt) || 0) - (Date.parse(first.updatedAt) || 0);
+    if (sorting === 'status') return (statusOrder.indexOf(first.status) < 0 ? statusOrder.length : statusOrder.indexOf(first.status))
+      - (statusOrder.indexOf(second.status) < 0 ? statusOrder.length : statusOrder.indexOf(second.status));
+    if (sorting === 'type') return first.type.localeCompare(second.type) || secondCreated - firstCreated;
     if (sorting === 'game') return (games.get(first.gameId) || '').localeCompare(games.get(second.gameId) || '');
-    return second.createdAt.localeCompare(first.createdAt);
+    return secondCreated - firstCreated;
   });
   const newCount = feedbackEntries.filter((entry) => entry.status === 'new').length;
   const archivedCount = feedbackEntries.filter((entry) => entry.archived).length;
@@ -692,68 +737,93 @@ function renderFeedback() {
     if (!feedbackEntries.some((entry) => entry.id === id)) selectedFeedback.delete(id);
   }
   document.querySelector('#feedback-new-count').textContent = `${newCount} New · ${archivedCount} Archived`;
-  const gameFilter = document.querySelector('#feedback-game-filter');
-  const selectedGame = gameFilter.value;
-  gameFilter.replaceChildren(new Option('All games', 'all'), new Option('Not related to a game', 'none'));
-  for (const game of dashboard?.games || []) gameFilter.add(new Option(game.title, game.id));
-  if ([...gameFilter.options].some((option) => option.value === selectedGame)) gameFilter.value = selectedGame;
+  const activeFilters = [];
+  if (query) activeFilters.push(['query', `Search: ${document.querySelector('#feedback-search').value.trim()}`]);
+  if (type !== 'all') activeFilters.push(['type', type === 'issue' ? 'Issues' : 'Suggestions']);
+  if (status !== 'all') activeFilters.push(['status', status === 'archived' ? 'Archived' : feedbackStatusLabels[status] || status]);
+  if (priority !== 'all') activeFilters.push(['priority', `${feedbackPriorityLabels[priority] || priority} priority`]);
+  if (gameId !== 'all') activeFilters.push(['game', gameId === 'none' ? 'Not related to a game' : games.get(gameId) || 'Unknown game']);
+  if (dateFrom) activeFilters.push(['date-from', `From ${dateFrom}`]);
+  if (dateTo) activeFilters.push(['date-to', `Through ${dateTo}`]);
+  document.querySelector('#feedback-result-count').textContent =
+    `${filtered.length} of ${feedbackEntries.length} tickets`;
+  document.querySelector('#feedback-active-filters').innerHTML = activeFilters.map(([key, label]) => `
+    <button class="filter-chip" type="button" data-clear-feedback-filter="${key}"
+      aria-label="Remove filter: ${escapeHtml(label)}">${escapeHtml(label)} <span aria-hidden="true">×</span></button>`).join('');
+  document.querySelector('#feedback-clear-filters').hidden = activeFilters.length === 0;
 
   const container = document.querySelector('#feedback-list');
   container.innerHTML = filtered.length ? filtered.map((entry) => {
     const device = entry.deviceInfo || {};
-    const deviceSummary = [device.deviceType, device.deviceName, device.operatingSystem, device.browser]
-      .filter(Boolean).join(' · ') || 'Unknown device';
-    const technical = [
-      device.screenResolution && `Screen: ${device.screenResolution}`,
-      device.octoVersion && `Build: ${device.octoVersion}`,
-    ].filter(Boolean).join(' · ');
-    return `<article class="feedback-card${entry.status === 'new' ? ' is-new' : ''}" data-feedback-card="${entry.id}">
-      <div class="feedback-card-top">
-        <label class="feedback-select-label"><input type="checkbox" data-feedback-select="${entry.id}"${selectedFeedback.has(entry.id) ? ' checked' : ''} aria-label="Select this feedback"></label>
-        <div class="feedback-title"><span class="feedback-ticket-number">#${escapeHtml(entry.ticketNumber || '—')}</span><span class="feedback-type" data-type="${entry.type}">${entry.type === 'issue' ? '🐛 ISSUE' : '💡 SUGGESTION'}</span><span class="feedback-game">${escapeHtml(entry.gameId ? games.get(entry.gameId) || 'Unknown game' : 'Not related to a game')}</span></div>
-        <span class="feedback-time">${escapeHtml(formatFeedbackDate(entry.createdAt))}</span>
+    const statusLabel = feedbackStatusLabels[entry.status] || entry.status.replaceAll('_', ' ');
+    const priorityLabel = feedbackPriorityLabels[entry.priority] || 'Medium';
+    const message = escapeHtml(entry.message);
+    return `<article class="feedback-card${entry.status === 'new' ? ' is-new' : ''}" data-feedback-card="${escapeHtml(entry.id)}">
+      <div class="feedback-card-head">
+        <label class="feedback-select-label"><input type="checkbox" data-feedback-select="${escapeHtml(entry.id)}"${selectedFeedback.has(entry.id) ? ' checked' : ''} aria-label="Select ticket #${escapeHtml(entry.ticketNumber || '—')}"></label>
+        <div class="feedback-card-heading">
+          <div class="feedback-ticket-identity">
+            <span class="feedback-ticket-number">#${escapeHtml(entry.ticketNumber || '—')}</span>
+            <span class="feedback-type" data-type="${escapeHtml(entry.type)}">${entry.type === 'issue' ? 'ISSUE' : 'SUGGESTION'}</span>
+          </div>
+          <div class="feedback-badges">
+            <span class="feedback-status-badge" data-status="${escapeHtml(entry.status)}">${escapeHtml(statusLabel)}</span>
+            <span class="feedback-priority-badge" data-priority="${escapeHtml(entry.priority || 'medium')}">${escapeHtml(priorityLabel)}</span>
+          </div>
+        </div>
+        <time class="feedback-time" datetime="${escapeHtml(entry.createdAt)}">${escapeHtml(formatFeedbackDate(entry.createdAt))}</time>
       </div>
-      <p class="feedback-message">${escapeHtml(entry.message)}</p>
-      <p class="feedback-device">${escapeHtml(deviceSummary)}${technical ? ` · ${escapeHtml(technical)}` : ''}</p>
-      <div class="feedback-controls">
+      <div class="feedback-card-body">
+        <h3>${entry.type === 'issue' ? 'Issue report' : 'Suggestion'}</h3>
+        <p class="feedback-message">${message}</p>
+        <details class="feedback-full-message"><summary>Read full inquiry</summary><p>${message}</p></details>
+      </div>
+      <dl class="feedback-meta">
+        <div><dt>Game</dt><dd>${escapeHtml(entry.gameId ? games.get(entry.gameId) || 'Unknown game' : 'Not related to a game')}</dd></div>
+        <div><dt>Device</dt><dd>${escapeHtml([device.deviceType, device.deviceName, device.operatingSystem].filter(Boolean).join(' · ') || 'Unknown')}</dd></div>
+        <div><dt>Browser</dt><dd>${escapeHtml([device.browser, device.browserVersion].filter(Boolean).join(' ').trim() || 'Unknown')}</dd></div>
+        <div><dt>Language</dt><dd>${escapeHtml(device.language || 'Unknown')}</dd></div>
+      </dl>
+      <div class="feedback-management">
         <label>Status
-          <select data-feedback-status="${entry.id}" aria-label="Status for feedback">
+          <select data-feedback-status="${escapeHtml(entry.id)}" aria-label="Status for ticket #${escapeHtml(entry.ticketNumber || '—')}">
             ${Object.entries(feedbackStatusLabels).map(([key, label]) => `<option value="${key}"${entry.status === key ? ' selected' : ''}>${label}</option>`).join('')}
           </select>
         </label>
         <label>Priority
-          <select data-feedback-priority="${entry.id}" aria-label="Priority for ticket">
+          <select data-feedback-priority="${escapeHtml(entry.id)}" aria-label="Priority for ticket #${escapeHtml(entry.ticketNumber || '—')}">
             ${Object.entries(feedbackPriorityLabels).map(([key, label]) => `<option value="${key}"${entry.priority === key ? ' selected' : ''}>${label}</option>`).join('')}
           </select>
         </label>
-        <button class="small-button" type="button" data-feedback-archive="${entry.id}" data-archived="${entry.archived ? 'true' : 'false'}">${entry.archived ? 'Unarchive' : 'Archive'}</button>
-        <button class="small-button" type="button" data-feedback-delete="${entry.id}">Delete</button>
-        <span class="feedback-updated">Updated ${escapeHtml(formatFeedbackDate(entry.updatedAt))}</span>
-        <button class="small-button" type="button" data-delete-inquiry="${escapeHtml(entry.id)}">Delete inquiry</button>
+        <details class="feedback-actions-menu">
+          <summary aria-label="More actions for ticket #${escapeHtml(entry.ticketNumber || '—')}" title="More actions">•••</summary>
+          <div>
+            <button class="small-button" type="button" data-feedback-archive="${escapeHtml(entry.id)}" data-archived="${entry.archived ? 'true' : 'false'}">${entry.archived ? 'Restore ticket' : 'Archive ticket'}</button>
+            <button class="small-button feedback-delete-button" type="button" data-feedback-delete="${escapeHtml(entry.id)}">Delete ticket</button>
+          </div>
+        </details>
       </div>
-      <details data-ticket-conversation="${entry.id}"${openedConversations.has(entry.id) ? ' open' : ''}>
+      <details class="feedback-card-disclosure" data-ticket-conversation="${escapeHtml(entry.id)}"${openedConversations.has(entry.id) ? ' open' : ''}>
         <summary>Conversation and activity</summary>
-        <div class="feedback-conversation" data-conversation-list="${entry.id}"><p class="subtle">Open to load conversation history.</p></div>
-        ${entry.userAccessEnabled ? `<form class="feedback-reply-form" data-admin-reply="${entry.id}">
-          <label for="feedback-reply-${entry.id}">Reply to user</label>
-          <textarea id="feedback-reply-${entry.id}" name="message" rows="3" maxlength="5000" required></textarea>
-          <button class="small-button" type="submit">Send reply</button>
-          <p data-admin-reply-status role="status" aria-live="polite"></p>
+        <div class="feedback-conversation" data-conversation-list="${escapeHtml(entry.id)}"><p class="subtle">Open to load conversation history.</p></div>
+        ${entry.userAccessEnabled ? `<form class="feedback-reply-form" data-admin-reply="${escapeHtml(entry.id)}">
+          <label for="feedback-reply-${escapeHtml(entry.id)}">Reply to user</label>
+          <textarea id="feedback-reply-${escapeHtml(entry.id)}" name="message" rows="3" maxlength="5000" placeholder="Write a clear reply…" required></textarea>
+          <div class="feedback-reply-actions"><button class="small-button" type="submit">Send reply</button>
+            <p data-admin-reply-status role="status" aria-live="polite"></p></div>
         </form>` : '<p class="subtle">Legacy inquiry: no user portal access was issued, so replies are unavailable.</p>'}
       </details>
-      <details data-feedback-details="${entry.id}"${openedFeedback.has(entry.id) ? ' open' : ''}>
-        <summary>Ticket diagnostics and private admin notes</summary>
+      <details class="feedback-card-disclosure" data-feedback-details="${escapeHtml(entry.id)}"${openedFeedback.has(entry.id) ? ' open' : ''}>
+        <summary>Diagnostics and private notes</summary>
         <dl class="feedback-device-details">
-          <div><dt>Device</dt><dd>${escapeHtml([device.deviceType, device.deviceName].filter(Boolean).join(' · ') || 'Unknown')}</dd></div>
-          <div><dt>Browser</dt><dd>${escapeHtml([device.browser, device.browserVersion].filter(Boolean).join(' ') || 'Unknown')}</dd></div>
           <div><dt>Operating system</dt><dd>${escapeHtml([device.operatingSystem, device.operatingSystemVersion].filter(Boolean).join(' ') || 'Unknown')}</dd></div>
-          <div><dt>Language</dt><dd>${escapeHtml(device.language || 'Unknown')}</dd></div>
           <div><dt>Timezone</dt><dd>${escapeHtml(device.timezone || 'Unknown')}</dd></div>
           <div><dt>Screen</dt><dd>${escapeHtml(device.screenResolution || 'Unknown')}</dd></div>
+          <div><dt>Build</dt><dd>${escapeHtml(device.octoVersion || 'Unknown')}</dd></div>
         </dl>
-        <label for="feedback-note-${entry.id}">Private admin notes</label>
-        <textarea id="feedback-note-${entry.id}" data-feedback-notes="${entry.id}" rows="3" maxlength="5000">${escapeHtml(entry.adminNotes || '')}</textarea>
-        <button class="small-button" type="button" data-save-feedback-notes="${entry.id}">Save private notes</button>
+        <label for="feedback-note-${escapeHtml(entry.id)}">Private admin notes</label>
+        <textarea id="feedback-note-${escapeHtml(entry.id)}" data-feedback-notes="${escapeHtml(entry.id)}" rows="3" maxlength="5000">${escapeHtml(entry.adminNotes || '')}</textarea>
+        <button class="small-button" type="button" data-save-feedback-notes="${escapeHtml(entry.id)}">Save private notes</button>
       </details>
     </article>`;
   }).join('') : '<p class="muted feedback-empty">No feedback matches these filters.</p>';
@@ -909,6 +979,20 @@ async function refreshDashboardData() {
     let payload = validateDashboardPayload(dashboardResult.value);
     if (!Array.isArray(window.OCTO_GAMES) || !window.OCTO_GAMES.length) {
       throw responseShapeError('/catalog.js', 'the generated game catalog is missing or empty');
+    }
+    const knownIds = new Set(payload.games.map((game) => game.id));
+    const missingGames = window.OCTO_GAMES.filter((game) => !knownIds.has(game.id));
+    if (missingGames.length) {
+      try {
+        const synced = await syncCatalogGames(missingGames);
+        payload = validateDashboardPayload(await api('/api/admin/dashboard'));
+        if (synced) {
+          showToast(`Catalog sync complete: ${synced} new ${synced === 1 ? 'game' : 'games'} added.`);
+        }
+      } catch (error) {
+        if (error.status === 401) throw error;
+        showToast(`Automatic catalog sync failed: ${error.message}`);
+      }
     }
     dashboard = payload;
     dashboardError.hidden = true;
@@ -1163,12 +1247,14 @@ feedbackList.addEventListener('change', async (event) => {
 feedbackList.addEventListener('click', async (event) => {
   const archiveButton = event.target.closest('[data-feedback-archive]');
   if (archiveButton) {
-    archiveButton.disabled = true;
     const id = archiveButton.dataset.feedbackArchive;
     const action = archiveButton.dataset.archived === 'true' ? 'unarchive' : 'archive';
+    const entry = feedbackEntries.find((feedback) => feedback.id === id);
+    if (action === 'archive'
+      && !window.confirm(`Archive ticket #${entry?.ticketNumber || '—'}? You can restore it later.`)) return;
+    archiveButton.disabled = true;
     try {
       const result = await api(`/api/admin/feedback/${encodeURIComponent(id)}/${action}`, { method: 'POST', body: '{}' });
-      const entry = feedbackEntries.find((feedback) => feedback.id === id);
       if (entry) {
         entry.archived = result.archived;
         entry.updatedAt = result.updatedAt;
@@ -1235,6 +1321,7 @@ feedbackList.addEventListener('submit', async (event) => {
     await api(`/api/admin/feedback/${encodeURIComponent(id)}/reply`, {
       method: 'POST', body: JSON.stringify({ message: form.elements.message.value }),
     });
+    status.textContent = 'Reply sent. Refreshing conversation…';
     openedConversations.add(id);
     await refreshDashboard();
     await loadFeedbackConversation(id);
@@ -1248,6 +1335,33 @@ feedbackList.addEventListener('submit', async (event) => {
   for (const selector of ['#feedback-search', '#feedback-type-filter', '#feedback-status-filter', '#feedback-priority-filter', '#feedback-game-filter', '#feedback-sort', '#feedback-date-from', '#feedback-date-to']) {
     document.querySelector(selector).addEventListener(selector === '#feedback-search' ? 'input' : 'change', renderFeedback);
 }
+document.querySelector('#feedback-clear-filters').addEventListener('click', () => {
+  document.querySelector('#feedback-search').value = '';
+  for (const selector of ['#feedback-type-filter', '#feedback-status-filter', '#feedback-priority-filter', '#feedback-game-filter']) {
+    document.querySelector(selector).value = 'all';
+  }
+  document.querySelector('#feedback-sort').value = 'newest';
+  document.querySelector('#feedback-date-from').value = '';
+  document.querySelector('#feedback-date-to').value = '';
+  renderFeedback();
+});
+document.querySelector('#feedback-active-filters').addEventListener('click', (event) => {
+  const chip = event.target.closest('[data-clear-feedback-filter]');
+  if (!chip) return;
+  const selectors = {
+    query: '#feedback-search',
+    type: '#feedback-type-filter',
+    status: '#feedback-status-filter',
+    priority: '#feedback-priority-filter',
+    game: '#feedback-game-filter',
+    'date-from': '#feedback-date-from',
+    'date-to': '#feedback-date-to',
+  };
+  const control = document.querySelector(selectors[chip.dataset.clearFeedbackFilter]);
+  if (!control) return;
+  control.value = control.matches('select') ? 'all' : '';
+  renderFeedback();
+});
 document.querySelector('#feedback-select-all').addEventListener('change', (event) => {
   feedbackList.querySelectorAll('input[data-feedback-select]').forEach((checkbox) => {
     const id = checkbox.dataset.feedbackSelect;
@@ -1275,6 +1389,8 @@ document.querySelector('#feedback-bulk-apply').addEventListener('click', async (
     showToast('Select feedback and choose a status first.');
     return;
   }
+  const statusLabel = feedbackStatusLabels[status] || status.replaceAll('_', ' ');
+  if (!window.confirm(`Change the status of ${ids.length} selected ticket${ids.length === 1 ? '' : 's'} to ${statusLabel}?`)) return;
   const button = event.currentTarget;
   button.disabled = true;
   try {
@@ -1294,34 +1410,38 @@ document.querySelector('#feedback-bulk-apply').addEventListener('click', async (
 document.querySelector('#feedback-bulk-archive').addEventListener('click', async (event) => {
   const ids = [...selectedFeedback];
   if (!ids.length || !window.confirm(`Archive ${ids.length} selected ticket${ids.length === 1 ? '' : 's'}?`)) return;
-  event.currentTarget.disabled = true;
+  const button = event.currentTarget;
+  button.disabled = true;
   try {
-    await Promise.all(ids.map((id) => {
-      const entry = feedbackEntries.find((feedback) => feedback.id === id);
-      const action = entry?.archived ? 'unarchive' : 'archive';
-      return api(`/api/admin/feedback/${encodeURIComponent(id)}/${action}`, { method: 'POST', body: '{}' });
-    }));
+    await api('/api/admin/feedback/bulk', {
+      method: 'POST',
+      body: JSON.stringify({ ids, archived: true }),
+    });
     selectedFeedback.clear();
     await refreshDashboard();
   } catch (error) {
     showToast(error.message);
   } finally {
-    event.currentTarget.disabled = false;
+    button.disabled = false;
   }
 });
 
 document.querySelector('#feedback-bulk-delete').addEventListener('click', async (event) => {
   const ids = [...selectedFeedback];
   if (!ids.length || !window.confirm(`Delete ${ids.length} selected ticket${ids.length === 1 ? '' : 's'} and revoke user access?`)) return;
-  event.currentTarget.disabled = true;
+  const button = event.currentTarget;
+  button.disabled = true;
   try {
-    await Promise.all(ids.map((id) => api(`/api/admin/feedback/${encodeURIComponent(id)}`, { method: 'DELETE' })));
+    await api('/api/admin/feedback/bulk', {
+      method: 'POST',
+      body: JSON.stringify({ ids, deleted: true }),
+    });
     selectedFeedback.clear();
     await refreshDashboard();
   } catch (error) {
     showToast(error.message);
   } finally {
-    event.currentTarget.disabled = false;
+    button.disabled = false;
   }
 });
 
@@ -1485,12 +1605,7 @@ document.querySelector('#catalog-sync-button').addEventListener('click', async (
   if (!window.confirm(`Synchronise ${missingGames.length} missing ${missingGames.length === 1 ? 'game' : 'games'}?\n\n${preview}`)) return;
   button.disabled = true;
   try {
-    for (let index = 0; index < missingGames.length; index += 25) {
-      await api('/api/admin/catalog/sync', {
-        method: 'POST',
-        body: JSON.stringify({ games: missingGames.slice(index, index + 25) }),
-      });
-    }
+    await syncCatalogGames(missingGames);
     showToast(`Catalog sync complete: ${missingGames.length} ${missingGames.length === 1 ? 'game' : 'games'} synchronised.`);
     await refreshDashboard();
   } catch (error) {

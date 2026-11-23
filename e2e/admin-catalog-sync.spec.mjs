@@ -1,8 +1,9 @@
 import { test, expect } from '@playwright/test';
 
-test('admin dashboard and game library load read-only; manual catalog sync sends JSON', async ({ page }) => {
+test('admin dashboard automatically syncs newly added catalog games', async ({ page }) => {
   const syncRequests = [];
   const consoleErrors = [];
+  let dashboardGames;
   page.on('console', (message) => {
     if (message.type() === 'error') consoleErrors.push(message.text());
   });
@@ -14,11 +15,18 @@ test('admin dashboard and game library load read-only; manual catalog sync sends
       return;
     }
     if (pathname.endsWith('/admin/dashboard')) {
-      const game = await route.request().frame().evaluate(() => window.OCTO_GAMES[0]);
+      const catalog = await route.request().frame().evaluate(() => window.OCTO_GAMES);
+      dashboardGames ||= [{ ...catalog[0], status: 'published', offlineReady: true }];
       await route.fulfill({
         json: {
-          counts: { total: 1, published: 1, drafts: 0, offlineReady: 1, failedJobs: 0 },
-          games: [{ ...game, status: 'published', offlineReady: true }],
+          counts: {
+            total: dashboardGames.length,
+            published: dashboardGames.length,
+            drafts: 0,
+            offlineReady: dashboardGames.length,
+            failedJobs: 0,
+          },
+          games: dashboardGames,
           jobs: [],
           activity: [],
           roadmap: [],
@@ -32,34 +40,35 @@ test('admin dashboard and game library load read-only; manual catalog sync sends
       return;
     }
     if (pathname.endsWith('/admin/catalog/sync')) {
-      syncRequests.push({
+      const request = {
         method: route.request().method(),
         headers: route.request().headers(),
         body: JSON.parse(route.request().postData()),
-      });
-      await route.fulfill({ json: { synced: 1 } });
+      };
+      syncRequests.push(request);
+      dashboardGames.push(...request.body.games.map((game) => ({ ...game, status: 'published', offlineReady: false })));
+      await route.fulfill({ json: { synced: request.body.games.length } });
       return;
     }
     await route.fulfill({ status: 404, json: { error: 'Unexpected admin endpoint.' } });
   });
 
   await page.goto('/Octo-Industries/BehindTheScenes/admin/index.html');
-  await expect(page.locator('#metric-total')).toHaveText('1');
-  expect(syncRequests).toHaveLength(0);
+  const catalogGames = await page.evaluate(() => window.OCTO_GAMES);
+  await expect(page.locator('#metric-total')).toHaveText(String(catalogGames.length));
+  await expect.poll(() => syncRequests.length).toBeGreaterThan(0);
+  await expect(page.locator('#toast')).toHaveText(/Catalog sync complete:/);
 
-  const firstGame = await page.evaluate(() => window.OCTO_GAMES[0]);
+  const firstGame = catalogGames[0];
   const drawerToggle = page.locator('#sidebar-drawer-toggle');
   if (await drawerToggle.isVisible()) await drawerToggle.click();
   await page.locator('#admin-sidebar summary[data-admin-view="games"]').click();
   await expect(page.locator('#game-list')).toContainText(firstGame.title);
-  page.on('dialog', (dialog) => dialog.accept());
-  const syncButton = page.locator('#catalog-sync-button');
-  await expect(syncButton).toBeVisible();
-  await syncButton.click();
-  await expect.poll(() => syncRequests.length).toBeGreaterThan(0);
-  await expect(page.locator('#toast')).toHaveText(/Catalog sync complete:/);
+  await expect(page.locator('#catalog-sync-button')).toBeVisible();
   expect(consoleErrors).toEqual([]);
 
+  expect(syncRequests.flatMap((request) => request.body.games).map((game) => game.id).sort())
+    .toEqual(catalogGames.slice(1).map((game) => game.id).sort());
   for (const request of syncRequests) {
     expect(request.method).toBe('POST');
     expect(request.headers['content-type']).toContain('application/json');
