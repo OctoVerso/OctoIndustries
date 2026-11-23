@@ -12,3 +12,10 @@ test('dashboard initialization automatically syncs missing generated catalog gam
   assert.match(source, /#catalog-sync-button/);
   assert.match(source, /window\.confirm/);
 });
+
+test('admin shell provides theme and search interactions without planned navigation', async () => {
+  const html = await readFile(new URL('./index.html', import.meta.url), 'utf8');
+  assert.match(html, /id="theme-toggle"/);
+  assert.match(html, /id="global-admin-search"/);
+  assert.doesNotMatch(html, /is-planned|Reviews, requests &amp; voting|Game DNA|Release Snapshots/);
+});

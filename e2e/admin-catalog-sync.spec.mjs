@@ -91,6 +91,20 @@ test('admin dashboard automatically syncs newly added catalog games', async ({ p
 
   await page.goto('/Octo-Industries/BehindTheScenes/admin/index.html');
 
+  await expect(page.locator('#admin-sidebar .is-planned')).toHaveCount(0);
+  await expect(page.locator('#admin-sidebar')).not.toContainText('Reviews, requests & voting');
+  await expect(page.locator('#admin-sidebar')).not.toContainText('Game DNA');
+
+  const initialTheme = await page.evaluate(() => document.documentElement.dataset.theme);
+  await page.locator('#theme-toggle').click();
+  await expect(page.locator('html')).toHaveAttribute(
+    'data-theme',
+    initialTheme === 'light' ? 'dark' : 'light'
+  );
+  await expect
+    .poll(() => page.evaluate(() => localStorage.getItem('octo-admin.theme')))
+    .toBe(initialTheme === 'light' ? 'dark' : 'light');
+
   const catalogGames = await page.evaluate(() => window.OCTO_GAMES);
 
   await expect(page.locator('#metric-total')).toHaveText(

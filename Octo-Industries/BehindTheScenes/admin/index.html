@@ -17,6 +17,7 @@
       <a class="brand" href="../../../" aria-label="Octo Industries home"><img src="../../branding/horizontal-logo.png" alt="Octo Industries"></a>
       <div class="header-actions">
         <a class="quiet-link" href="../../../">View public hub ↗</a>
+        <button class="icon-button theme-toggle" id="theme-toggle" type="button" aria-label="Switch to light theme" title="Switch theme">◐</button>
         <button class="button button-quiet" id="logout-button" type="button" hidden>Sign out</button>
       </div>
     </header>
@@ -44,45 +45,20 @@
               <summary aria-label="Games" title="Games" data-admin-view="games"><span class="nav-icon" aria-hidden="true">◈</span><span>Games</span></summary>
               <button class="nav-item nav-subitem" type="button" data-admin-view="games"><span>Library</span><span class="nav-count" id="nav-game-count">Loading…</span></button>
               <button class="nav-item nav-subitem" type="button" data-admin-view="games" data-focus-target="#category-filter"><span>Categories &amp; tags</span></button>
-              <button class="nav-item nav-subitem is-planned" type="button" disabled title="No game creation API is available yet"><span>Add game</span><small>Planned</small></button>
-              <button class="nav-item nav-subitem is-planned" type="button" disabled title="Game DNA storage is not available yet"><span>Game DNA</span><small data-roadmap-label="game-dna">Planned</small></button>
-              <button class="nav-item nav-subitem is-planned" type="button" disabled title="Game changelog management is not available yet"><span>Changelogs</span><small>Planned</small></button>
             </details>
             <details class="nav-group" open>
               <summary aria-label="Community" title="Community" data-admin-view="community"><span class="nav-icon" aria-hidden="true">◉</span><span>Community</span><span class="nav-count" id="nav-feedback-count">Loading…</span></summary>
               <button class="nav-item nav-subitem" type="button" data-admin-view="community"><span>Inquiries</span></button>
-              <button class="nav-item nav-subitem is-planned" type="button" disabled title="Reviews are not collected by the current backend"><span>Reviews, requests &amp; voting</span><small>Planned</small></button>
-            </details>
-            <details class="nav-group">
-              <summary aria-label="Content" title="Content"><span class="nav-icon" aria-hidden="true">▤</span><span>Content</span></summary>
-              <button class="nav-item nav-subitem is-planned" type="button" disabled title="Content publishing is not available yet"><span>News &amp; announcements</span><small data-roadmap-label="octo-news">Planned</small></button>
-              <button class="nav-item nav-subitem is-planned" type="button" disabled title="Featured content workflow is not available yet"><span>Coming soon &amp; featured</span><small>Planned</small></button>
             </details>
             <details class="nav-group" open>
               <summary aria-label="Operations" title="Operations" data-admin-view="operations"><span class="nav-icon" aria-hidden="true">⌁</span><span>Operations</span><span class="nav-count" id="nav-failed-count">Loading…</span></summary>
               <button class="nav-item nav-subitem" type="button" data-admin-view="operations"><span>Job center</span></button>
               <button class="nav-item nav-subitem" type="button" data-admin-view="operations" data-focus-target="#game-url"><span>Health checks &amp; source scan</span></button>
-              <button class="nav-item nav-subitem is-planned" type="button" disabled title="Integrity scanning is not available yet"><span>Integrity Scanner</span><small>Planned</small></button>
-              <button class="nav-item nav-subitem is-planned" type="button" disabled title="Backup restore workflows are not available yet"><span>Backup Manager</span><small data-roadmap-label="backup-manager">Planned</small></button>
-              <button class="nav-item nav-subitem is-planned" type="button" disabled title="Offline hub mode is not available yet"><span>Offline Hub</span><small data-roadmap-label="offline-hub">On Hold</small></button>
-            </details>
-            <details class="nav-group">
-              <summary aria-label="Octo Nexus" title="Octo Nexus"><span class="nav-icon" aria-hidden="true">⌘</span><span>Octo Nexus</span></summary>
-              <button class="nav-item nav-subitem is-planned" type="button" disabled title="GitHub automation views are not available yet"><span>Sync &amp; commit timeline</span><small data-roadmap-label="octo-nexus">In Progress</small></button>
-              <button class="nav-item nav-subitem is-planned" type="button" disabled title="Release snapshots are not available yet"><span>Release Snapshots</span><small data-roadmap-label="release-snapshots">Planned</small></button>
             </details>
             <details class="nav-group" open>
               <summary aria-label="AI Center" title="AI Center" data-admin-view="ai"><span class="nav-icon" aria-hidden="true">✳</span><span>AI Center</span></summary>
               <button class="nav-item nav-subitem" type="button" data-admin-view="ai"><span>Library assistant</span></button>
               <button class="nav-item nav-subitem" type="button" data-admin-view="operations" data-focus-target="#game-url"><span>Game page inspector</span></button>
-              <button class="nav-item nav-subitem is-planned" type="button" disabled title="Metadata generation and trend analysis are not available yet"><span>Metadata generator</span><small data-roadmap-label="ai-metadata-generator">Planned</small></button>
-              <button class="nav-item nav-subitem is-planned" type="button" disabled title="Personalized recommendations are not available yet"><span>Recommendations</span><small data-roadmap-label="game-recommendations">Planned</small></button>
-              <button class="nav-item nav-subitem is-planned" type="button" disabled title="Trend forecasting is not available yet"><span>Trend Forecaster</span><small data-roadmap-label="trend-forecaster">Planned</small></button>
-            </details>
-            <details class="nav-group">
-              <summary aria-label="Museum and analytics" title="Museum and analytics"><span class="nav-icon" aria-hidden="true">▧</span><span>Museum &amp; analytics</span></summary>
-              <button class="nav-item nav-subitem is-planned" type="button" disabled title="Historical archives and analytics are not available yet"><span>Archives &amp; platform stats</span><small data-roadmap-label="octo-museum">Planned</small></button>
-              <button class="nav-item nav-subitem is-planned" type="button" disabled title="Search analytics are not available yet"><span>Search Analytics</span><small data-roadmap-label="search-analytics">Planned</small></button>
             </details>
           </nav>
           <button class="sidebar-collapse" id="sidebar-collapse" type="button" aria-label="Collapse navigation" title="Collapse navigation"><span aria-hidden="true">‹</span><span class="collapse-label">Collapse navigation</span></button>

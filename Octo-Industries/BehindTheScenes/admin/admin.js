@@ -9,6 +9,38 @@ const dashboardRetryButton = document.querySelector('#dashboard-retry');
 const toast = document.querySelector('#toast');
 let sessionToken = sessionStorage.getItem('octoAdminToken') || '';
 
+function safeStorageGet(key) {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function safeStorageSet(key, value) {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    // Theme and layout preferences remain usable for this session.
+  }
+}
+
+function applyTheme(theme) {
+  const nextTheme = theme === 'light' ? 'light' : 'dark';
+  document.documentElement.dataset.theme = nextTheme;
+  const toggle = document.querySelector('#theme-toggle');
+  if (toggle) {
+    toggle.setAttribute('aria-label', nextTheme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme');
+    toggle.setAttribute('title', nextTheme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme');
+  }
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', nextTheme === 'dark' ? '#07111d' : '#eef5f7');
+}
+
+const savedTheme = safeStorageGet('octo-admin.theme');
+applyTheme(savedTheme === 'light' || savedTheme === 'dark'
+  ? savedTheme
+  : (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'));
+
 function storeToken(token) {
   sessionToken = token || '';
   if (sessionToken) sessionStorage.setItem('octoAdminToken', sessionToken);
@@ -265,22 +297,6 @@ function showDashboard() {
   logoutButton.hidden = false;
   setAdminView('overview');
   syncSidebarMode();
-}
-
-function safeStorageGet(key) {
-  try {
-    return localStorage.getItem(key);
-  } catch {
-    return null;
-  }
-}
-
-function safeStorageSet(key, value) {
-  try {
-    localStorage.setItem(key, value);
-  } catch {
-    return;
-  }
 }
 
 function syncSidebarMode() {
@@ -1709,6 +1725,13 @@ document.querySelector('#sidebar-collapse').addEventListener('click', () => {
   safeStorageSet('octo-admin.sidebar-collapsed', String(collapsed));
   document.querySelector('#sidebar-collapse').setAttribute('aria-label', collapsed ? 'Expand navigation' : 'Collapse navigation');
 });
+
+document.querySelector('#theme-toggle').addEventListener('click', () => {
+  const nextTheme = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+  applyTheme(nextTheme);
+  safeStorageSet('octo-admin.theme', nextTheme);
+});
+
 window.addEventListener('resize', () => {
   if (!dashboardView.hidden) syncSidebarMode();
 });
@@ -1848,4 +1871,18 @@ globalSearchResults.addEventListener('click', (event) => {
   }
   globalSearch.value = '';
   renderGlobalSearch();
+});
+
+document.addEventListener('keydown', (event) => {
+  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+    event.preventDefault();
+    if (!dashboardView.hidden) {
+      globalSearch.focus();
+      globalSearch.select();
+    }
+  }
+  if (event.key === 'Escape' && dashboardView.classList.contains('drawer-open')) {
+    setDrawerOpen(false);
+    document.querySelector('#sidebar-drawer-toggle')?.focus();
+  }
 });
