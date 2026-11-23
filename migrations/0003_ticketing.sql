@@ -7,7 +7,7 @@ CREATE TABLE feedback_submissions_new (
   message TEXT NOT NULL,
   device_info TEXT NOT NULL DEFAULT '{}',
   status TEXT NOT NULL DEFAULT 'new'
-    CHECK (status IN ('new', 'under_review', 'planned', 'in_progress', 'awaiting_user_reply', 'implemented', 'resolved', 'rejected', 'closed')),
+    CHECK (status IN ('new', 'under_review', 'awaiting_user', 'planned', 'in_progress', 'awaiting_user_reply', 'implemented', 'resolved', 'rejected', 'closed')),
   priority TEXT NOT NULL DEFAULT 'medium'
     CHECK (priority IN ('low', 'medium', 'high', 'critical')),
   admin_notes TEXT NOT NULL DEFAULT '',

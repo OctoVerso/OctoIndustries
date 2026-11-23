@@ -1,5 +1,5 @@
 export const feedbackStatuses = [
-  'new', 'under_review', 'planned', 'in_progress', 'awaiting_user_reply', 'implemented', 'resolved', 'rejected', 'closed',
+  'new', 'under_review', 'awaiting_user', 'planned', 'in_progress', 'awaiting_user_reply', 'implemented', 'resolved', 'rejected', 'closed',
   // Statuses stored by earlier releases remain valid.
   'seen', 'working', 'important', 'archived',
 ];

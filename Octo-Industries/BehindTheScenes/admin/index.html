@@ -184,21 +184,16 @@
                 <div class="section-heading"><div><p class="eyebrow">PRIVATE INBOX</p><h2 id="feedback-inbox-title">Inquiries <span class="feedback-new-badge" id="feedback-new-count">0 New</span></h2></div></div>
                 <section class="ticket-analytics" aria-labelledby="ticket-analytics-title">
                   <h3 id="ticket-analytics-title">Ticket analytics</h3>
-                  <div class="ticket-analytics-metrics">
-                    <div><span>Open</span><strong id="ticket-metric-open">0</strong></div>
-                    <div><span>Awaiting user</span><strong id="ticket-metric-awaiting">0</strong></div>
-                    <div><span>Critical</span><strong id="ticket-metric-critical">0</strong></div>
-                    <div><span>Created in 30 days</span><strong id="ticket-metric-recent">0</strong></div>
-                  </div>
-                  <div class="ticket-status-breakdown" id="ticket-status-breakdown" aria-label="Ticket counts by status"></div>
+                  <div class="ticket-analytics-metrics" id="ticket-analytics-metrics" aria-live="polite"></div>
+                  <div class="ticket-status-breakdown" id="ticket-status-breakdown" role="group" aria-label="Ticket status distribution"></div>
                 </section>
                 <div class="feedback-toolbar">
                   <label class="visually-hidden" for="feedback-search">Search feedback</label>
-                  <input type="search" id="feedback-search" placeholder="Search ticket, message, device, browser, language, or timezone">
+                  <input type="search" id="feedback-search" placeholder="Search ticket ID, message, device, browser, or language">
                   <label class="visually-hidden" for="feedback-type-filter">Filter by type</label>
                   <select id="feedback-type-filter"><option value="all">All types</option><option value="issue">Issues</option><option value="suggestion">Suggestions</option></select>
                   <label class="visually-hidden" for="feedback-status-filter">Filter by status</label>
-                  <select id="feedback-status-filter"><option value="all">All statuses</option><option value="new">New</option><option value="under_review">Under Review</option><option value="planned">Planned</option><option value="in_progress">In Progress</option><option value="awaiting_user_reply">Awaiting User Reply</option><option value="implemented">Implemented</option><option value="resolved">Resolved</option><option value="rejected">Rejected</option><option value="closed">Closed</option><option value="archived">Archived</option></select>
+                  <select id="feedback-status-filter"><option value="all">All statuses</option><option value="new">New</option><option value="under_review">Under Review</option><option value="awaiting_user">Awaiting User</option><option value="planned">Planned</option><option value="in_progress">In Progress</option><option value="awaiting_user_reply">Awaiting User Reply</option><option value="implemented">Implemented</option><option value="resolved">Resolved</option><option value="rejected">Rejected</option><option value="closed">Closed</option><option value="archived">Archived</option></select>
                   <label class="visually-hidden" for="feedback-priority-filter">Filter by priority</label>
                   <select id="feedback-priority-filter"><option value="all">All priorities</option><option value="low">Low Priority</option><option value="medium">Medium Priority</option><option value="high">High Priority</option><option value="critical">Critical Priority</option></select>
                   <label class="visually-hidden" for="feedback-game-filter">Filter by game</label>
@@ -210,10 +205,15 @@
                   <label class="visually-hidden" for="feedback-date-to">Created through (Bahrain time)</label>
                   <input type="date" id="feedback-date-to" aria-label="Created through date in Bahrain time">
                 </div>
+                <div class="feedback-filter-summary">
+                  <span id="feedback-result-count" aria-live="polite"></span>
+                  <div id="feedback-active-filters" aria-label="Active filters"></div>
+                  <button class="small-button" id="feedback-clear-filters" type="button" hidden>Clear all filters</button>
+                </div>
                 <div class="feedback-bulk">
                   <label class="check-label"><input id="feedback-select-all" type="checkbox"> Select visible</label>
                   <label class="visually-hidden" for="feedback-bulk-status">Set selected submissions status</label>
-                  <select id="feedback-bulk-status"><option value="">Bulk status…</option><option value="new">New</option><option value="under_review">Under Review</option><option value="planned">Planned</option><option value="in_progress">In Progress</option><option value="awaiting_user_reply">Awaiting User Reply</option><option value="implemented">Implemented</option><option value="resolved">Resolved</option><option value="rejected">Rejected</option><option value="closed">Closed</option></select>
+                  <select id="feedback-bulk-status"><option value="">Bulk status…</option><option value="new">New</option><option value="under_review">Under Review</option><option value="awaiting_user">Awaiting User</option><option value="planned">Planned</option><option value="in_progress">In Progress</option><option value="awaiting_user_reply">Awaiting User Reply</option><option value="implemented">Implemented</option><option value="resolved">Resolved</option><option value="rejected">Rejected</option><option value="closed">Closed</option></select>
                   <button class="small-button" id="feedback-bulk-apply" type="button">Apply to selected</button>
                   <button class="small-button" id="feedback-bulk-archive" type="button">Archive selected</button>
                   <button class="small-button" id="feedback-bulk-delete" type="button">Delete selected</button>
