@@ -468,6 +468,7 @@ form label { display: block; margin: 13px 0 7px; color: var(--muted); font-size:
   .header-actions .button { min-height: 40px; padding: 0 9px; font-size: 10px; }
   .dashboard-heading { flex-wrap: wrap; }
   .dashboard-actions .button-secondary { display: none; }
+  .dashboard-actions #catalog-sync-button { display: inline-flex; }
   .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .overview-grid { grid-template-columns: 1fr; }
   .overview-feedback { grid-column: auto; }

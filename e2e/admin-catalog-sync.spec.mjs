@@ -48,11 +48,16 @@ test('admin dashboard and game library load read-only; manual catalog sync sends
   expect(syncRequests).toHaveLength(0);
 
   const firstGame = await page.evaluate(() => window.OCTO_GAMES[0]);
+  const drawerToggle = page.locator('#sidebar-drawer-toggle');
+  if (await drawerToggle.isVisible()) await drawerToggle.click();
   await page.locator('#admin-sidebar summary[data-admin-view="games"]').click();
   await expect(page.locator('#game-list')).toContainText(firstGame.title);
   page.on('dialog', (dialog) => dialog.accept());
-  await page.locator('#catalog-sync-button').click();
+  const syncButton = page.locator('#catalog-sync-button');
+  await expect(syncButton).toBeVisible();
+  await syncButton.click();
   await expect.poll(() => syncRequests.length).toBeGreaterThan(0);
+  await expect(page.locator('#toast')).toHaveText(/Catalog sync complete:/);
   expect(consoleErrors).toEqual([]);
 
   for (const request of syncRequests) {
