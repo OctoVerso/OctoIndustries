@@ -63,6 +63,32 @@ window.OCTO_GAMES = Object.freeze([
     "screenshots": []
   },
   {
+    "id": "b-cubed",
+    "addedAt": "2026-11-23T10:12:22.610Z",
+    "title": "B-Cubed",
+    "description": "Navigate a 3D cube through 30 platform levels, teleporting and bridging across the grid to reach the goal.",
+    "version": "1.0.0",
+    "category": "Puzzle",
+    "tags": [
+      "puzzle",
+      "3d",
+      "platform",
+      "levels",
+      "cube"
+    ],
+    "launch": "/Octo-Industries/B-Cubed/index.html",
+    "thumbnail": "/Octo-Industries/B-Cubed/hub-banner.svg?v=a7a9f306a6fae2bc",
+    "accent": "#65e6e3",
+    "saveLevel": 3,
+    "sourceUrl": "https://ubgforschool.gitlab.io/game/b-cubed.html",
+    "sourceFile": "Octo-Industries/B-Cubed/game.json",
+    "banner": "/Octo-Industries/B-Cubed/hub-banner.svg?v=a7a9f306a6fae2bc",
+    "screenshots": [
+      "/Octo-Industries/B-Cubed/screenshots/01-gameplay.png?v=83c657980123f826"
+    ],
+    "featured": false
+  },
+  {
     "id": "baggio-magical-kicks",
     "title": "Baggio Magical Kicks",
     "description": "Take free kicks as Roberto Baggio. Adjust height, direction, and swerve while accounting for distance, the wall, and wind.",

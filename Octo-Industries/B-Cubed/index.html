@@ -1,0 +1,93 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>B-Cubed | Octo Industries</title>
+        <meta name="HandheldFriendly" content="true">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+        <link href="styles/bcubed.css" rel="stylesheet">
+        <link rel="icon" href="../branding/favicon.svg" type="image/svg+xml">
+        <link rel="stylesheet" href="../branding/game-branding.css">
+        <link rel="stylesheet" href="../branding/game-loader.css">
+        <script defer src="../branding/game-branding.js"></script>
+        <script src="../branding/game-loader.js"></script>
+    </head>
+    <body style="overflow:hidden;">
+
+        <div id="bcubed">
+            <div id="bcubed-start-screen"><div>
+
+                <p id="bcubed-loading">
+                    <img src="images/menu/page_loading.jpg" alt="">
+                    <span class="bcubed-loading-bar"><span id="bcubed-loading-progress"></span></span>
+
+                </p>
+            </div></div>
+            <script>var BCubed = {'Cache': {}};</script>
+            <script>var octoLoader = OctoLoader.show({ artwork: 'screenshots/01-gameplay.png', title: 'B-Cubed' });</script>
+            <script src="scripts/loading.js"></script>
+            <script>
+                (function () {
+                    var progress = BCubed.loading.progress;
+                    var hide = BCubed.loading.hide;
+                    BCubed.loading.progress = function (percent) {
+                        progress(percent);
+                        octoLoader.progress(percent * 100);
+                    };
+                    BCubed.loading.hide = function () {
+                        hide();
+                        octoLoader.finish(100);
+                    };
+                })();
+            </script>
+
+            <p id="bcubed-stars"></p>
+
+            <div id="bcubed-game">
+                <canvas id="bcubed-scene"></canvas>
+                <p class="bcubed-game-ui">Level Time: <span id="bcubed-level-time">00:00</span></p>
+                <p class="bcubed-game-ui" id="bcubed-level-name"></p>
+                <button class="bcubed-game-ui bcubed-level-menu">Level Menu</button>
+            </div>
+
+            <div id="bcubed-menu" class="bcubed-visible">
+                <div id="bcubed-menu-scale">
+                    <div class="bcubed-page bcubed-level-won">
+                        <h1></h1>
+                        <p>Level Time: <span class="bcubed-level-won-time"></span></p>
+                        <div class="bcubed-level-completed">
+                            <p>Overall Time: <span class="bcubed-level-won-overall-time"></span></p>
+                            <p><button class="bcubed-next-level">Next Level</button></p>
+                        </div>
+                        <div class="bcubed-game-completed">
+                            <p>Final Time: <span class="bcubed-level-won-overall-time"></span></p>
+                            <p><button class="bcubed-click-here">Click Here</button></p>
+                        </div>
+                    </div>
+
+                    <div class="bcubed-page bcubed-level-list">
+                        <h1>Choose Level</h1>
+                        <ul></ul>
+                        <p><button class="bcubed-back">Back</button></p>
+                    </div>
+
+                    <div class="bcubed-page bcubed-game-won">
+                        <h1>Congratulations!</h1>
+                        <p>You have conquered every level!</p>
+                    </div>
+
+                    <p class="bcubed-page bcubed-title bcubed-visible">
+                        <button class="bcubed-start">Play</button>
+                    </p>
+                </div>
+
+                <button class="bcubed-page bcubed-game-won bcubed-back">Back</button>
+                <button class="bcubed-page bcubed-level-won bcubed-level-menu">Level Menu</button>
+            </div>
+
+            <p id="bcubed-options"><button id="bcubed-music-toggle"></button><button id="bcubed-sound-toggle"></button></p>
+        </div>
+
+        <script src="scripts/bcubed.js"></script>
+    </body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "id": "b-cubed",
+  "addedAt": "2026-11-23T10:12:22.610Z",
+  "title": "B-Cubed",
+  "description": "Navigate a 3D cube through 30 platform levels, teleporting and bridging across the grid to reach the goal.",
+  "version": "1.0.0",
+  "category": "Puzzle",
+  "tags": ["puzzle", "3d", "platform", "levels", "cube"],
+  "launch": "index.html",
+  "thumbnail": "screenshots/01-gameplay.png",
+  "accent": "#65e6e3",
+  "bannerSource": "screenshots/01-gameplay.png",
+  "bannerFit": "contain",
+  "saveLevel": 3,
+  "sourceUrl": "https://ubgforschool.gitlab.io/game/b-cubed.html"
+}
