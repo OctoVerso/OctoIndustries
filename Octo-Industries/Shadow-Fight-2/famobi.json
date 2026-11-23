@@ -712,8 +712,7 @@
         "button:map:fight",
         "button:exit:surrender",
         "button:result:continue",
-        "break:result",
-        "break:round"
+        "break:result"
       ]
     },
     "rewarded": {

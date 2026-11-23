@@ -5,10 +5,16 @@
   "scripts": {
     "pages:build": "node scripts/build-pages-site.mjs",
     "codespace:clean": "node scripts/clean-codespace.mjs",
-    "test": "node --test \"supabase/functions/_shared/*.test.mjs\""
+    "test": "node --test \"supabase/functions/_shared/*.test.mjs\"",
+    "test:frontend": "node --test \"Octo-Industries/BehindTheScenes/**/*.test.mjs\" \"Octo-Industries/PvZ2/tests/*.test.mjs\" \"functions/_lib/*.test.mjs\"",
+    "test:e2e": "playwright test",
+    "test:all": "npm run test && npm run test:frontend"
   },
   "dependencies": {
     "esbuild": "0.28.2",
     "phaser": "4.2.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.1"
   }
 }

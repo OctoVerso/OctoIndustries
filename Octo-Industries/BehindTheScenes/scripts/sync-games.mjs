@@ -123,6 +123,7 @@ function assetReference(gameDirectory, value) {
   if (!file) throw new Error(`Banner artwork does not exist for ${gameDirectory}: ${value}`);
   const assetPath = resolve(root, ...file.split('/').map(decodeURIComponent));
   const mimeType = ({
+    '.avif': 'image/avif',
     '.gif': 'image/gif',
     '.ico': 'image/x-icon',
     '.jpeg': 'image/jpeg',
@@ -132,7 +133,24 @@ function assetReference(gameDirectory, value) {
     '.webp': 'image/webp',
   })[extname(assetPath).toLowerCase()];
   if (!mimeType) throw new Error(`Unsupported banner artwork format for ${gameDirectory}: ${value}`);
-  return `data:${mimeType};base64,${readFileSync(assetPath).toString('base64')}`;
+  const bytes = readFileSync(assetPath);
+  if (!bytes.length) throw new Error(`Banner artwork is empty for ${gameDirectory}: ${value}`);
+  const extension = extname(assetPath).toLowerCase();
+  const detectedMimeType = (() => {
+    if (bytes.length >= 8 && bytes.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))) return 'image/png';
+    if (bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) return 'image/jpeg';
+    if (/^GIF8[79]a/.test(bytes.subarray(0, 6).toString('ascii'))) return 'image/gif';
+    if (bytes.length >= 12 && bytes.subarray(0, 4).toString('ascii') === 'RIFF' && bytes.subarray(8, 12).toString('ascii') === 'WEBP') return 'image/webp';
+    if (bytes.length >= 4 && bytes[0] === 0 && bytes[1] === 0 && bytes[2] === 1 && bytes[3] === 0) return 'image/x-icon';
+    if (bytes.length >= 12 && bytes.subarray(4, 8).toString('ascii') === 'ftyp') return 'image/avif';
+    if (extension === '.svg') {
+      const svg = bytes.toString('utf8').trim();
+      return /^(?:<\?xml[\s\S]*?\?>\s*)?<svg(?:\s|>)/i.test(svg) && /<\/svg>\s*$/.test(svg) ? 'image/svg+xml' : '';
+    }
+    return '';
+  })();
+  if (!detectedMimeType) throw new Error(`Banner artwork has an invalid ${extension || 'image'} signature or structure for ${gameDirectory}: ${value}`);
+  return `data:${detectedMimeType};base64,${bytes.toString('base64')}`;
 }
 
 function bannerSvg(game, gameDirectory) {
@@ -147,17 +165,29 @@ function bannerSvg(game, gameDirectory) {
   }
   const fit = game.bannerFit === 'contain' ? 'xMidYMid meet' : 'xMidYMid slice';
   const artwork = source
-    ? `<rect width="1200" height="675" fill="#071019"/><image href="${xmlEscape(source)}" x="-180" y="-100" width="1560" height="875" preserveAspectRatio="xMidYMid slice" filter="url(#backdrop)"/><rect width="1200" height="675" fill="#071019" fill-opacity=".18"/><image href="${xmlEscape(source)}" x="0" y="0" width="1200" height="675" preserveAspectRatio="${fit}"/>`
+    ? `<rect width="1200" height="675" fill="#071019"/><use href="#octo-artwork" x="-180" y="-100" width="1560" height="875" preserveAspectRatio="xMidYMid slice" filter="url(#backdrop)"/><rect width="1200" height="675" fill="#071019" fill-opacity=".18"/><use href="#octo-artwork" x="0" y="0" width="1200" height="675" preserveAspectRatio="${fit}"/>`
     : `<rect width="1200" height="675" fill="#08111a"/><circle cx="900" cy="330" r="330" fill="${accent}" fill-opacity=".13"/><text x="600" y="355" fill="#eaf3ef" font-family="Georgia, serif" font-size="84" font-weight="700" text-anchor="middle">${title}</text>`;
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" role="img" aria-label="${title} game artwork">
   <defs>
+    ${source ? `<image id="octo-artwork" href="${xmlEscape(source)}" width="1200" height="675" preserveAspectRatio="${fit}"/>` : ''}
     <linearGradient id="vignette" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#071019" stop-opacity=".16"/><stop offset=".5" stop-color="#071019" stop-opacity="0"/><stop offset="1" stop-color="#071019" stop-opacity=".22"/></linearGradient>
     <filter id="backdrop" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="28"/><feColorMatrix type="saturate" values=".82"/></filter>
   </defs>
   ${artwork}
   <rect width="1200" height="675" fill="url(#vignette)"/>
 </svg>\n`;
+}
+
+function validateBannerSvg(svg) {
+  if (typeof svg !== 'string' || !svg.trim()) throw new Error('Generated banner SVG is empty.');
+  if (!/^<svg\b[\s\S]*<\/svg>\s*$/.test(svg.trim())) throw new Error('Generated banner SVG has invalid structure.');
+  if (!/<svg[^>]*\bwidth="1200"[^>]*\bheight="675"/.test(svg) && !/<svg[^>]*\bheight="675"[^>]*\bwidth="1200"/.test(svg)) {
+    throw new Error('Generated banner SVG must have 1200x675 dimensions.');
+  }
+  if (!/(?:data:image\/(?:png|jpeg|jpg|gif|svg\+xml|webp|avif|x-icon);base64,|href="#octo-artwork")/.test(svg)) {
+    throw new Error('Generated banner SVG does not contain valid artwork.');
+  }
 }
 
 function resolveGameFile(gameDirectory, value) {
@@ -216,7 +246,9 @@ const games = gamesToRegister.map(({ gameDirectory, manifest }) => {
   }
 
   const bannerPath = resolve(gameDirectory, 'hub-banner.svg');
-  writeFileSync(bannerPath, bannerSvg(game, gameDirectory));
+  const generatedBanner = bannerSvg(game, gameDirectory);
+  validateBannerSvg(generatedBanner);
+  writeFileSync(bannerPath, generatedBanner);
   const {
     bannerSource,
     bannerFit,

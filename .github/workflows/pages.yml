@@ -24,6 +24,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
+      - name: Install dependencies
+        run: npm ci
+      - name: Run full unit and frontend verification
+        run: npm run test:all
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run browser tests
+        run: npm run test:e2e
       - name: Build static site
         env:
           # Repository variable (Settings > Secrets and variables > Actions > Variables).

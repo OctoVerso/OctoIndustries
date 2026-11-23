@@ -59,5 +59,13 @@ test('the generated main registry includes every importable game folder with com
         .filter(Boolean);
       assert.ok(await isFile(resolve(root, ...assetPath)), `${game.title} asset exists: ${asset}`);
     }
+
+    const bannerPath = resolve(directory, 'hub-banner.svg');
+    assert.ok(await isFile(bannerPath), `${game.title} generated banner exists`);
+    const banner = await readFile(bannerPath, 'utf8');
+    assert.ok(banner.trim().length > 0, `${game.title} generated banner is not empty`);
+    assert.match(banner, /^<svg[\s\S]*<\/svg>\s*$/, `${game.title} banner has valid SVG structure`);
+    assert.match(banner, /width="1200"[\s\S]*height="675"|height="675"[\s\S]*width="1200"/, `${game.title} banner is 16:9`);
+    assert.match(banner, /(?:data:image\/|href="#octo-artwork")/, `${game.title} banner contains embedded or referenced artwork`);
   }
 });
