@@ -36,8 +36,6 @@
     const GAM_CHILD_CODE = window?.EOS_SDK_GAM_OVERRIDE?.childNetworkCode;
     const GAM_NETWORK_CODE = GAM_CHILD_CODE ? (GAM_PARENT_CODE + "," + GAM_CHILD_CODE) : GAM_PARENT_CODE;
     const GAM_AD_UNIT = (window?.EOS_SDK_GAM_OVERRIDE?.bannerUnit || "eos/default-h5-game-banner");
-    const WAIT_BEFORE_REFRESH_MS = 40000;
-    const MIN_REFRESH_DURATION_MS = 30000;
     const CSS_FADE_DURATION_MS = 600;
     const SLOT_CLEANUP_DELAY_MS = 50;
 
@@ -64,7 +62,6 @@
         static support = { top: false, bottom: false, left: false, right: false };
         static sizes = { top: [], bottom: [], left: [], right: [] };
         static containers = {};
-        static refreshAfter = {};
         static adUnitPath = `/${GAM_NETWORK_CODE}/${GAM_AD_UNIT}`;
         static resizeTimer = null;
         static destroyTimers = {};
@@ -77,7 +74,6 @@
             window.addEventListener("resize", () => this.handleViewportResize());
             window.addEventListener("orientationchange", () => this.handleViewportResize());
 
-            setInterval(() => this.showAds(), WAIT_BEFORE_REFRESH_MS);
             this.showAds();
         }
 
@@ -131,7 +127,6 @@
                 window.googletag.pubads().addEventListener("slotRenderEnded", (evt) => {
                     const type = this.getSlotType(evt.slot);
                     if (type) {
-                        this.refreshAfter[type] = Date.now() + MIN_REFRESH_DURATION_MS;
                         if (!evt.isEmpty) {
                             window.GameInterface._triggerOffsetChange();
                         }
@@ -146,11 +141,7 @@
                 ACTIVE_TYPES.forEach(type => {
                     if (!this.support[type]) return;
 
-                    if (this.slots[type]) {
-                        if (this.refreshAfter[type] && this.refreshAfter[type] <= Date.now()) {
-                            window.googletag.pubads().refresh([this.slots[type]]);
-                        }
-                    } else {
+                    if (!this.slots[type]) {
                         this.configureSlot(type);
                     }
                 });

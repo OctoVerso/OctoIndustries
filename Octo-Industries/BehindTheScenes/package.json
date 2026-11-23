@@ -1,11 +1,14 @@
 {
   "name": "octo-industries-game-hub",
   "private": true,
+  "type": "module",
   "scripts": {
     "presync": "node scripts/fetch-baggio-magical-kicks.mjs && node scripts/fetch-ragdoll-hit.mjs",
     "sync": "node scripts/sync-games.mjs",
     "build": "node scripts/sync-games.mjs",
     "admin:hash": "node scripts/create-admin-hash.mjs",
-    "test": "node --test ../../supabase/functions/_shared/*.test.mjs"
+    "test": "node --test \"../../supabase/functions/_shared/*.test.mjs\"",
+    "test:frontend": "node --test \"./**/*.test.mjs\"",
+    "test:all": "npm test && npm run test:frontend"
   }
 }

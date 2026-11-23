@@ -1,5 +1,5 @@
 import { getRouteTitle, normalizeHubRoute } from './route-utils.js';
-import { gameCategories, mergeGameCatalog } from './catalog-utils.mjs';
+import { gameCategories, mergeGameCatalog, rankTrendingGames } from './catalog-utils.mjs';
 
 const normalizeGame = (game) => ({
   ...game,
@@ -33,6 +33,7 @@ let slideIndex = 0;
 let searchTimer;
 let activeGallery;
 let galleryIndex = 0;
+let galleryTrigger = null;
 let gameInteractionsBound = false;
 const octoConfig = window.OCTO_CONFIG;
 const fallbackBannerUrl = octoConfig.assetUrl('Octo-Industries/branding/fallback-banner.svg?v=1');
@@ -74,8 +75,15 @@ function markPlayed(game) {
     const recent = [game.id, ...readRecent().filter((id) => id !== game.id)].slice(0, 3);
     localStorage.setItem('octo-industries.recent', JSON.stringify(recent));
     const playCounts = readPlayCounts();
-    playCounts[game.id] = (Number(playCounts[game.id]) || 0) + 1;
+    const previous = playCounts[game.id];
+    const previousCount = typeof previous === 'number'
+      ? previous
+      : previous && typeof previous === 'object'
+        ? Number(previous.count) || 0
+        : 0;
+    playCounts[game.id] = { count: previousCount + 1, lastPlayedAt: new Date().toISOString() };
     localStorage.setItem('octo-industries.play-counts', JSON.stringify(playCounts));
+    refreshTrendingDisplays();
   } catch {
     return;
   }
@@ -112,6 +120,9 @@ function categories() {
 function gameCard(game, index, localPlayCount = null) {
   const tags = [game.category, ...(game.tags || [])].filter((tag, position, list) => list.indexOf(tag) === position).slice(0, 2);
   const hasThumbnail = Boolean(game.thumbnail);
+  const galleryControl = Array.isArray(game.screenshots) && game.screenshots.length
+    ? `<button class="gallery-link" type="button" data-gallery-id="${escapeHtml(game.id)}" aria-label="Open screenshots for ${escapeHtml(game.title)}">GALLERY</button>`
+    : '';
   return `
     <article class="game-card" style="animation-delay:${Math.min(index * 45, 225)}ms" data-game-id="${escapeHtml(game.id)}">
       <a class="game-art" data-category="${escapeHtml(game.category)}" href="${escapeHtml(game.launch)}" data-launch-id="${escapeHtml(game.id)}" aria-label="Play ${escapeHtml(game.title)}">
@@ -121,7 +132,7 @@ function gameCard(game, index, localPlayCount = null) {
       </a>
       <div class="game-card-copy">
         <div><div class="game-heading-line"><h3>${escapeHtml(game.title)}</h3><span class="category-label">${escapeHtml(game.category.toUpperCase())}</span></div><p class="game-description">${escapeHtml(game.description)}</p></div>
-        <div class="game-card-foot"><div class="game-tags">${tags.map((tag) => `<span class="game-tag">#${escapeHtml(tag.toLowerCase())}</span>`).join('')}</div><div class="game-card-actions"><a class="play-link" href="${escapeHtml(game.launch)}" data-launch-id="${escapeHtml(game.id)}"><span aria-hidden="true">▶</span> PLAY</a></div></div>
+        <div class="game-card-foot"><div class="game-tags">${tags.map((tag) => `<span class="game-tag">#${escapeHtml(tag.toLowerCase())}</span>`).join('')}</div><div class="game-card-actions">${galleryControl}<a class="play-link" href="${escapeHtml(game.launch)}" data-launch-id="${escapeHtml(game.id)}"><span aria-hidden="true">▶</span> PLAY</a></div></div>
       </div>
     </article>`;
 }
@@ -130,6 +141,7 @@ function renderGalleryImage() {
   if (!activeGallery) return;
   const image = document.querySelector('#gallery-image');
   const screenshot = activeGallery.screenshots[galleryIndex];
+  image.dataset.fallbackAttempted = 'false';
   image.src = screenshot;
   image.alt = `${activeGallery.title} gameplay screenshot ${galleryIndex + 1}`;
   document.querySelector('#gallery-caption').textContent = `Screenshot ${galleryIndex + 1} of ${activeGallery.screenshots.length}`;
@@ -145,6 +157,7 @@ function openGallery(game) {
   if (!Array.isArray(game.screenshots) || !game.screenshots.length) return;
   activeGallery = game;
   galleryIndex = 0;
+  galleryTrigger = document.activeElement;
   document.querySelector('#gallery-title').textContent = game.title;
   document.querySelector('#gallery-thumbnails').innerHTML = game.screenshots.map((screenshot, index) => `
     <button type="button" data-gallery-index="${index}" aria-label="Show screenshot ${index + 1}" aria-pressed="${index === 0}">
@@ -188,8 +201,7 @@ function renderGames() {
 function renderDashboardOverview() {
   const currentGames = Array.isArray(games) ? games : [];
   const recent = readRecent().map((id) => byId.get(id)).filter(Boolean);
-  const featuredEntries = currentGames.filter((game) => game.featured).slice(0, 4);
-  const trendingEntries = featuredEntries.length ? featuredEntries : currentGames.slice(0, 4);
+  const trendingEntries = rankTrendingGames(currentGames, readPlayCounts());
   const overviewTotal = document.querySelector('#overview-total');
   const overviewCategories = document.querySelector('#overview-categories');
   const overviewTrending = document.querySelector('#overview-trending');
@@ -338,7 +350,7 @@ function renderNewsPage() {
 function renderTrendingPage() {
   const list = document.querySelector('#trending-page-grid');
   if (!list) return;
-  const items = games.slice(0, 6);
+  const items = rankTrendingGames(games, readPlayCounts(), 6);
   list.innerHTML = items.length ? items.map((game) => `
     <article class="game-card">
       <a class="game-art" href="${escapeHtml(game.launch)}" data-launch-id="${escapeHtml(game.id)}" aria-label="Play ${escapeHtml(game.title)}">
@@ -350,7 +362,7 @@ function renderTrendingPage() {
         <div><div class="game-heading-line"><h3>${escapeHtml(game.title)}</h3><span class="category-label">${escapeHtml(game.category.toUpperCase())}</span></div><p class="game-description">${escapeHtml(game.description)}</p></div>
         <div class="game-card-foot"><div class="game-tags"></div><a class="play-link" href="${escapeHtml(game.launch)}" data-launch-id="${escapeHtml(game.id)}"><span aria-hidden="true">▶</span> PLAY</a></div>
       </div>
-    </article>`).join('') : '<p class="empty-mini-state">No trending data is available right now.</p>';
+    </article>`).join('') : '<p class="empty-mini-state" role="status">No games have recorded plays yet. Trending will appear after games are played.</p>';
 }
 
 function renderRecentlyAddedPage() {
@@ -394,8 +406,7 @@ function renderRecent() {
 
 function renderHomeOverview() {
   const categoryCount = new Set(games.map((game) => game.category).filter(Boolean)).size;
-  const playCounts = readPlayCounts();
-  const trendingCount = games.filter((game) => Number(playCounts[game.id]) > 0).length;
+  const trendingCount = rankTrendingGames(games, readPlayCounts()).length;
   const recentCount = readRecent().length;
   document.querySelector('#home-total-games').textContent = games.length;
   document.querySelector('#home-ready-count').textContent = games.length;
@@ -422,8 +433,7 @@ function gameAddedDate(game) {
 }
 
 function renderTrending() {
-  const picks = games.filter((game) => game.featured).slice(0, 4);
-  const list = picks.length ? picks : games.slice(0, 4);
+  const list = rankTrendingGames(games, readPlayCounts(), 4);
 
   if (trendingList) {
     trendingList.innerHTML = list.length
@@ -439,6 +449,13 @@ function renderTrending() {
         `).join('')
       : '<p class="empty-mini-state">No trending games right now.</p>';
   }
+}
+
+function refreshTrendingDisplays() {
+  renderTrending();
+  renderTrendingPage();
+  renderDashboardOverview();
+  renderHomeOverview();
 }
 
 function renderRecentlyAdded() {
@@ -802,6 +819,21 @@ function bindEvents() {
 
   document.querySelector('#gallery-close').addEventListener('click', () => {
     document.querySelector('#screenshot-gallery').close();
+  });
+  document.querySelector('#gallery-image').addEventListener('error', () => {
+    const image = document.querySelector('#gallery-image');
+    if (!activeGallery) return;
+    if (image.dataset.fallbackAttempted !== 'true') {
+      image.dataset.fallbackAttempted = 'true';
+      image.src = fallbackBannerUrl;
+      image.alt = `Screenshot unavailable for ${activeGallery.title}`;
+    } else {
+      image.removeAttribute('src');
+      image.alt = `Screenshot unavailable for ${activeGallery.title}`;
+    }
+  });
+  document.querySelector('#screenshot-gallery').addEventListener('close', () => {
+    if (galleryTrigger instanceof HTMLElement) galleryTrigger.focus({ preventScroll: true });
   });
   document.querySelector('#gallery-previous').addEventListener('click', () => {
     if (!activeGallery) return;
@@ -1220,6 +1252,16 @@ function start() {
   bindNavigationControls();
   window.addEventListener('popstate', () => applyRoute(currentRoute()));
   window.addEventListener('hashchange', () => applyRoute(currentRoute()));
+  window.addEventListener('storage', (event) => {
+    if (!event.key || event.key === 'octo-industries.play-counts' || event.key === 'octo-industries.recent') {
+      refreshTrendingDisplays();
+    }
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) refreshTrendingDisplays();
+  });
+  window.addEventListener('pageshow', refreshTrendingDisplays);
+  refreshTrendingDisplays();
 }
 
 async function loadPublicCatalog() {

@@ -910,23 +910,6 @@ async function refreshDashboardData() {
     if (!Array.isArray(window.OCTO_GAMES) || !window.OCTO_GAMES.length) {
       throw responseShapeError('/catalog.js', 'the generated game catalog is missing or empty');
     }
-    const catalog = window.OCTO_GAMES;
-    const knownGameIds = new Set(payload.games.map((game) => game.id));
-    const missingGames = catalog.filter((game) => !knownGameIds.has(game.id));
-    if (missingGames.length) {
-      for (let index = 0; index < missingGames.length; index += 25) {
-        await api('/api/admin/catalog/sync', {
-          method: 'POST',
-          body: { games: missingGames.slice(index, index + 25) },
-        });
-      }
-      payload = validateDashboardPayload(await api('/api/admin/dashboard'));
-      const syncedIds = new Set(payload.games.map((game) => game.id));
-      const stillMissing = missingGames.filter((game) => !syncedIds.has(game.id));
-      if (stillMissing.length) {
-        throw responseShapeError('/api/admin/catalog/sync', `${stillMissing.length} catalog games are still missing after sync`);
-      }
-    }
     dashboard = payload;
     dashboardError.hidden = true;
     roadmapItems = dashboard.roadmap;
@@ -1486,6 +1469,36 @@ document.querySelector('#edit-form').addEventListener('submit', async (event) =>
 
 document.querySelector('#close-dialog').addEventListener('click', () => document.querySelector('#edit-dialog').close());
 document.querySelector('#cancel-edit').addEventListener('click', () => document.querySelector('#edit-dialog').close());
+document.querySelector('#catalog-sync-button').addEventListener('click', async (event) => {
+  const button = event.currentTarget;
+  if (!dashboard || !Array.isArray(window.OCTO_GAMES)) {
+    showToast('Dashboard catalog data is not ready.');
+    return;
+  }
+  const knownIds = new Set(dashboard.games.map((game) => game.id));
+  const missingGames = window.OCTO_GAMES.filter((game) => !knownIds.has(game.id));
+  if (!missingGames.length) {
+    showToast('Catalog preview: no games need synchronisation.');
+    return;
+  }
+  const preview = missingGames.map((game) => game.title).join(', ');
+  if (!window.confirm(`Synchronise ${missingGames.length} missing ${missingGames.length === 1 ? 'game' : 'games'}?\n\n${preview}`)) return;
+  button.disabled = true;
+  try {
+    for (let index = 0; index < missingGames.length; index += 25) {
+      await api('/api/admin/catalog/sync', {
+        method: 'POST',
+        body: JSON.stringify({ games: missingGames.slice(index, index + 25) }),
+      });
+    }
+    showToast(`Catalog sync complete: ${missingGames.length} ${missingGames.length === 1 ? 'game' : 'games'} synchronised.`);
+    await refreshDashboard();
+  } catch (error) {
+    showToast(`Catalog sync failed: ${error.message}`);
+  } finally {
+    button.disabled = false;
+  }
+});
 document.querySelector('#build-button').addEventListener('click', async (event) => {
   const button = event.currentTarget;
   button.disabled = true;
