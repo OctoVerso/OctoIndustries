@@ -38,6 +38,7 @@
     <nav class="primary-nav" id="primary-nav" aria-label="Main navigation">
       <a class="nav-link is-active" href="#/" data-route="/">🏠 │ Home</a>
       <a class="nav-link" href="#/games" data-route="/games">🎮 │ Games</a>
+      <a class="nav-link" href="#/favorites" data-route="/favorites">⭐ │ Favorites</a>
       <a class="nav-link" href="#/trending" data-route="/trending">🔥 │ Trending</a>
       <a class="nav-link" href="#/recently-added" data-route="/recently-added">🆕 │ Recently Added</a>
       <a class="nav-link" href="#/news" data-route="/news">📰 │ Octo News</a>
@@ -143,6 +144,7 @@
           </div>
           <div class="mini-list" id="trending-list"></div>
         </aside>
+
       </div>
     </section>
 
@@ -169,6 +171,22 @@
       <p class="results-summary" id="results-summary" aria-live="polite"></p>
       <div class="game-grid" id="game-grid" aria-live="polite" aria-busy="true"></div>
       <div class="empty-state" id="empty-state" hidden><span class="empty-orbit" aria-hidden="true"><img src="Octo-Industries/branding/icon-only.png" alt=""></span><h3>No games in this orbit.</h3><p>Try another title, tag, or category.</p><button class="button button-secondary" id="clear-filters" type="button">Clear all filters</button></div>
+    </section>
+
+    <section class="page-view" id="favorites-page" data-page="/favorites" aria-labelledby="favorites-page-heading" hidden>
+      <div class="content-width panel-page">
+        <div class="section-heading">
+          <div><p class="eyebrow"><span class="eyebrow-line"></span> YOUR COLLECTION</p><h1 id="favorites-page-heading">Favorites</h1></div>
+        </div>
+        <div class="discovery-grid" id="favorites-grid"></div>
+        <div class="empty-state" id="favorites-empty" hidden><span class="empty-orbit" aria-hidden="true"><img src="Octo-Industries/branding/icon-only.png" alt=""></span><h3>No favorites yet.</h3><p>Open a game's details by selecting its title, then choose Favorite.</p><a class="button button-secondary" href="#/games" data-route="/games">Browse Games</a></div>
+      </div>
+    </section>
+
+    <section class="page-view game-detail-page" id="game-detail-page" data-page="/game-detail" aria-labelledby="game-detail-heading" hidden>
+      <div class="content-width panel-page" id="game-detail-content">
+        <p class="empty-mini-state">Choose a game to see its details.</p>
+      </div>
     </section>
 
     <section class="page-view" id="trending-page" data-page="/trending" aria-labelledby="trending-page-heading" hidden>
@@ -252,12 +270,6 @@
       </div>
     </section>
 
-    <section class="hub-panel content-width contact-view" id="contact" data-hub-panel="contact" aria-labelledby="contact-heading" hidden>
-      <div class="view-heading"><div><p class="eyebrow"><span class="eyebrow-line"></span> GET IN TOUCH</p><h1 id="contact-heading" tabindex="-1">Contact</h1></div></div>
-      <a class="contact-email" href="mailto:RealMrOcto@Outlook.com">RealMrOcto@Outlook.com</a>
-      <p>For general questions or partnership inquiries.</p>
-      <button class="button button-secondary" type="button" data-feedback-open>Suggestions / Issues</button>
-    </section>
   </main>
 
   <dialog class="feedback-dialog" id="feedback-dialog" aria-labelledby="feedback-title">

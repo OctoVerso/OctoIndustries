@@ -12,5 +12,12 @@
   "bannerFit": "cover",
   "featured": false,
   "offlineReady": false,
+  "acquisitionStatus": "external-only",
+  "runtimeStatus": "external-required",
+  "networkDependency": "required",
+  "saveLevel": 0,
+  "saveStatus": "unsupported",
+  "testStatus": "not-run",
+  "acquisitionEvidence": ["README.md", "index.html loads the official third-party service"],
   "sourceUrl": "https://turball.io/casual"
 }

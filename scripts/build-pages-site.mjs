@@ -63,7 +63,7 @@ await writeFile(join(output, '404.html'), `<!doctype html><meta charset="utf-8">
 <script>
   const base = location.pathname.split('/').slice(0, 2).join('/') + '/';
   const route = location.pathname.slice(base.length).replace(/\\/+$/, '');
-  const known = ['games', 'trending', 'recently-added', 'news', 'coming-soon', 'about', 'contact', 'inquiries'];
+  const known = ['games', 'favorites', 'trending', 'recently-added', 'news', 'coming-soon', 'about', 'contact', 'inquiries'];
   if (known.includes(route)) location.replace(base + '#/' + route + location.search);
   else document.addEventListener('DOMContentLoaded', () => { document.body.innerHTML = '<h1>Page not found</h1><p><a href="' + base + '">Back to Octo Industries</a></p>'; });
 </script>
