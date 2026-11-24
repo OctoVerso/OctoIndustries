@@ -204,6 +204,7 @@ async function api(path, options = {}) {
 
 async function syncCatalogGames(games) {
   let synced = 0;
+  const warnings = [];
   for (let index = 0; index < games.length; index += 25) {
     const result = await api('/api/admin/catalog/sync', {
       method: 'POST',
@@ -213,8 +214,9 @@ async function syncCatalogGames(games) {
       throw responseShapeError('/api/admin/catalog/sync', 'expected a synced game count');
     }
     synced += result.synced;
+    if (typeof result.warning === 'string' && result.warning) warnings.push(result.warning);
   }
-  return synced;
+  return { synced, warnings };
 }
 
 async function createLoginProof(password, challenge) {
@@ -992,12 +994,13 @@ async function refreshDashboardData() {
       try {
         const synced = await syncCatalogGames(missingGames);
         payload = validateDashboardPayload(await api('/api/admin/dashboard'));
-        if (synced) {
-          showToast(`Catalog sync complete: ${synced} new ${synced === 1 ? 'game' : 'games'} added.`);
+        if (synced.warnings.length) showToast(synced.warnings.join(' '));
+        else if (synced.synced) {
+          showToast(`Catalog sync complete: ${synced.synced} new ${synced.synced === 1 ? 'game' : 'games'} added.`);
         }
       } catch (error) {
         if (error.status === 401) throw error;
-        showToast(`Automatic catalog sync failed: ${error.message}`);
+        showToast(`Automatic catalog sync failed: ${error.details || error.message}`);
       }
     }
     dashboard = payload;
@@ -1611,11 +1614,13 @@ document.querySelector('#catalog-sync-button').addEventListener('click', async (
   if (!window.confirm(`Synchronise ${missingGames.length} missing ${missingGames.length === 1 ? 'game' : 'games'}?\n\n${preview}`)) return;
   button.disabled = true;
   try {
-    await syncCatalogGames(missingGames);
-    showToast(`Catalog sync complete: ${missingGames.length} ${missingGames.length === 1 ? 'game' : 'games'} synchronised.`);
+    const result = await syncCatalogGames(missingGames);
+    showToast(result.warnings.length
+      ? result.warnings.join(' ')
+      : `Catalog sync complete: ${result.synced} ${result.synced === 1 ? 'game' : 'games'} synchronised.`);
     await refreshDashboard();
   } catch (error) {
-    showToast(`Catalog sync failed: ${error.message}`);
+    showToast(`Catalog sync failed: ${error.details || error.message}`);
   } finally {
     button.disabled = false;
   }

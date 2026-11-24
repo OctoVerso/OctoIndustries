@@ -304,7 +304,7 @@ test('admin catalog sync adds new draft games once and preserves existing record
     thumbnail: '/Octo-Industries/New-Game/hub-banner.svg?v=0123456789abcdef',
   };
   const first = await call(admin, 'admin', '/catalog/sync', { method: 'POST', token, body: { games: [addition] } });
-  assert.deepEqual(await first.json(), { synced: 1 });
+  assert.deepEqual(await first.json(), { synced: 1, warning: '' });
   assert.equal(db.tables.games.find((row) => row.id === 'new-game').status, 'draft');
   assert.equal(db.tables.games.find((row) => row.id === 'new-game').launch, 'Octo-Industries/New-Game/index.html');
   assert.equal(db.tables.games.find((row) => row.id === 'new-game').thumbnail, 'Octo-Industries/New-Game/hub-banner.svg?v=0123456789abcdef');
@@ -314,7 +314,7 @@ test('admin catalog sync adds new draft games once and preserves existing record
 
   db.tables.games[0].title = 'Admin edited title';
   const second = await call(admin, 'admin', '/catalog/sync', { method: 'POST', token, body: { games: [addition] } });
-  assert.deepEqual(await second.json(), { synced: 0 });
+  assert.deepEqual(await second.json(), { synced: 0, warning: '' });
   assert.equal(db.tables.games[0].title, 'Admin edited title');
   assert.equal((await call(admin, 'admin', '/catalog/sync', { method: 'POST', body: { games: [addition] } })).status, 401);
 });
@@ -342,7 +342,7 @@ test('admin catalog sync registers all 33 generated games when 18 already exist'
     body: { games: missingGames },
   });
   assert.equal(syncResponse.status, 200);
-  assert.deepEqual(await syncResponse.json(), { synced: 15 });
+  assert.deepEqual(await syncResponse.json(), { synced: 15, warning: '' });
 
   const dashboard = await (await call(admin, 'admin', '/dashboard', { token })).json();
   assert.equal(dashboard.counts.total, 33);
@@ -363,6 +363,81 @@ test('admin catalog sync rejects external asset paths and duplicate IDs', async 
   assert.equal((await call(admin, 'admin', '/catalog/sync', { method: 'POST', token, body: { games: [addition] } })).status, 400);
   addition.launch = '/Octo-Industries/New-Game/index.html';
   assert.equal((await call(admin, 'admin', '/catalog/sync', { method: 'POST', token, body: { games: [addition, addition] } })).status, 400);
+});
+
+test('catalog sync returns database errors with a useful reason', async () => {
+  db = createDb();
+  const { body: { token } } = await signIn();
+  const database = db;
+  db = new Proxy(database, {
+    get(target, property) {
+      if (property !== 'from') return Reflect.get(target, property);
+      return (table) => {
+        const query = target.from(table);
+        if (table !== 'games') return query;
+        return new Proxy(query, {
+          get(builder, method) {
+            if (method !== 'upsert') return Reflect.get(builder, method);
+            return (...args) => {
+              builder.upsert(...args);
+              return {
+                select() { return this; },
+                then(resolve, reject) {
+                  return Promise.resolve({ data: null, error: { message: 'permission denied for table games' } })
+                    .then(resolve, reject);
+                },
+              };
+            };
+          },
+        });
+      };
+    },
+  });
+  const response = await call(admin, 'admin', '/catalog/sync', {
+    method: 'POST', token, body: { games: [generatedCatalog[0]] },
+  });
+  assert.equal(response.status, 502);
+  assert.deepEqual(await response.json(), {
+    error: 'The database request failed.',
+    reason: 'Could not sync games from the generated catalog. permission denied for table games',
+  });
+  db = database;
+});
+
+test('catalog sync succeeds when its secondary activity log is unavailable', async () => {
+  db = createDb();
+  const { body: { token } } = await signIn();
+  const database = db;
+  db = new Proxy(database, {
+    get(target, property) {
+      if (property !== 'from') return Reflect.get(target, property);
+      return (table) => {
+        const query = target.from(table);
+        if (table !== 'activity') return query;
+        return new Proxy(query, {
+          get(builder, method) {
+            if (method !== 'insert') return Reflect.get(builder, method);
+            return () => ({
+              then(resolve, reject) {
+                return Promise.resolve({ data: null, error: { message: 'activity table unavailable' } })
+                  .then(resolve, reject);
+              },
+            });
+          },
+        });
+      };
+    },
+  });
+  const response = await call(admin, 'admin', '/catalog/sync', {
+    method: 'POST', token, body: { games: [generatedCatalog[0]] },
+  });
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), {
+    synced: 1,
+    warning: 'Games were synced, but the activity log could not be updated.',
+  });
+  assert.equal(database.tables.games.some((entry) => entry.id === generatedCatalog[0].id), true);
+  db = database;
 });
 
 test('acquisition queue preserves evidence, approval states, and external-only restrictions', async () => {

@@ -553,9 +553,17 @@ export const admin = serve('admin', async (context) => {
     }
     const synced = must(await db.from('games')
       .upsert(rows, { onConflict: 'id', ignoreDuplicates: true })
-      .select('id'), 'Could not sync games from the generated catalog.');
-    if (synced.length) await logActivity(db, `Synced ${synced.length} new game${synced.length === 1 ? '' : 's'} from the generated catalog`);
-    return json({ synced: synced.length });
+      .select('id'), 'Could not sync games from the generated catalog.', true);
+    let warning = '';
+    if (synced.length) {
+      try {
+        await logActivity(db, `Synced ${synced.length} new game${synced.length === 1 ? '' : 's'} from the generated catalog`);
+      } catch (error) {
+        console.error('Games synced, but the catalog sync activity could not be recorded.', error);
+        warning = 'Games were synced, but the activity log could not be updated.';
+      }
+    }
+    return json({ synced: synced.length, warning });
   }
 
   if (path === '/dashboard' && method === 'GET') {
