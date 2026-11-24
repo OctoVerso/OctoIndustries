@@ -1,7 +1,10 @@
 import { createSession, login, loginChallenge, readSession, requireAdmin } from './auth.js';
 import {
-  addJob, enforceRateLimit, gameFromRow, listJobs, must, proposalFromRow, publicGame, roadmapFromRow,
+  acquisitionFromRow, addJob, enforceRateLimit, gameFromRow, listAcquisitions, listJobs, must, proposalFromRow, publicGame, roadmapFromRow,
 } from './data.js';
+import {
+  approvalStateFor, validateAcquisitionCreate, validateAcquisitionPatch,
+} from './acquisition-queue.js';
 import {
   normalizeFeedback, validateAdminNotes, validateConversationMessage, validateFeedbackPriority,
   validateFeedbackStatus, validateFeedbackSubmission,
@@ -53,7 +56,7 @@ function catalogGameRow(game) {
     launch: catalogAssetPath(game.launch, 'launch', game.id),
     thumbnail: catalogAssetPath(game.thumbnail, 'thumbnail', game.id),
     offline_ready: false,
-    status: 'published',
+    status: 'draft',
   };
 }
 
@@ -314,6 +317,55 @@ export const roadmap = serve('roadmap', async ({ request, env, db, method, path 
 export const jobs = serve('jobs', async ({ request, env, db, method, path }) => {
   await requireAdmin({ request, env, db });
   if (method === 'GET' && path === '/') return json(await listJobs(db, 100));
+  if (method === 'GET' && path === '/acquisitions') return json(await listAcquisitions(db, 100));
+  if (method === 'POST' && path === '/acquisitions') {
+    const input = validateAcquisitionCreate(await bodyJson(request));
+    const now = new Date().toISOString();
+    const row = {
+      id: randomHex(10),
+      game_id: input.gameId,
+      title: input.title,
+      action: input.action,
+      state: 'proposed',
+      approval_state: 'not-requested',
+      source_url: input.sourceUrl || null,
+      requested_version: input.requestedVersion || null,
+      acquisition_status: input.acquisitionStatus,
+      evidence: input.evidence,
+      notes: input.notes || null,
+      created_at: now,
+      updated_at: now,
+      approved_at: null,
+    };
+    must(await db.from('game_acquisition_queue').insert(row), 'Could not create acquisition queue item.');
+    await logActivity(db, `Queued ${input.action} request for ${input.title}`);
+    return json(acquisitionFromRow(row), 202);
+  }
+  const acquisitionRoute = /^\/acquisitions\/([a-f0-9]{20})$/.exec(path);
+  if (acquisitionRoute) {
+    const id = acquisitionRoute[1];
+    const existing = must(await db.from('game_acquisition_queue').select('*').eq('id', id).maybeSingle());
+    if (!existing) throw httpError('Acquisition queue item not found.', 404);
+    if (method === 'GET') return json(acquisitionFromRow(existing));
+    if (method === 'PATCH') {
+      const current = acquisitionFromRow(existing);
+      const changes = validateAcquisitionPatch(current, await bodyJson(request));
+      if (!Object.keys(changes).length) throw httpError('No acquisition fields to update.', 400);
+      const now = new Date().toISOString();
+      const update = {
+        ...(changes.state === undefined ? {} : { state: changes.state, approval_state: approvalStateFor(changes.state), approved_at: changes.state === 'approved' ? now : null }),
+        ...(changes.evidence === undefined ? {} : { evidence: changes.evidence }),
+        ...(changes.notes === undefined ? {} : { notes: changes.notes || null }),
+        ...(changes.requestedVersion === undefined ? {} : { requested_version: changes.requestedVersion || null }),
+        ...(changes.sourceUrl === undefined ? {} : { source_url: changes.sourceUrl || null }),
+        ...(changes.acquisitionStatus === undefined ? {} : { acquisition_status: changes.acquisitionStatus }),
+        updated_at: now,
+      };
+      must(await db.from('game_acquisition_queue').update(update).eq('id', id), 'Could not update acquisition queue item.');
+      await logActivity(db, `Updated acquisition queue item ${current.title} to ${changes.state || current.state}`);
+      return json(acquisitionFromRow({ ...existing, ...update }));
+    }
+  }
   if (method === 'POST' && path === '/build') {
     const games = must(await db.from('games').select('id').eq('status', 'published'));
     const job = await addJob(db, 'standalone', null, { gameCount: games.length, file: 'client-generated' },
@@ -518,6 +570,7 @@ export const admin = serve('admin', async (context) => {
     const count = feedbackCount.count ?? 0;
     const pending = must(await db.from('proposals').select('*').in('status', ['pending', 'approved'])
       .order('created_at', { ascending: false }).limit(20), 'Could not load dashboard proposals.', true);
+    const acquisitions = await listAcquisitions(db, 100);
     return json({
       counts: {
         total: games.length,
@@ -536,6 +589,7 @@ export const admin = serve('admin', async (context) => {
         'Could not load dashboard roadmap.',
         true,
       ).map((row) => roadmapFromRow(row, true)),
+      acquisitions,
       proposals: pending.map(proposalFromRow),
       capabilities: { changeProposals: Boolean(env.GITHUB_TOKEN) },
     });

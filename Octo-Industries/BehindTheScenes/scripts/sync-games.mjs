@@ -3,6 +3,8 @@ import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from '
 import { basename, dirname, extname, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ensureGameBranding } from './branding-injection.mjs';
+import { assertCatalogPreservesPreviousEntries } from '../hub/registry-integrity.mjs';
+import { normalizeRegistryMetadata } from '../hub/registry-metadata.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
 const gameCollection = resolve(root, 'Octo-Industries');
@@ -256,6 +258,7 @@ const games = gamesToRegister.map(({ gameDirectory, manifest }) => {
     screenshots: configuredScreenshots,
     ...metadata
   } = game;
+  const registryMetadata = normalizeRegistryMetadata(game);
   const directThumbnail = thumbnailDirect ? resolveGameFile(gameDirectory, game.thumbnail || '') : '';
   const banner = versionedAssetReference(relative(root, bannerPath).split(sep).map(encodeURIComponent).join('/'));
   if (thumbnailDirect && !directThumbnail) {
@@ -264,6 +267,7 @@ const games = gamesToRegister.map(({ gameDirectory, manifest }) => {
 
   return {
     ...metadata,
+    ...registryMetadata,
     sourceFile,
     banner,
     addedAt: Number.isFinite(Date.parse(game.addedAt || ''))
@@ -280,6 +284,7 @@ const games = gamesToRegister.map(({ gameDirectory, manifest }) => {
 }).sort((first, second) => first.title.localeCompare(second.title));
 
 if (!games.length) throw new Error(`No games found beneath ${gameCollection}`);
+assertCatalogPreservesPreviousEntries(previousCatalog, games);
 const gameIds = new Set();
 for (const game of games) {
   if (gameIds.has(game.id)) throw new Error(`Duplicate game id: ${game.id}`);

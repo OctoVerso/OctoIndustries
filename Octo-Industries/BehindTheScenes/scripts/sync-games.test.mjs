@@ -52,6 +52,12 @@ test('the generated main registry includes every importable game folder with com
       assert.ok(typeof game[field] === 'string' && game[field].trim(), `${game.title} has ${field}`);
     }
     assert.ok(Array.isArray(game.tags), `${game.title} has searchable tags`);
+    assert.ok(['local-payload', 'local-wrapper', 'external-only', 'unverified'].includes(game.acquisitionStatus), `${game.title} has acquisition classification`);
+    assert.ok(['local', 'external-required', 'unverified'].includes(game.runtimeStatus), `${game.title} has runtime classification`);
+    assert.ok(['not-required', 'optional', 'required', 'unverified'].includes(game.networkDependency), `${game.title} has dependency classification`);
+    assert.ok(game.saveLevel === null || (Number.isInteger(game.saveLevel) && game.saveLevel >= 0 && game.saveLevel <= 3), `${game.title} has save level classification`);
+    assert.ok(['game-managed', 'hub-adapter', 'unsupported', 'unverified'].includes(game.saveStatus), `${game.title} has save classification`);
+    assert.ok(['verified', 'partial', 'not-run', 'unverified'].includes(game.testStatus), `${game.title} has test classification`);
 
     for (const asset of [game.launch, game.thumbnail, game.banner]) {
       const assetPath = decodeURIComponent(new URL(asset, 'https://octo.invalid').pathname)
@@ -68,4 +74,8 @@ test('the generated main registry includes every importable game folder with com
     assert.match(banner, /width="1200"[\s\S]*height="675"|height="675"[\s\S]*width="1200"/, `${game.title} banner is 16:9`);
     assert.match(banner, /(?:data:image\/|href="#octo-artwork")/, `${game.title} banner contains embedded or referenced artwork`);
   }
+
+  assert.equal(catalog.find((game) => game.id === 'tiny-fishing')?.acquisitionStatus, 'external-only');
+  assert.equal(catalog.find((game) => game.id === 'turball')?.networkDependency, 'required');
+  assert.equal(catalog.find((game) => game.id === 'pvz2-gardendless')?.saveLevel, 3);
 });

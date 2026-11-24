@@ -1,12 +1,14 @@
 import { defineConfig, devices } from '@playwright/test';
 
+const existingServer = process.env.PLAYWRIGHT_BASE_URL;
+
 export default defineConfig({
   testDir: './e2e',
   timeout: 30_000,
   fullyParallel: false,
   reporter: 'line',
   use: {
-    baseURL: 'http://127.0.0.1:4173',
+    baseURL: existingServer || 'http://127.0.0.1:4173',
     trace: 'retain-on-failure',
   },
   projects: [
@@ -14,7 +16,7 @@ export default defineConfig({
     { name: 'tablet', use: { viewport: { width: 768, height: 1024 } } },
     { name: 'desktop', use: { viewport: { width: 1440, height: 900 } } },
   ],
-  webServer: {
+  webServer: existingServer ? undefined : {
     command: 'npm run pages:build && python3 -m http.server 4173 -d dist',
     url: 'http://127.0.0.1:4173',
     reuseExistingServer: false,

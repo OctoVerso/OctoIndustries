@@ -1,5 +1,7 @@
 import { getRouteTitle, normalizeHubRoute } from './route-utils.js';
 import { gameCategories, mergeGameCatalog, rankTrendingGames } from './catalog-utils.mjs';
+import { createPersistence } from './persistence.mjs';
+import { compareRegistryIntegrity } from './registry-integrity.mjs';
 
 const normalizeGame = (game) => ({
   ...game,
@@ -10,6 +12,7 @@ const normalizeGame = (game) => ({
 
 const generatedCatalog = Array.isArray(window.OCTO_GAMES) ? window.OCTO_GAMES : [];
 let games = generatedCatalog.map(normalizeGame);
+const hubPersistence = createPersistence({ windowRef: window });
 console.info('[Octo Industries] Generated catalog loaded.', { totalGames: games.length });
 if (!games.length) console.error('[Octo Industries] The generated catalog is missing or empty.');
 let byId = new Map(games.map((game) => [game.id, game]));
@@ -35,6 +38,7 @@ let activeGallery;
 let galleryIndex = 0;
 let galleryTrigger = null;
 let gameInteractionsBound = false;
+let detailRenderToken = 0;
 const octoConfig = window.OCTO_CONFIG;
 const fallbackBannerUrl = octoConfig.assetUrl('Octo-Industries/branding/fallback-banner.svg?v=1');
 
@@ -53,36 +57,16 @@ function escapeHtml(value = '') {
 }
 
 function readRecent() {
-  try {
-    const stored = JSON.parse(localStorage.getItem('octo-industries.recent') || '[]');
-    return Array.isArray(stored) ? stored.filter((id) => byId.has(id)) : [];
-  } catch {
-    return [];
-  }
+  return hubPersistence.getRecent().filter((id) => byId.has(id));
 }
 
 function readPlayCounts() {
-  try {
-    const stored = JSON.parse(localStorage.getItem('octo-industries.play-counts') || '{}');
-    return stored && typeof stored === 'object' && !Array.isArray(stored) ? stored : {};
-  } catch {
-    return {};
-  }
+  return hubPersistence.getPlayCounts();
 }
 
 function markPlayed(game) {
   try {
-    const recent = [game.id, ...readRecent().filter((id) => id !== game.id)].slice(0, 3);
-    localStorage.setItem('octo-industries.recent', JSON.stringify(recent));
-    const playCounts = readPlayCounts();
-    const previous = playCounts[game.id];
-    const previousCount = typeof previous === 'number'
-      ? previous
-      : previous && typeof previous === 'object'
-        ? Number(previous.count) || 0
-        : 0;
-    playCounts[game.id] = { count: previousCount + 1, lastPlayedAt: new Date().toISOString() };
-    localStorage.setItem('octo-industries.play-counts', JSON.stringify(playCounts));
+    hubPersistence.markPlayed(game.id);
     refreshTrendingDisplays();
   } catch {
     return;
@@ -123,6 +107,7 @@ function gameCard(game, index, localPlayCount = null) {
   const galleryControl = Array.isArray(game.screenshots) && game.screenshots.length
     ? `<button class="gallery-link" type="button" data-gallery-id="${escapeHtml(game.id)}" aria-label="Open screenshots for ${escapeHtml(game.title)}">GALLERY</button>`
     : '';
+  const detailRoute = `/games/${encodeURIComponent(game.id)}`;
   return `
     <article class="game-card" style="animation-delay:${Math.min(index * 45, 225)}ms" data-game-id="${escapeHtml(game.id)}">
       <a class="game-art" data-category="${escapeHtml(game.category)}" href="${escapeHtml(game.launch)}" data-launch-id="${escapeHtml(game.id)}" aria-label="Play ${escapeHtml(game.title)}">
@@ -131,10 +116,19 @@ function gameCard(game, index, localPlayCount = null) {
         <span class="art-live"><i></i> READY TO PLAY</span><span class="art-category">${escapeHtml(game.category.toUpperCase())}</span>
       </a>
       <div class="game-card-copy">
-        <div><div class="game-heading-line"><h3>${escapeHtml(game.title)}</h3><span class="category-label">${escapeHtml(game.category.toUpperCase())}</span></div><p class="game-description">${escapeHtml(game.description)}</p></div>
+        <div><div class="game-heading-line"><h3><a class="game-title-link" href="#${escapeHtml(detailRoute)}" data-route="${escapeHtml(detailRoute)}" aria-label="Details for ${escapeHtml(game.title)}">${escapeHtml(game.title)}</a></h3><span class="category-label">${escapeHtml(game.category.toUpperCase())}</span></div><p class="game-description">${escapeHtml(game.description)}</p></div>
         <div class="game-card-foot"><div class="game-tags">${tags.map((tag) => `<span class="game-tag">#${escapeHtml(tag.toLowerCase())}</span>`).join('')}</div><div class="game-card-actions">${galleryControl}<a class="play-link" href="${escapeHtml(game.launch)}" data-launch-id="${escapeHtml(game.id)}"><span aria-hidden="true">▶</span> PLAY</a></div></div>
       </div>
     </article>`;
+}
+
+function checkRenderedCollection(expectedGames, container, label = 'collection') {
+  if (!container) return;
+  const actualIds = [...container.querySelectorAll('.game-card[data-game-id]')].map((element) => element.dataset.gameId);
+  const result = compareRegistryIntegrity(expectedGames, actualIds);
+  if (!result.ok) {
+    console.error(`[Octo Industries] ${label} integrity check failed.`, result);
+  }
 }
 
 function renderGalleryImage() {
@@ -188,6 +182,7 @@ function renderGames() {
   });
 
   grid.innerHTML = matches.map((game, index) => gameCard(game, index)).join('');
+  checkRenderedCollection(matches, grid, 'Games view');
   grid.hidden = matches.length === 0;
   emptyState.hidden = matches.length > 0;
   grid.setAttribute('aria-busy', 'false');
@@ -232,6 +227,7 @@ function renderGameCollection() {
   renderGames();
   renderRecent();
   renderTrending();
+  renderFavoriteDisplays();
   renderRecentlyAdded();
   renderHomeRoutes();
   if (!gameInteractionsBound) {
@@ -392,7 +388,7 @@ function renderRecent() {
   if (!recent.length) {
     continueList.innerHTML = `
       <p class="empty-mini-state">No recently played games yet.</p>
-      <button class="mini-action" type="button" data-view="games">Browse Games</button>`;
+      <button class="mini-action" type="button" data-route="/games">Browse Games</button>`;
   } else {
     continueList.innerHTML = recent.map((game) => `
       <a class="mini-game-item" href="${escapeHtml(game.launch)}" data-launch-id="${escapeHtml(game.id)}">
@@ -404,16 +400,83 @@ function renderRecent() {
 
 }
 
-function renderHomeOverview() {
-  const categoryCount = new Set(games.map((game) => game.category).filter(Boolean)).size;
-  const trendingCount = rankTrendingGames(games, readPlayCounts()).length;
-  const recentCount = readRecent().length;
-  document.querySelector('#home-total-games').textContent = games.length;
-  document.querySelector('#home-ready-count').textContent = games.length;
-  document.querySelector('#home-category-count').textContent = categoryCount;
-  document.querySelector('#home-trending-count').textContent = trendingCount;
-  document.querySelector('#home-continue-count').textContent = recentCount;
-  document.querySelector('#home-browse-count').textContent = games.length;
+function favoriteGames() {
+  return hubPersistence.getFavorites().map((id) => byId.get(id)).filter(Boolean);
+}
+
+function renderFavoritesPage() {
+  const grid = document.querySelector('#favorites-grid');
+  const empty = document.querySelector('#favorites-empty');
+  if (!grid || !empty) return;
+  const favorites = favoriteGames();
+  grid.innerHTML = favorites.map((game, index) => gameCard(game, index)).join('');
+  checkRenderedCollection(favorites, grid, 'Favorites view');
+  grid.hidden = !favorites.length;
+  empty.hidden = favorites.length > 0;
+}
+
+function renderFavoriteDisplays() {
+  renderFavoritesPage();
+}
+
+function formatPlayTime(durationMs) {
+  const totalMinutes = Math.max(0, Math.floor(Number(durationMs) || 0) / 60000);
+  if (totalMinutes < 1) return 'Not recorded';
+  if (totalMinutes < 60) return `${Math.floor(totalMinutes)} min`;
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = Math.floor(totalMinutes % 60);
+  return minutes ? `${hours}h ${minutes}m` : `${hours}h`;
+}
+
+async function renderGameDetail(gameId, { focusHeading = false } = {}) {
+  const container = document.querySelector('#game-detail-content');
+  if (!container) return;
+  const token = ++detailRenderToken;
+  const game = byId.get(gameId);
+  if (!game) {
+    container.innerHTML = '<div class="detail-empty"><h1 id="game-detail-heading">Game not found</h1><p>This game is not in the current collection registry.</p><a class="button button-secondary" href="#/games" data-route="/games">Back to Games</a></div>';
+    return;
+  }
+
+  container.innerHTML = '<p class="empty-mini-state">Loading game details…</p>';
+  await hubPersistence.ready;
+  const stats = hubPersistence.getStats(game.id);
+  const save = await hubPersistence.getSave(game.id);
+  if (token !== detailRenderToken) return;
+  const adapter = hubPersistence.getAdapter(game.id);
+  const validSave = save?.integrity === 'valid';
+  const canContinue = validSave && Boolean(adapter?.restore);
+  const favorite = hubPersistence.isFavorite(game.id);
+  const screenshots = Array.isArray(game.screenshots) ? game.screenshots : [];
+  const screenshotMarkup = screenshots.length
+    ? screenshots.map((screenshot, index) => `<button class="detail-screenshot" type="button" data-gallery-id="${escapeHtml(game.id)}" data-detail-gallery-index="${index}" aria-label="Open screenshot ${index + 1} for ${escapeHtml(game.title)}"><img src="${escapeHtml(screenshot)}" alt="${escapeHtml(game.title)} screenshot ${index + 1}" loading="lazy"></button>`).join('')
+    : '<p class="empty-mini-state">No screenshots have been registered for this game.</p>';
+  const saveStatus = validSave
+    ? canContinue ? 'Validated save ready to continue' : 'Validated hub save stored; this game has no restore adapter yet'
+    : 'No validated hub save available';
+
+  container.innerHTML = `
+    <a class="detail-back" href="#/games" data-route="/games">← Back to Games</a>
+    <div class="game-detail-hero">
+      <div class="game-detail-art">${game.thumbnail ? imageMarkup(game, 'detail-image') : `<span class="art-index" aria-hidden="true">${escapeHtml(game.title.slice(0, 1))}</span>`}</div>
+      <div class="game-detail-copy">
+        <p class="eyebrow"><span class="eyebrow-line"></span> ${escapeHtml(game.category.toUpperCase())}</p>
+        <h1 id="game-detail-heading">${escapeHtml(game.title)}</h1>
+        <p class="game-detail-description">${escapeHtml(game.description)}</p>
+        <div class="detail-actions">
+          <a class="button button-primary" href="${escapeHtml(game.launch)}" data-launch-id="${escapeHtml(game.id)}"><span aria-hidden="true">▶</span> Play</a>
+          ${canContinue ? `<a class="button button-secondary" href="${escapeHtml(game.launch)}" data-launch-id="${escapeHtml(game.id)}" data-continue-id="${escapeHtml(game.id)}">Continue</a>` : ''}
+          <button class="button button-secondary favorite-detail-button${favorite ? ' is-favorite' : ''}" type="button" data-favorite-id="${escapeHtml(game.id)}" aria-pressed="${favorite}">${favorite ? '★ Favorited' : '☆ Favorite'}</button>
+        </div>
+        <p class="detail-save-status" role="status">${escapeHtml(saveStatus)}</p>
+      </div>
+    </div>
+    <div class="game-detail-grid">
+      <section class="detail-module" aria-labelledby="detail-stats-heading"><h2 id="detail-stats-heading">Your statistics</h2><dl class="detail-stats"><div><dt>Plays</dt><dd>${stats.playCount}</dd></div><div><dt>Time played</dt><dd>${escapeHtml(formatPlayTime(stats.totalTimeMs))}</dd></div><div><dt>Progress</dt><dd>${stats.completed ? 'Complete' : stats.progress ? 'In progress' : 'Not recorded'}</dd></div><div><dt>Version</dt><dd>${escapeHtml(game.version || 'Unspecified')}</dd></div></dl></section>
+      <section class="detail-module" aria-labelledby="detail-save-heading"><h2 id="detail-save-heading">Save management</h2><p>${adapter ? 'This game is connected to the hub save adapter.' : 'This game has not registered a hub save adapter yet. Its own runtime storage is left untouched.'}</p><div class="detail-save-actions">${validSave ? `<button class="button button-secondary" type="button" data-reset-save-id="${escapeHtml(game.id)}">Reset hub save</button>` : ''}<button class="button button-secondary" type="button" data-export-save-id="${escapeHtml(game.id)}" ${validSave ? '' : 'disabled'}>Export</button><button class="button button-secondary" type="button" data-import-save-id="${escapeHtml(game.id)}">Import</button><input class="detail-save-file" type="file" accept="application/json,.json" data-save-file-id="${escapeHtml(game.id)}" hidden></div><p class="detail-save-status" data-detail-save-status role="status"></p></section>
+    </div>
+    <section class="detail-module detail-screenshots" aria-labelledby="detail-screenshots-heading"><div class="section-heading"><div><p class="eyebrow"><span class="eyebrow-line"></span> LOOK CLOSER</p><h2 id="detail-screenshots-heading">Screenshots</h2></div></div><div class="detail-screenshot-grid">${screenshotMarkup}</div></section>`;
+  if (focusHeading) focusPageHeading();
 }
 
 function gamePreviewRow(game, detail) {
@@ -455,7 +518,8 @@ function refreshTrendingDisplays() {
   renderTrending();
   renderTrendingPage();
   renderDashboardOverview();
-  renderHomeOverview();
+  renderRecent();
+  renderFavoriteDisplays();
 }
 
 function renderRecentlyAdded() {
@@ -496,65 +560,6 @@ function renderRoadmapViews() {
   renderNewsPage();
 }
 
-function setDrawerOpen(open) {
-  const menuToggle = document.querySelector('#menu-toggle');
-  document.querySelector('#primary-nav').classList.toggle('is-open', open);
-  document.body.classList.toggle('nav-open', open);
-  document.querySelector('#nav-backdrop').hidden = !open;
-  menuToggle.setAttribute('aria-expanded', String(open));
-  menuToggle.setAttribute('aria-label', open ? 'Close Hub menu' : 'Open Hub menu');
-}
-
-const hubViewMetadata = {
-  home: { title: 'Octo Industries | Game Hub', description: 'Continue playing, browse featured games, or find your next game in the Octo Industries Hub.' },
-  games: { title: 'Games | Octo Industries', description: 'Search and filter the Octo Industries game collection by category, title, and tag.' },
-  trending: { title: 'Trending Games | Octo Industries', description: 'Browse games ranked by plays recorded on this device in the Octo Industries Hub.' },
-  'recently-added': { title: 'Recently Added | Octo Industries', description: 'Find newly added games in the Octo Industries game collection.' },
-  news: { title: 'News | Octo Industries', description: 'Read the latest Octo Industries game hub news and announcements.' },
-  'coming-soon': { title: 'Coming Soon | Octo Industries', description: 'See upcoming games and updates planned for Octo Industries.' },
-  about: { title: 'About | Octo Industries', description: 'Learn about Octo Industries, an independent gaming platform created by Mr. Octo.' },
-  contact: { title: 'Contact | Octo Industries', description: 'Contact Mr. Octo about Octo Industries, partnerships, suggestions, or issues.' },
-};
-
-function updateHubMetadata(view) {
-  const metadata = hubViewMetadata[view];
-  const viewUrl = new URL(window.location.href);
-  viewUrl.searchParams.set('view', view);
-  const canonicalUrl = new URL(window.location.pathname, window.location.origin);
-  if (view !== 'home') canonicalUrl.searchParams.set('view', view);
-  document.title = metadata.title;
-  document.querySelector('meta[name="description"]').content = metadata.description;
-  document.querySelector('meta[property="og:title"]').content = metadata.title;
-  document.querySelector('meta[property="og:description"]').content = metadata.description;
-  document.querySelector('meta[property="og:url"]').content = canonicalUrl.href;
-  document.querySelector('link[rel="canonical"]').href = canonicalUrl.href;
-}
-
-function setHubView(name, { focusSearch = false, focusHeading = false, focusTarget = '', pushState = false } = {}) {
-  const panels = [...document.querySelectorAll('[data-hub-panel]')];
-  const view = panels.some((panel) => panel.dataset.hubPanel === name) ? name : 'games';
-  const currentView = new URLSearchParams(window.location.search).get('view') || 'home';
-  if (pushState && currentView !== view) {
-    const nextUrl = new URL(window.location.href);
-    nextUrl.searchParams.set('view', view);
-    window.history.pushState({ view }, '', `${nextUrl.pathname}${nextUrl.search}${nextUrl.hash}`);
-  }
-  panels.forEach((panel) => { panel.hidden = panel.dataset.hubPanel !== view; });
-  document.querySelectorAll('#primary-nav [data-hub-view]').forEach((button) => {
-    const active = button.dataset.hubView === view;
-    button.classList.toggle('is-active', active);
-    if (active) button.setAttribute('aria-current', 'page');
-    else button.removeAttribute('aria-current');
-  });
-  updateHubMetadata(view);
-  setDrawerOpen(false);
-  requestAnimationFrame(() => {
-    if (focusSearch) searchInput.focus({ preventScroll: true });
-    else if (focusTarget) document.querySelector(focusTarget)?.focus({ preventScroll: true });
-    else if (focusHeading) panels.find((panel) => panel.dataset.hubPanel === view)?.querySelector('h1')?.focus({ preventScroll: true });
-  });
-}
-
 function renderFeatured() {
   if (!slides.length) return;
   const game = slides[slideIndex];
@@ -568,6 +573,7 @@ function renderFeatured() {
   document.querySelector('#feature-index').textContent = String(slideIndex + 1).padStart(2, '0');
   document.querySelector('#featured-play').href = game.launch;
   document.querySelector('#featured-play').dataset.launchId = game.id;
+  document.querySelector('#featured-play').removeAttribute('data-route');
   document.querySelector('#featured-play').setAttribute('aria-label', `Play featured game: ${game.title}`);
   document.querySelector('#feature-progress').innerHTML = slides.map((_, index) => `<i class="${index === slideIndex ? 'is-active' : ''}"></i>`).join('');
 }
@@ -587,11 +593,27 @@ function closeNavigation(restoreFocus = false) {
   if (restoreFocus) menuToggle.focus({ preventScroll: true });
 }
 
-function applyRoute(pathname = currentRoute()) {
+function gameIdFromRoute(pathname) {
+  const match = normalizeHubRoute(pathname).match(/^\/games\/([^/]+)$/i);
+  if (!match) return '';
+  try { return decodeURIComponent(match[1]); } catch { return ''; }
+}
+
+function focusPageHeading() {
+  const heading = document.querySelector('[data-page]:not([hidden]) h1, [data-page]:not([hidden]) h2');
+  if (!heading) return;
+  heading.tabIndex = -1;
+  heading.focus({ preventScroll: true });
+}
+
+function applyRoute(pathname = currentRoute(), { focusHeading = false } = {}) {
+  detailRenderToken += 1;
+  if (focusHeading) window.scrollTo({ top: 0, behavior: 'instant' });
   const safePath = normalizeHubRoute(pathname);
   const routeMap = {
     '/': ['/', '/games'],
     '/games': ['/games'],
+    '/favorites': ['/favorites'],
     '/trending': ['/trending'],
     '/recently-added': ['/recently-added'],
     '/news': ['/news'],
@@ -602,24 +624,27 @@ function applyRoute(pathname = currentRoute()) {
     '/admin': ['/admin'],
   };
 
-  const activePages = routeMap[safePath] || ['/'];
+  const detailGameId = gameIdFromRoute(safePath);
+  const activePages = detailGameId ? ['/game-detail'] : routeMap[safePath] || ['/'];
   document.querySelectorAll('[data-page]').forEach((section) => {
     const page = section.dataset.page || '/';
     section.hidden = !activePages.includes(page);
   });
 
   document.querySelectorAll('.nav-link[data-route]').forEach((link) => {
-    const isActive = normalizeHubRoute(link.dataset.route || '/') === safePath;
+    const isActive = normalizeHubRoute(link.dataset.route || '/') === (detailGameId ? '/games' : safePath);
     link.classList.toggle('is-active', isActive);
+    if (isActive) link.setAttribute('aria-current', 'page');
+    else link.removeAttribute('aria-current');
   });
 
-  const heading = document.querySelector('#home-page h1, #games-page h2, #trending-page h1, #recently-added-page h1, #news-page h1, #coming-soon-page h2, #about-page h1, #contact-page h1, #inquiries-page h1');
-  if (heading) heading.tabIndex = -1;
-  if (heading) {
-    heading.focus({ preventScroll: true });
-  }
+  if (focusHeading && !detailGameId) focusPageHeading();
 
-  document.title = getRouteTitle(safePath);
+  document.title = detailGameId && byId.has(detailGameId)
+    ? `${byId.get(detailGameId).title} | Octo Industries`
+    : getRouteTitle(safePath);
+
+  if (detailGameId) void renderGameDetail(detailGameId, { focusHeading });
 
   if (safePath !== '/games' && searchInput) {
     searchInput.blur();
@@ -647,13 +672,7 @@ function bindNavigationControls() {
   navigation.addEventListener('click', (event) => {
     const routeLink = event.target.closest('[data-route]');
     if (routeLink) {
-      const route = normalizeHubRoute(routeLink.dataset.route || '/');
-      if (route !== '/admin') {
-        event.preventDefault();
-        pushRoute(route);
-        applyRoute(route);
-      }
-      closeNavigation(true);
+      closeNavigation();
     }
   });
 
@@ -713,7 +732,6 @@ function bindEvents() {
   const updateSearch = (event) => {
     searchInput.value = event.currentTarget.value;
     if (homeSearchInput) homeSearchInput.value = searchInput.value;
-    currentPage = 1;
     clearTimeout(searchTimer);
     searchTimer = setTimeout(renderGames, reducedMotion ? 0 : 70);
   };
@@ -722,14 +740,12 @@ function bindEvents() {
   document.querySelector('#home-search-form')?.addEventListener('submit', (event) => {
     event.preventDefault();
     searchInput.value = homeSearchInput.value;
-    currentPage = 1;
     renderGames();
     pushRoute('/games');
     applyRoute('/games');
     searchInput.focus({ preventScroll: true });
   });
   document.querySelector('#game-sort').addEventListener('change', () => {
-    currentPage = 1;
     renderGames();
   });
 
@@ -738,7 +754,6 @@ function bindEvents() {
     if (!button) return;
     const panel = document.querySelector('#filter-panel');
     activeCategory = button.dataset.category;
-    currentPage = 1;
     categories();
     renderGames();
     if (panel) panel.hidden = true;
@@ -779,7 +794,6 @@ function bindEvents() {
     searchInput.value = '';
     if (homeSearchInput) homeSearchInput.value = '';
     searchInput.focus();
-    currentPage = 1;
     renderGames();
   });
 
@@ -798,20 +812,9 @@ function bindEvents() {
     activeCategory = 'All';
     searchInput.value = '';
     if (homeSearchInput) homeSearchInput.value = '';
-    currentPage = 1;
     categories();
     renderGames();
     searchInput.focus();
-  });
-
-  document.querySelectorAll('[data-roadmap-category]').forEach((link) => link.addEventListener('click', () => {
-    activeRoadmapCategory = link.dataset.roadmapCategory;
-    renderComingSoon();
-  }));
-  document.querySelector('[data-hub-action="search"]')?.addEventListener('click', () => {
-    pushRoute('/games');
-    applyRoute('/games');
-    searchInput.focus({ preventScroll: true });
   });
 
   document.querySelector('#feature-previous').addEventListener('click', () => showSlide(-1));
@@ -867,9 +870,69 @@ function bindEvents() {
   }, { passive: true });
 
   document.addEventListener('click', (event) => {
+    const favorite = event.target.closest('[data-favorite-id]');
+    if (favorite && byId.has(favorite.dataset.favoriteId)) {
+      event.preventDefault();
+      event.stopPropagation();
+      hubPersistence.toggleFavorite(favorite.dataset.favoriteId);
+      renderGames();
+      renderFavoriteDisplays();
+      if (gameIdFromRoute(currentRoute()) === favorite.dataset.favoriteId) void renderGameDetail(favorite.dataset.favoriteId);
+      return;
+    }
+
+    const resetSave = event.target.closest('[data-reset-save-id]');
+    if (resetSave) {
+      event.preventDefault();
+      const gameId = resetSave.dataset.resetSaveId;
+      const status = document.querySelector('[data-detail-save-status]');
+      resetSave.disabled = true;
+      if (status) status.textContent = 'Resetting hub save…';
+      void hubPersistence.resetGame(gameId).then(() => {
+        if (status) status.textContent = 'Hub save reset. The game runtime was not modified.';
+        void renderGameDetail(gameId);
+      }).catch((error) => {
+        if (status) status.textContent = error.message;
+        resetSave.disabled = false;
+      });
+      return;
+    }
+
+    const exportSave = event.target.closest('[data-export-save-id]');
+    if (exportSave) {
+      event.preventDefault();
+      const gameId = exportSave.dataset.exportSaveId;
+      const status = document.querySelector('[data-detail-save-status]');
+      void hubPersistence.exportGame(gameId).then((payload) => {
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `octo-${gameId}-save.json`;
+        link.click();
+        URL.revokeObjectURL(url);
+        if (status) status.textContent = 'Save export created.';
+      }).catch((error) => {
+        if (status) status.textContent = error.message;
+      });
+      return;
+    }
+
+    const importSave = event.target.closest('[data-import-save-id]');
+    if (importSave) {
+      event.preventDefault();
+      [...document.querySelectorAll('[data-save-file-id]')]
+        .find((input) => input.dataset.saveFileId === importSave.dataset.importSaveId)?.click();
+      return;
+    }
+
     const gallery = event.target.closest('[data-gallery-id]');
     if (gallery && byId.has(gallery.dataset.galleryId)) {
       openGallery(byId.get(gallery.dataset.galleryId));
+      if (gallery.dataset.detailGalleryIndex !== undefined) {
+        galleryIndex = Number(gallery.dataset.detailGalleryIndex);
+        renderGalleryImage();
+      }
       return;
     }
     const launch = event.target.closest('[data-launch-id]');
@@ -877,11 +940,12 @@ function bindEvents() {
 
     const routeLink = event.target.closest('[data-route]');
     if (routeLink) {
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       const nextPath = normalizeHubRoute(routeLink.dataset.route || '/');
       if (nextPath !== '/admin') {
         event.preventDefault();
         pushRoute(nextPath);
-        applyRoute(nextPath);
+        applyRoute(nextPath, { focusHeading: true });
       }
       return;
     }
@@ -895,6 +959,22 @@ function bindEvents() {
       }
     }
 
+  });
+
+  document.addEventListener('change', (event) => {
+    const input = event.target.closest('[data-save-file-id]');
+    if (!input || !input.files?.length) return;
+    const gameId = input.dataset.saveFileId;
+    const status = document.querySelector('[data-detail-save-status]');
+    const [file] = input.files;
+    input.value = '';
+    if (status) status.textContent = 'Importing save…';
+    void file.text().then((text) => hubPersistence.importGame(JSON.parse(text))).then(() => {
+      if (status) status.textContent = 'Save imported and integrity checked.';
+      void renderGameDetail(gameId);
+    }).catch((error) => {
+      if (status) status.textContent = error.message;
+    });
   });
 
   document.addEventListener('keydown', (event) => {
@@ -917,23 +997,6 @@ function bindEvents() {
       }
     }
   });
-  window.addEventListener('popstate', () => {
-    setHubView(new URLSearchParams(window.location.search).get('view') || 'home');
-  });
-
-  const navLinks = [...document.querySelectorAll('.primary-nav .nav-link[data-route]')];
-  if ('IntersectionObserver' in window) {
-    const observer = new IntersectionObserver((entries) => {
-      for (const entry of entries) {
-        if (!entry.isIntersecting) continue;
-        const route = entry.target.dataset.page || '/';
-        navLinks.forEach((link) => link.classList.toggle('is-active', normalizeHubRoute(link.dataset.route || '/') === route));
-      }
-    }, { rootMargin: '-25% 0px -65% 0px' });
-    document.querySelectorAll('[data-page]').forEach((section) => {
-      if (!section.hidden) observer.observe(section);
-    });
-  }
 }
 
 function browserDeviceInfo() {
@@ -991,19 +1054,13 @@ const ticketStatuses = {
 };
 
 function savedTicketCredentials() {
-  try {
-    const stored = JSON.parse(localStorage.getItem('octo-industries.tickets') || '[]');
-    return Array.isArray(stored) ? stored.filter((ticket) => /^[a-f\d]{32}$/.test(ticket.ticketId || '')
-      && /^[a-f\d]{64}$/.test(ticket.accessToken || '') && Number.isInteger(ticket.ticketNumber)) : [];
-  } catch {
-    return [];
-  }
+  return hubPersistence.getTickets().filter((ticket) => /^[a-f\d]{32}$/.test(ticket.ticketId || '')
+    && /^[a-f\d]{64}$/.test(ticket.accessToken || '') && Number.isInteger(ticket.ticketNumber));
 }
 
 function saveTicketCredentials(ticket) {
   try {
-    const existing = savedTicketCredentials().filter((entry) => entry.ticketId !== ticket.ticketId);
-    localStorage.setItem('octo-industries.tickets', JSON.stringify([ticket, ...existing].slice(0, 50)));
+    hubPersistence.saveTicket(ticket);
     return true;
   } catch {
     return false;
@@ -1257,10 +1314,15 @@ function start() {
       refreshTrendingDisplays();
     }
   });
+  window.addEventListener('octo:persistence-change', () => refreshTrendingDisplays());
   document.addEventListener('visibilitychange', () => {
     if (!document.hidden) refreshTrendingDisplays();
   });
   window.addEventListener('pageshow', refreshTrendingDisplays);
+  void hubPersistence.ready.then(() => {
+    renderRecent();
+    refreshTrendingDisplays();
+  });
   refreshTrendingDisplays();
 }
 
@@ -1302,9 +1364,6 @@ async function loadRoadmap() {
   }
   renderRoadmapViews();
 }
-
-const initialHubView = new URLSearchParams(window.location.search).get('view') || 'home';
-setHubView(initialHubView);
 
 void loadRoadmap();
 start();

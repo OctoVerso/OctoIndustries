@@ -1,7 +1,7 @@
 
 import { test, expect } from '@playwright/test';
 
-test('admin dashboard automatically syncs newly added catalog games', async ({ page }) => {
+test('admin dashboard automatically syncs missing games from the generated catalog', async ({ page }) => {
   const syncRequests = [];
   const consoleErrors = [];
   let dashboardGames;
@@ -32,9 +32,9 @@ test('admin dashboard automatically syncs newly added catalog games', async ({ p
         () => window.OCTO_GAMES
       );
 
-      dashboardGames ||= [
-        { ...catalog[0], status: 'published', offlineReady: true },
-      ];
+      dashboardGames ||= catalog
+        .slice(0, 18)
+        .map((game) => ({ ...game, status: 'published', offlineReady: true }));
 
       await route.fulfill({
         json: {
@@ -93,15 +93,8 @@ test('admin dashboard automatically syncs newly added catalog games', async ({ p
 
   const catalogGames = await page.evaluate(() => window.OCTO_GAMES);
 
-  await expect(page.locator('#metric-total')).toHaveText(
-    String(catalogGames.length)
-  );
-
-  await expect.poll(() => syncRequests.length).toBeGreaterThan(0);
-
-  await expect(page.locator('#toast')).toHaveText(
-    /Catalog sync complete:/
-  );
+  await expect(page.locator('#metric-total')).toHaveText('33');
+  await expect(page.locator('#nav-game-count')).toHaveText('33');
 
   const firstGame = catalogGames[0];
 
@@ -119,9 +112,10 @@ test('admin dashboard automatically syncs newly added catalog games', async ({ p
     firstGame.title
   );
 
-  await expect(
-    page.locator('#catalog-sync-button')
-  ).toBeVisible();
+  await expect.poll(() => syncRequests.length).toBe(1);
+  await expect(page.locator('#toast')).toHaveText(
+    /Catalog sync complete:/
+  );
 
   expect(consoleErrors).toEqual([]);
 
@@ -131,7 +125,7 @@ test('admin dashboard automatically syncs newly added catalog games', async ({ p
       .map((game) => game.id)
       .sort()
   ).toEqual(
-    catalogGames.slice(1).map((game) => game.id).sort()
+    catalogGames.slice(18).map((game) => game.id).sort()
   );
 
   for (const request of syncRequests) {

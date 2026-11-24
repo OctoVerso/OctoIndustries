@@ -10,4 +10,5 @@ test('hub routes normalize and resolve to the correct public pages', () => {
   assert.equal(normalizeHubRoute('/about#team'), '/about');
   assert.equal(getRouteTitle('/coming-soon'), 'Coming Soon | Octo Industries');
   assert.equal(getRouteTitle('/news'), 'Octo News | Octo Industries');
+  assert.equal(getRouteTitle('/games/b-cubed'), 'Game Details | Octo Industries');
 });

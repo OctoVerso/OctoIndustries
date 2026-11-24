@@ -18,6 +18,13 @@ export function gameFromRow(row) {
     bannerFit: row.banner_fit,
     screenshots: row.screenshots || [],
     offlineReady: row.offline_ready === true,
+    acquisitionStatus: row.acquisition_status || 'unverified',
+    runtimeStatus: row.runtime_status || 'unverified',
+    networkDependency: row.network_dependency || 'unverified',
+    saveLevel: Number.isInteger(row.save_level) ? row.save_level : null,
+    saveStatus: row.save_status || 'unverified',
+    testStatus: row.test_status || 'unverified',
+    acquisitionEvidence: Array.isArray(row.acquisition_evidence) ? row.acquisition_evidence : [],
     status: row.status,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -40,6 +47,30 @@ export function jobFromRow(row) {
     logs: row.logs || [],
     result: row.result ?? null,
   };
+}
+
+export function acquisitionFromRow(row) {
+  return {
+    id: row.id,
+    gameId: row.game_id,
+    title: row.title,
+    action: row.action,
+    state: row.state,
+    approvalState: row.approval_state || 'not-requested',
+    sourceUrl: row.source_url || '',
+    requestedVersion: row.requested_version || '',
+    acquisitionStatus: row.acquisition_status || 'unverified',
+    evidence: row.evidence || [],
+    notes: row.notes || '',
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    approvedAt: row.approved_at,
+  };
+}
+
+export async function listAcquisitions(db, limit = 100) {
+  const rows = must(await db.from('game_acquisition_queue').select('*').order('created_at', { ascending: false }).limit(limit));
+  return rows.map(acquisitionFromRow);
 }
 
 export function proposalFromRow(row) {
