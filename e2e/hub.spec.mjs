@@ -1,8 +1,16 @@
 import { test, expect } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
+
+const catalogSource = await readFile(new URL('../Octo-Industries/BehindTheScenes/hub/catalog.js', import.meta.url), 'utf8');
+const catalogMatch = /^window\.OCTO_GAMES = Object\.freeze\(([\s\S]*)\);\s*$/.exec(catalogSource);
+if (!catalogMatch) throw new Error('Generated catalog has an invalid format.');
+const generatedCatalog = JSON.parse(catalogMatch[1]);
 
 test('homepage loads with catalog content and no loading placeholders', async ({ page }) => {
   const consoleErrors = [];
   const failedRequests = [];
+  await page.route('**/functions/v1/catalog', (route) => route.fulfill({ json: generatedCatalog }));
+  await page.route('**/functions/v1/roadmap', (route) => route.fulfill({ json: [] }));
   page.on('console', (message) => {
     if (message.type() === 'error') consoleErrors.push(message.text());
   });

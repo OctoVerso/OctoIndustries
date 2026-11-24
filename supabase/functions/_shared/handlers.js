@@ -570,7 +570,6 @@ export const admin = serve('admin', async (context) => {
     const count = feedbackCount.count ?? 0;
     const pending = must(await db.from('proposals').select('*').in('status', ['pending', 'approved'])
       .order('created_at', { ascending: false }).limit(20), 'Could not load dashboard proposals.', true);
-    const acquisitions = await listAcquisitions(db, 100);
     return json({
       counts: {
         total: games.length,
@@ -589,7 +588,6 @@ export const admin = serve('admin', async (context) => {
         'Could not load dashboard roadmap.',
         true,
       ).map((row) => roadmapFromRow(row, true)),
-      acquisitions,
       proposals: pending.map(proposalFromRow),
       capabilities: { changeProposals: Boolean(env.GITHUB_TOKEN) },
     });

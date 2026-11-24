@@ -10,17 +10,24 @@ export function randomHex(byteLength = 32) {
 }
 
 export function corsHeaders(request, env) {
-  const allowed = String(env.ALLOWED_ORIGIN
-    || 'https://octoverso.github.io,http://localhost:8080,http://127.0.0.1:8080,https://9q6gx354p5-8080.app.github.dev')
+  const configuredOrigins = String(env.ALLOWED_ORIGIN || '')
     .split(',').map((value) => value.trim()).filter(Boolean);
   const origin = request.headers.get('origin');
+  const defaultOrigins = [
+    'https://octoverso.github.io',
+  ];
+  const isLocalPreview = /^http:\/\/(?:localhost|127\.0\.0\.1)(?::\d+)?$/.test(origin || '');
+  const isCodespacesPreview = /^https:\/\/[a-z0-9-]+-\d+\.app\.github\.dev$/.test(origin || '');
   const headers = {
     'Access-Control-Allow-Headers': 'authorization, content-type, apikey, x-client-info, x-ticket-access-token',
     'Access-Control-Allow-Methods': 'GET, POST, PATCH, DELETE, OPTIONS',
     'Access-Control-Max-Age': '86400',
     Vary: 'Origin',
   };
-  if (origin && allowed.includes(origin)) headers['Access-Control-Allow-Origin'] = origin;
+  if (origin && (defaultOrigins.includes(origin) || configuredOrigins.includes(origin)
+    || isLocalPreview || isCodespacesPreview)) {
+    headers['Access-Control-Allow-Origin'] = origin;
+  }
   return headers;
 }
 

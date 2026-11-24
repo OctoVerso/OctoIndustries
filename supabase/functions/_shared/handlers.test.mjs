@@ -134,15 +134,21 @@ test('CORS preflight is answered and unknown origins get no allow header', async
 
 test('default CORS origins support production and localhost previews', () => {
   for (const origin of [
-    'https://octoverso.github.io', 'http://localhost:8080', 'http://127.0.0.1:8080',
+    'https://octoverso.github.io', 'http://localhost:8080', 'http://localhost:4173',
+    'http://127.0.0.1:8080', 'http://127.0.0.1:4173',
     'https://9q6gx354p5-8080.app.github.dev',
   ]) {
-    assert.equal(corsHeaders(new Request('https://project.supabase.co', { headers: { Origin: origin } }), {})
+    assert.equal(corsHeaders(new Request('https://project.supabase.co', { headers: { Origin: origin } }), {
+      ALLOWED_ORIGIN: 'https://custom.example',
+    })
       ['Access-Control-Allow-Origin'], origin);
   }
   assert.equal(corsHeaders(new Request('https://project.supabase.co', {
+    headers: { Origin: 'https://custom.example' },
+  }), { ALLOWED_ORIGIN: 'https://custom.example' })['Access-Control-Allow-Origin'], 'https://custom.example');
+  assert.equal(corsHeaders(new Request('https://project.supabase.co', {
     headers: { Origin: 'https://evil.example' },
-  }), {})['Access-Control-Allow-Origin'], undefined);
+  }), { ALLOWED_ORIGIN: 'https://custom.example' })['Access-Control-Allow-Origin'], undefined);
 });
 
 test('database failures include a diagnostic reason for the admin error details', () => {
@@ -266,6 +272,27 @@ test('admin dashboard, game edits, publishing, jobs, and activity logging use Su
   const listed = await (await call(jobs, 'jobs', '', { token })).json();
   assert.equal(listed.some((job) => job.type === 'standalone'), true);
   assert.ok(db.tables.activity.some((row) => row.message === 'Published BETA'));
+});
+
+test('admin dashboard does not require the optional acquisition queue migration', async () => {
+  db = createDb({ games: [game('alpha')] });
+  const { body: { token } } = await signIn();
+  const database = db;
+  db = new Proxy(database, {
+    get(target, property) {
+      if (property === 'from') {
+        return (table) => {
+          if (table === 'game_acquisition_queue') throw new Error('relation "game_acquisition_queue" does not exist');
+          return target.from(table);
+        };
+      }
+      return Reflect.get(target, property);
+    },
+  });
+  const response = await call(admin, 'admin', '/dashboard', { token });
+  assert.equal(response.status, 200);
+  assert.equal((await response.json()).games.length, 1);
+  db = database;
 });
 
 test('admin catalog sync adds new draft games once and preserves existing records', async () => {
