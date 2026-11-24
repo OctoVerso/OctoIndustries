@@ -26,6 +26,7 @@ export function getRouteTitle(pathname = '/') {
   const titles = {
     '/': 'Home | Octo Industries',
     '/games': 'Games | Octo Industries',
+    '/favorites': 'Favorites | Octo Industries',
     '/trending': 'Trending | Octo Industries',
     '/recently-added': 'Recently Added | Octo Industries',
     '/news': 'Octo News | Octo Industries',
@@ -35,6 +36,8 @@ export function getRouteTitle(pathname = '/') {
     '/inquiries': 'Inquiries | Octo Industries',
     '/admin': 'Admin Dashboard | Octo Industries',
   };
+
+  if (/^\/games\/[^/]+$/i.test(route)) return 'Game Details | Octo Industries';
 
   return titles[route] || 'Octo Industries';
 }

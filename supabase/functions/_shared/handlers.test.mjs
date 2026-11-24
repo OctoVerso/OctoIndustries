@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { pbkdf2Sync, createHmac } from 'node:crypto';
+import { readFile } from 'node:fs/promises';
 import {
   admin, catalog, feedback, jobs, proposals, roadmap,
 } from './handlers.js';
@@ -89,6 +90,10 @@ const env = {
   OCTO_ADMIN_PASSWORD_HASH: `pbkdf2$${iterations}$${salt}$${derived.toString('hex')}`,
 };
 const base = 'https://project.supabase.co/functions/v1';
+const catalogSource = await readFile(new URL('../../../Octo-Industries/BehindTheScenes/hub/catalog.js', import.meta.url), 'utf8');
+const catalogMatch = /^window\.OCTO_GAMES = Object\.freeze\(([\s\S]*)\);\s*$/.exec(catalogSource);
+assert.ok(catalogMatch, 'generated catalog has the expected format');
+const generatedCatalog = JSON.parse(catalogMatch[1]);
 const call = (handler, name, path, { method = 'GET', body, token, headers = {} } = {}) => handler(new Request(`${base}/${name}${path}`, {
   method,
   headers: {
@@ -236,7 +241,7 @@ test('admin dashboard, game edits, publishing, jobs, and activity logging use Su
   assert.ok(db.tables.activity.some((row) => row.message === 'Published BETA'));
 });
 
-test('admin catalog sync adds new published games once and preserves existing records', async () => {
+test('admin catalog sync adds new draft games once and preserves existing records', async () => {
   db = createDb({ games: [game('existing')] });
   const { body: { token } } = await signIn();
   const addition = {
@@ -246,18 +251,51 @@ test('admin catalog sync adds new published games once and preserves existing re
   };
   const first = await call(admin, 'admin', '/catalog/sync', { method: 'POST', token, body: { games: [addition] } });
   assert.deepEqual(await first.json(), { synced: 1 });
-  assert.equal(db.tables.games.find((row) => row.id === 'new-game').status, 'published');
+  assert.equal(db.tables.games.find((row) => row.id === 'new-game').status, 'draft');
   assert.equal(db.tables.games.find((row) => row.id === 'new-game').launch, 'Octo-Industries/New-Game/index.html');
   assert.equal(db.tables.games.find((row) => row.id === 'new-game').thumbnail, 'Octo-Industries/New-Game/hub-banner.svg?v=0123456789abcdef');
   const dashboard = await (await call(admin, 'admin', '/dashboard', { token })).json();
   assert.equal(dashboard.counts.total, 2);
-  assert.equal(dashboard.counts.published, 2);
+  assert.equal(dashboard.counts.published, 1);
 
   db.tables.games[0].title = 'Admin edited title';
   const second = await call(admin, 'admin', '/catalog/sync', { method: 'POST', token, body: { games: [addition] } });
   assert.deepEqual(await second.json(), { synced: 0 });
   assert.equal(db.tables.games[0].title, 'Admin edited title');
   assert.equal((await call(admin, 'admin', '/catalog/sync', { method: 'POST', body: { games: [addition] } })).status, 401);
+});
+
+test('admin catalog sync registers all 33 generated games when 18 already exist', async () => {
+  const existingGames = generatedCatalog.slice(0, 18).map((entry) => ({
+    id: entry.id,
+    title: entry.title,
+    description: entry.description,
+    category: entry.category,
+    tags: entry.tags,
+    featured: entry.featured === true,
+    launch: entry.launch,
+    thumbnail: entry.thumbnail,
+    offline_ready: false,
+    status: 'published',
+  }));
+  db = createDb({ games: existingGames });
+  const { body: { token } } = await signIn();
+  const existingIds = new Set(existingGames.map((entry) => entry.id));
+  const missingGames = generatedCatalog.filter((entry) => !existingIds.has(entry.id));
+  const syncResponse = await call(admin, 'admin', '/catalog/sync', {
+    method: 'POST',
+    token,
+    body: { games: missingGames },
+  });
+  assert.equal(syncResponse.status, 200);
+  assert.deepEqual(await syncResponse.json(), { synced: 15 });
+
+  const dashboard = await (await call(admin, 'admin', '/dashboard', { token })).json();
+  assert.equal(dashboard.counts.total, 33);
+  assert.deepEqual(
+    new Set(dashboard.games.map((entry) => entry.id)),
+    new Set(generatedCatalog.map((entry) => entry.id)),
+  );
 });
 
 test('admin catalog sync rejects external asset paths and duplicate IDs', async () => {
@@ -271,6 +309,45 @@ test('admin catalog sync rejects external asset paths and duplicate IDs', async 
   assert.equal((await call(admin, 'admin', '/catalog/sync', { method: 'POST', token, body: { games: [addition] } })).status, 400);
   addition.launch = '/Octo-Industries/New-Game/index.html';
   assert.equal((await call(admin, 'admin', '/catalog/sync', { method: 'POST', token, body: { games: [addition, addition] } })).status, 400);
+});
+
+test('acquisition queue preserves evidence, approval states, and external-only restrictions', async () => {
+  db = createDb();
+  const { body: { token } } = await signIn();
+  const created = await call(jobs, 'jobs', '/acquisitions', {
+    method: 'POST',
+    token,
+    body: {
+      gameId: 'new-game',
+      title: 'New Game',
+      action: 'acquire',
+      acquisitionStatus: 'unverified',
+      evidence: [{ kind: 'source', label: 'Source page', url: 'https://example.com/game' }],
+    },
+  });
+  assert.equal(created.status, 202);
+  const item = await created.json();
+  assert.equal(item.state, 'proposed');
+  assert.equal(item.approvalState, 'not-requested');
+
+  for (const state of ['source-review', 'acquiring', 'awaiting-evidence', 'awaiting-approval']) {
+    const response = await call(jobs, 'jobs', `/acquisitions/${item.id}`, { method: 'PATCH', token, body: { state } });
+    assert.equal(response.status, 200);
+  }
+  const approved = await call(jobs, 'jobs', `/acquisitions/${item.id}`, { method: 'PATCH', token, body: { state: 'approved' } });
+  assert.equal(approved.status, 200);
+  assert.equal((await approved.json()).approvalState, 'approved');
+
+  const external = await call(jobs, 'jobs', '/acquisitions', {
+    method: 'POST', token,
+    body: { gameId: 'external-game', title: 'External Game', acquisitionStatus: 'external-only' },
+  });
+  const externalItem = await external.json();
+  for (const state of ['source-review', 'acquiring', 'awaiting-evidence', 'awaiting-approval']) {
+    await call(jobs, 'jobs', `/acquisitions/${externalItem.id}`, { method: 'PATCH', token, body: { state } });
+  }
+  const externalApproval = await call(jobs, 'jobs', `/acquisitions/${externalItem.id}`, { method: 'PATCH', token, body: { state: 'approved' } });
+  assert.equal(externalApproval.status, 400);
 });
 
 test('activity is trimmed to 100 rows', async () => {

@@ -229,6 +229,18 @@
               <div class="operations-grid">
                 <div class="operations-stream">
                   <section class="panel" aria-labelledby="jobs-title"><div class="section-heading"><div><p class="eyebrow">BACKGROUND TASKS</p><h2 id="jobs-title">Job center</h2></div></div><label class="visually-hidden" for="job-search">Filter jobs</label><input class="job-search" id="job-search" type="search" placeholder="Filter recent jobs"><div class="job-list" id="job-list" aria-live="polite"></div></section>
+                  <section class="panel" aria-labelledby="acquisitions-title">
+                    <div class="section-heading"><div><p class="eyebrow">EVIDENCE-FIRST INTAKE</p><h2 id="acquisitions-title">Acquisition queue</h2></div><button class="small-button" id="acquisition-refresh" type="button">Refresh</button></div>
+                    <p class="muted">Queue a source or update request before any payload is imported. Approval requires evidence; external-only entries cannot be approved as local acquisitions.</p>
+                    <form class="acquisition-form" id="acquisition-form">
+                      <div class="acquisition-form-grid"><label>Game ID<input id="acquisition-game-id" name="gameId" pattern="[a-z0-9]+(?:-[a-z0-9]+)*" required placeholder="new-game"></label><label>Title<input id="acquisition-title" name="title" required placeholder="Game title"></label><label>Action<select id="acquisition-action" name="action"><option value="acquire">Acquire</option><option value="update">Update</option></select></label><label>Target classification<select id="acquisition-status" name="acquisitionStatus"><option value="unverified">Unverified</option><option value="local-payload">Local payload</option><option value="local-wrapper">Local wrapper</option><option value="external-only">External-only</option></select></label></div>
+                      <label>Source URL (optional)<input id="acquisition-source-url" name="sourceUrl" type="url" placeholder="https://example.com/game"></label>
+                      <label>Evidence (one URL or note per line)<textarea id="acquisition-evidence" name="evidence" rows="3" placeholder="https://example.com/license"></textarea></label>
+                      <label>Notes (optional)<textarea id="acquisition-notes" name="notes" rows="2"></textarea></label>
+                      <div class="acquisition-form-actions"><button class="button button-primary" type="submit">Add to queue</button><p class="notice" id="acquisition-message" role="status" hidden></p></div>
+                    </form>
+                    <div class="acquisition-list" id="acquisition-list" aria-live="polite"></div>
+                  </section>
                   <section class="panel" aria-labelledby="activity-title"><div class="section-heading"><div><p class="eyebrow">AUDIT TRAIL</p><h2 id="activity-title">Admin activity</h2></div></div><div class="activity-list" id="activity-list" aria-live="polite"></div></section>
                 </div>
                 <section class="panel agent-panel" aria-labelledby="agent-title">
