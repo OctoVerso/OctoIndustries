@@ -196,7 +196,7 @@ async function api(path, options = {}) {
     error.endpoint = `${method} ${path}`;
     error.status = response.status;
     error.requestId = response.headers.get('x-request-id') || body?.requestId || '';
-    error.details = body?.details || '';
+    error.details = body?.details || body?.reason || '';
     throw error;
   }
   return body;

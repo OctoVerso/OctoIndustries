@@ -4,6 +4,8 @@ import { pbkdf2Sync, createHmac } from 'node:crypto';
 import {
   admin, catalog, feedback, jobs, proposals, roadmap,
 } from './handlers.js';
+import { corsHeaders } from './http.js';
+import { must } from './data.js';
 
 function createDb(seed = {}) {
   const tables = { games: [], jobs: [], activity: [], roadmap: [], feedback: [], proposals: [], admin_sessions: [], feedback_activity: [], feedback_conversations: [], ...seed };
@@ -123,6 +125,31 @@ test('CORS preflight is answered and unknown origins get no allow header', async
   assert.equal(ok.status, 204);
   const other = await call(catalog, 'catalog', '', { headers: { Origin: 'https://evil.example' } });
   assert.equal(other.headers.get('access-control-allow-origin'), null);
+});
+
+test('default CORS origins support production and localhost previews', () => {
+  for (const origin of [
+    'https://octoverso.github.io', 'http://localhost:8080', 'http://127.0.0.1:8080',
+    'https://9q6gx354p5-8080.app.github.dev',
+  ]) {
+    assert.equal(corsHeaders(new Request('https://project.supabase.co', { headers: { Origin: origin } }), {})
+      ['Access-Control-Allow-Origin'], origin);
+  }
+  assert.equal(corsHeaders(new Request('https://project.supabase.co', {
+    headers: { Origin: 'https://evil.example' },
+  }), {})['Access-Control-Allow-Origin'], undefined);
+});
+
+test('database failures include a diagnostic reason for the admin error details', () => {
+  assert.throws(
+    () => must({ data: null, error: { message: 'column proposals.status does not exist' } }, 'Could not load dashboard proposals.', true),
+    (error) => error.status === 502
+      && error.reason === 'Could not load dashboard proposals. column proposals.status does not exist',
+  );
+  assert.throws(
+    () => must({ data: null, error: { message: 'internal schema detail' } }),
+    (error) => error.status === 502 && !Object.hasOwn(error, 'reason'),
+  );
 });
 
 test('feedback is validated, stored in Supabase and rate limited', async () => {

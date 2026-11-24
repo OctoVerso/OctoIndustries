@@ -57,8 +57,12 @@ function catalogGameRow(game) {
   };
 }
 
-async function activityList(db, limit) {
-  const rows = must(await db.from('activity').select('message, created_at').order('id', { ascending: false }).limit(limit));
+async function activityList(db, limit, exposeReason = false) {
+  const rows = must(
+    await db.from('activity').select('message, created_at').order('id', { ascending: false }).limit(limit),
+    'Could not load admin activity.',
+    exposeReason,
+  );
   return rows.map((row) => ({ message: row.message, createdAt: row.created_at }));
 }
 
@@ -503,13 +507,17 @@ export const admin = serve('admin', async (context) => {
   }
 
   if (path === '/dashboard' && method === 'GET') {
-    const games = must(await db.from('games').select('*').order('title', { ascending: true })).map(gameFromRow);
-    const jobList = await listJobs(db, 100);
+    const games = must(
+      await db.from('games').select('*').order('title', { ascending: true }),
+      'Could not load dashboard games.',
+      true,
+    ).map(gameFromRow);
+    const jobList = await listJobs(db, 100, true);
     const feedbackCount = await db.from('feedback').select('id', { count: 'exact', head: true }).eq('status', 'new');
-    if (feedbackCount.error) must(feedbackCount, 'Could not count new feedback.');
+    if (feedbackCount.error) must(feedbackCount, 'Could not count new feedback.', true);
     const count = feedbackCount.count ?? 0;
     const pending = must(await db.from('proposals').select('*').in('status', ['pending', 'approved'])
-      .order('created_at', { ascending: false }).limit(20));
+      .order('created_at', { ascending: false }).limit(20), 'Could not load dashboard proposals.', true);
     return json({
       counts: {
         total: games.length,
@@ -522,8 +530,12 @@ export const admin = serve('admin', async (context) => {
       },
       games,
       jobs: jobList.slice(0, 30),
-      activity: await activityList(db, 30),
-      roadmap: must(await db.from('roadmap').select('*').order('updated_at', { ascending: false })).map((row) => roadmapFromRow(row, true)),
+      activity: await activityList(db, 30, true),
+      roadmap: must(
+        await db.from('roadmap').select('*').order('updated_at', { ascending: false }),
+        'Could not load dashboard roadmap.',
+        true,
+      ).map((row) => roadmapFromRow(row, true)),
       proposals: pending.map(proposalFromRow),
       capabilities: { changeProposals: Boolean(env.GITHUB_TOKEN) },
     });

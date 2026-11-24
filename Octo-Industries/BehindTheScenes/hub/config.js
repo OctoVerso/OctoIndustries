@@ -14,6 +14,7 @@
     [/^\/api\/admin\/roadmap(?=\/|\?|$)/, '/roadmap'],
     [/^\/api\/admin(?=\/|\?|$)/, '/admin'],
     [/^\/api\/catalog(?=\/|\?|$)/, '/catalog'],
+    [/^\/api\/roadmap(?=\/|\?|$)/, '/roadmap'],
     [/^\/api\/feedback(?=\/|\?|$)/, '/feedback'],
     [/^\/api\/tickets(?=\/|\?|$)/, '/feedback/tickets'],
   ];

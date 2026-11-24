@@ -75,10 +75,12 @@ export function roadmapFromRow(row, includeInternal) {
   return item;
 }
 
-export function must({ data, error }, message = 'Database request failed.') {
+export function must({ data, error }, message = 'Database request failed.', exposeReason = false) {
   if (error) {
     console.error(message, error);
-    throw httpError('The database request failed.', 502);
+    const failure = httpError('The database request failed.', 502);
+    if (exposeReason) failure.reason = `${message} ${error.message || 'Unknown database error.'}`;
+    throw failure;
   }
   return data;
 }
@@ -101,8 +103,12 @@ export async function addJob(db, type, gameId = null, result = null, message = '
   return jobFromRow(row);
 }
 
-export async function listJobs(db, limit = 100) {
-  const rows = must(await db.from('jobs').select('*').order('created_at', { ascending: false }).limit(limit));
+export async function listJobs(db, limit = 100, exposeReason = false) {
+  const rows = must(
+    await db.from('jobs').select('*').order('created_at', { ascending: false }).limit(limit),
+    'Could not load jobs.',
+    exposeReason,
+  );
   return rows.map(jobFromRow);
 }
 

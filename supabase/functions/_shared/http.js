@@ -10,7 +10,9 @@ export function randomHex(byteLength = 32) {
 }
 
 export function corsHeaders(request, env) {
-  const allowed = String(env.ALLOWED_ORIGIN || '').split(',').map((value) => value.trim()).filter(Boolean);
+  const allowed = String(env.ALLOWED_ORIGIN
+    || 'https://octoverso.github.io,http://localhost:8080,http://127.0.0.1:8080,https://9q6gx354p5-8080.app.github.dev')
+    .split(',').map((value) => value.trim()).filter(Boolean);
   const origin = request.headers.get('origin');
   const headers = {
     'Access-Control-Allow-Headers': 'authorization, content-type, apikey, x-client-info, x-ticket-access-token',
