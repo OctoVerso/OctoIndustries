@@ -23,7 +23,7 @@ if (!window.config.unityWebglLoaderUrl) {
   }
 }
 var sdkScript = document.createElement("script");
-sdkScript.src = "JS/poki/poki-sdk.js", sdkScript.onload = function() {
+sdkScript.src = "../branding/poki-sdk-compat.js", sdkScript.onload = function() {
   var i = document.createElement("script");
   i.src = root + loader, document.body.appendChild(i)
 }, document.body.appendChild(sdkScript);

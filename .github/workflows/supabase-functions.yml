@@ -1,18 +1,23 @@
 name: Deploy Supabase Edge Functions
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'supabase/**'
   workflow_dispatch:
+    inputs:
+      apply_migrations:
+        description: 'Apply database migrations after explicit staging and backup approval'
+        required: true
+        type: boolean
+        default: false
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: supabase-production
     env:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
       SUPABASE_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -27,5 +32,11 @@ jobs:
         run: |
           [ -n "$SUPABASE_ACCESS_TOKEN" ] || { echo "::error::Secret SUPABASE_ACCESS_TOKEN is not set (Settings > Secrets and variables > Actions > Secrets)."; exit 1; }
           [ -n "$SUPABASE_PROJECT_REF" ] || { echo "::error::Variable SUPABASE_PROJECT_REF is not set (Settings > Secrets and variables > Actions > Variables)."; exit 1; }
+          [ -n "$SUPABASE_DB_PASSWORD" ] || { echo "::error::Secret SUPABASE_DB_PASSWORD is not set (Settings > Secrets and variables > Actions > Secrets)."; exit 1; }
+      - name: Deploy database migrations
+        if: ${{ inputs.apply_migrations }}
+        run: |
+          supabase link --project-ref "$SUPABASE_PROJECT_REF" --password "$SUPABASE_DB_PASSWORD"
+          supabase db push --linked --yes
       - name: Deploy functions
         run: supabase functions deploy --project-ref "$SUPABASE_PROJECT_REF" --no-verify-jwt --yes

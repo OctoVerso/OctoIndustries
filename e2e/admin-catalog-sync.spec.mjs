@@ -1,7 +1,7 @@
 
 import { test, expect } from '@playwright/test';
 
-test('admin dashboard automatically syncs missing games from the generated catalog', async ({ page }) => {
+test('admin dashboard reads are safe and catalog synchronization is explicitly confirmed', async ({ page }) => {
   const syncRequests = [];
   const consoleErrors = [];
   let dashboardGames;
@@ -93,8 +93,12 @@ test('admin dashboard automatically syncs missing games from the generated catal
 
   const catalogGames = await page.evaluate(() => window.OCTO_GAMES);
 
-  await expect(page.locator('#metric-total')).toHaveText('33');
-  await expect(page.locator('#nav-game-count')).toHaveText('33');
+  await expect(page.locator('#metric-total')).toHaveText('18');
+  expect(syncRequests).toHaveLength(0);
+  page.on('dialog', (dialog) => dialog.accept());
+  await page.locator('#catalog-sync-button').click();
+  await expect(page.locator('#metric-total')).toHaveText(String(catalogGames.length));
+  await expect(page.locator('#nav-game-count')).toHaveText(String(catalogGames.length));
 
   const firstGame = catalogGames[0];
 

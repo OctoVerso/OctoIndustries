@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readdir, readFile, stat } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { assertNoExternalRuntimeAssets, externalCssAssetSources, externalRuntimeAssetSources } from './local-runtime-policy.mjs';
 
 const root = resolve(fileURLToPath(new URL('../../..', import.meta.url)));
 const collection = resolve(root, 'Octo-Industries');
@@ -24,6 +25,21 @@ async function isFile(path) {
     if (error.code === 'ENOENT') return false;
     throw error;
   }
+}
+
+async function gameRuntimeFiles(directory) {
+  const entries = await readdir(directory, { withFileTypes: true });
+  const files = [];
+  for (const entry of entries) {
+    if (entry.isDirectory()) {
+      if (!['.git', 'dist', 'node_modules'].includes(entry.name)) {
+        files.push(...await gameRuntimeFiles(resolve(directory, entry.name)));
+      }
+    } else if (entry.isFile() && /\.(?:css|html?)$/i.test(entry.name)) {
+      files.push(resolve(directory, entry.name));
+    }
+  }
+  return files;
 }
 
 test('the generated main registry includes every importable game folder with complete metadata and assets', async () => {
@@ -66,6 +82,10 @@ test('the generated main registry includes every importable game folder with com
       assert.ok(await isFile(resolve(root, ...assetPath)), `${game.title} asset exists: ${asset}`);
     }
 
+    for (const runtimeFile of await gameRuntimeFiles(directory)) {
+      assertNoExternalRuntimeAssets(await readFile(runtimeFile, 'utf8'), `${game.title} (${runtimeFile})`);
+    }
+
     const bannerPath = resolve(directory, 'hub-banner.svg');
     assert.ok(await isFile(bannerPath), `${game.title} generated banner exists`);
     const banner = await readFile(bannerPath, 'utf8');
@@ -75,7 +95,41 @@ test('the generated main registry includes every importable game folder with com
     assert.match(banner, /(?:data:image\/|href="#octo-artwork")/, `${game.title} banner contains embedded or referenced artwork`);
   }
 
-  assert.equal(catalog.find((game) => game.id === 'tiny-fishing')?.acquisitionStatus, 'external-only');
+  const tinyFishing = catalog.find((game) => game.id === 'tiny-fishing');
+  assert.equal(tinyFishing?.acquisitionStatus, 'local-payload');
+  assert.equal(tinyFishing?.runtimeStatus, 'local');
+  assert.equal(tinyFishing?.networkDependency, 'not-required');
+  assert.ok(await isFile(resolve(collection, 'Tiny-Fishing/html5game/TinyFishing.js')));
+  assert.ok(await isFile(resolve(collection, 'Tiny-Fishing/html5game/TinyFishing_texture_0.png')));
+  const brotato = catalog.find((game) => game.id === 'brotato');
+  assert.equal(brotato?.acquisitionStatus, 'local-payload');
+  assert.equal(brotato?.runtimeStatus, 'local');
+  assert.equal(brotato?.networkDependency, 'optional');
+  assert.ok(await isFile(resolve(collection, 'Brotato/payload/index.js')));
+  assert.ok(await isFile(resolve(collection, 'Brotato/payload/index.pck.part1')));
+  assert.ok(await isFile(resolve(collection, 'Brotato/payload/index.wasm.part1')));
+  assert.ok(await isFile(resolve(collection, 'Brotato/LICENSE.coi-serviceworker.txt')));
   assert.equal(catalog.find((game) => game.id === 'turball')?.networkDependency, 'required');
   assert.equal(catalog.find((game) => game.id === 'pvz2-gardendless')?.saveLevel, 3);
+
+  const ironSnout = catalog.find((game) => game.id === 'iron-snout');
+  assert.equal(ironSnout?.acquisitionStatus, 'local-payload');
+  assert.equal(ironSnout?.runtimeStatus, 'local');
+  assert.equal(ironSnout?.networkDependency, 'not-required');
+  assert.ok(await isFile(resolve(collection, 'Iron-Snout/html5game/IronSnout.js')));
+  assert.ok(await isFile(resolve(collection, 'Iron-Snout/LICENSE.third-party.txt')));
+});
+
+test('external runtime assets are rejected while local game assets are allowed', () => {
+  assert.deepEqual(externalRuntimeAssetSources('<iframe src="https://games.example/play"></iframe>'), ['https://games.example/play']);
+  assert.deepEqual(externalRuntimeAssetSources('<script src="//cdn.example/game.js"></script>'), ['//cdn.example/game.js']);
+  assert.deepEqual(externalRuntimeAssetSources('<iframe src="game/index.html"></iframe><script src="/local.js"></script>'), []);
+  assert.deepEqual(externalRuntimeAssetSources('<a href="https://games.example">external navigation</a>'), []);
+  assert.deepEqual(externalRuntimeAssetSources('<style>@import url("https://cdn.example/game.css");</style>'), ['https://cdn.example/game.css']);
+  assert.deepEqual(externalCssAssetSources('@import url(https://cdn.example/font.css); body{background:url("//cdn.example/bg.png")}'), [
+    'https://cdn.example/font.css',
+    '//cdn.example/bg.png',
+  ]);
+  assert.throws(() => assertNoExternalRuntimeAssets('@import "https://cdn.example/font.css";', 'game.css'), /externally hosted runtime assets/);
+  assert.throws(() => assertNoExternalRuntimeAssets('<iframe src="https://games.example/play"></iframe>', 'launch.html'), /externally hosted runtime assets/);
 });

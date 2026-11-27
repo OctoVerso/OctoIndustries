@@ -26,17 +26,21 @@ jobs:
           node-version: 24
       - name: Install dependencies
         run: npm ci
+      - name: Check source and credentials
+        run: npm run check && npm run security:scan
       - name: Run full unit and frontend verification
         run: npm run test:all
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
-      - name: Run browser tests
-        run: npm run test:e2e
       - name: Build static site
         env:
           # Repository variable (Settings > Secrets and variables > Actions > Variables).
           SUPABASE_FUNCTIONS_URL: ${{ vars.SUPABASE_FUNCTIONS_URL }}
         run: npm run pages:build
+      - name: Verify published files
+        run: node scripts/scan-secrets.mjs --artifact
+      - name: Run browser tests against built site
+        run: npm run test:e2e
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

@@ -19,10 +19,11 @@ export function corsHeaders(request, env) {
   const isLocalPreview = /^http:\/\/(?:localhost|127\.0\.0\.1)(?::\d+)?$/.test(origin || '');
   const isCodespacesPreview = /^https:\/\/[a-z0-9-]+-\d+\.app\.github\.dev$/.test(origin || '');
   const headers = {
-    'Access-Control-Allow-Headers': 'authorization, content-type, apikey, x-client-info, x-ticket-access-token',
+    'Access-Control-Allow-Headers': 'authorization, content-type, apikey, x-client-info, x-ticket-access-token, x-record-version',
     'Access-Control-Allow-Methods': 'GET, POST, PATCH, DELETE, OPTIONS',
     'Access-Control-Max-Age': '86400',
     Vary: 'Origin',
+    'Access-Control-Expose-Headers': 'x-request-id',
   };
   if (origin && (defaultOrigins.includes(origin) || configuredOrigins.includes(origin)
     || isLocalPreview || isCodespacesPreview)) {
@@ -92,6 +93,7 @@ export async function logActivity(db, message) {
 export function serve(name, handler) {
   return async (request, env, db) => {
     const cors = corsHeaders(request, env);
+    const requestId = randomHex(12);
     if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
     let response;
     try {
@@ -102,11 +104,12 @@ export function serve(name, handler) {
     } catch (error) {
       if (error.status) response = json(error.reason ? { error: error.message, reason: error.reason } : { error: error.message }, error.status);
       else {
-        console.error(`${name} function failed:`, error);
+        console.error(JSON.stringify({ service: name, requestId, event: 'request_failed', code: /^[A-Z0-9_]{1,30}$/.test(error.code || '') ? error.code : 'INTERNAL' }));
         response = json({ error: 'The service could not complete the request.' }, 500);
       }
     }
     const headers = new Headers(response.headers);
+    headers.set('x-request-id', requestId);
     for (const [key, value] of Object.entries(cors)) headers.set(key, value);
     return new Response(response.body, { status: response.status, headers });
   };

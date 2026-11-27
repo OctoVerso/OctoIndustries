@@ -47,54 +47,6 @@
   <script src="save-store.js"></script>
   <!-- PVZ-IPAD END -->
 
-  <script>
-    (function () {
-      const isGitHubPages = window.location.hostname === 'play.pvzge.com';
-
-      if (isGitHubPages) {
-        // 加载 Google Analytics
-        const gtagScript = document.createElement('script');
-        gtagScript.async = true;
-        gtagScript.src = 'https://www.googletagmanager.com/gtag/js?id=G-FNC28KV0ZR';
-        document.head.appendChild(gtagScript);
-
-        window.dataLayer = window.dataLayer || [];
-        function gtag() { dataLayer.push(arguments); }
-        gtag('js', new Date());
-        gtag('config', 'G-FNC28KV0ZR');
-
-        const adsenseScript = document.createElement('script');
-        adsenseScript.async = true;
-        adsenseScript.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2336226859954206';
-        adsenseScript.crossOrigin = 'anonymous';
-        document.head.appendChild(adsenseScript);
-
-        const fundingScript = document.createElement('script');
-        fundingScript.async = true;
-        fundingScript.src = 'https://fundingchoicesmessages.google.com/i/pub-2336226859954206?ers=1';
-        document.head.appendChild(fundingScript);
-
-        (function () {
-          function signalGooglefcPresent() {
-            if (!window.frames['googlefcPresent']) {
-              if (document.body) {
-                const iframe = document.createElement('iframe');
-                iframe.style = 'width: 0; height: 0; border: none; z-index: -1000; left: -1000px; top: -1000px;';
-                iframe.style.display = 'none';
-                iframe.name = 'googlefcPresent';
-                document.body.appendChild(iframe);
-              } else {
-                setTimeout(signalGooglefcPresent, 0);
-              }
-            }
-          }
-          signalGooglefcPresent();
-        })();
-      }
-    })();
-  </script>
-
-
     <link rel="stylesheet" href="../../branding/game-branding.css">
     <script defer src="../../branding/game-branding.js"></script>
   </head>

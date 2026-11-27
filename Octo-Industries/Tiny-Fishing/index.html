@@ -7,40 +7,48 @@
   <title>Tiny Fishing | Octo Industries</title>
   <link rel="stylesheet" href="../branding/game-branding.css">
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
-    html,
-    body,
-    main,
-    iframe {
-      width: 100%;
-      height: 100%;
-      margin: 0;
-    }
-
-    body {
-      overflow: hidden;
-      background: #071019;
-    }
-
-    iframe {
-      display: block;
-      border: 0;
-    }
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: #000; }
+    #gm4html5_div_id, #canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+    #canvas { display: block; image-rendering: pixelated; touch-action: none; }
   </style>
   <script defer src="../branding/game-branding.js"></script>
+  <script src="../branding/poki-sdk-compat.js"></script>
+  <script>
+    window.PokiSDK_OK = true;
+    if (!Number.isNaN && window.isNaN) Number.isNaN = window.isNaN;
+  </script>
+  <script src="html5game/TinyFishing.js"></script>
 </head>
 <body>
-  <main aria-label="Tiny Fishing">
-    <iframe
-      src="https://tiny-fishing.bitbucket.io/tiny-fishing/"
-      title="Tiny Fishing"
-      allow="fullscreen; autoplay; gamepad"
-      allowfullscreen
-      referrerpolicy="strict-origin-when-cross-origin">
-    </iframe>
-  </main>
+  <div id="gm4html5_div_id">
+    <canvas id="canvas" width="836" height="470">
+      <p>Your browser does not support HTML5 canvas.</p>
+    </canvas>
+  </div>
+  <div hidden aria-hidden="true">
+    <img id="img_loadingbg" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=">
+    <img id="img_loadingicon" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=">
+    <img id="img_loadinglogoicon" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=">
+    <img id="img_loadingbar" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=">
+    <img id="img_loadingbaroverlay" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=">
+  </div>
+  <script src="html5game/tph_PokiExt.js"></script>
+  <script src="html5game/uph_cookieManager.js"></script>
+  <script src="html5game/vph_HTML5Func.js"></script>
+  <script src="html5game/wph_API_Fullscreen.js"></script>
+  <script src="html5game/xph_external.js"></script>
+  <script src="html5game/zph_djl.js"></script>
+  <script src="html5game/aqh_GameAnalytics.js"></script>
+  <script src="html5game/bqh_GameAnalyticsExt.js"></script>
+  <script src="html5game/cqh_djs.js"></script>
+  <script src="html5game/eqh_gamesnacks.js"></script>
+  <script>
+    window.addEventListener('load', () => {
+      PokiSDK.init().then(() => {
+        PokiSDK.gameLoadingStart();
+        GameMaker_Init();
+      });
+    });
+  </script>
 </body>
 </html>

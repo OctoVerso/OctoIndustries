@@ -2,9 +2,16 @@
   const script = document.currentScript;
   // This file lives at Octo-Industries/BehindTheScenes/hub/config.js, three levels below the site root.
   const siteRoot = new URL('../../../', script.src).href;
+  const isLocalPreview = ['localhost', '127.0.0.1'].includes(location.hostname) && location.port === '8080';
+  const isCodespacesPreview = location.hostname.endsWith('.app.github.dev');
+  const deploymentConfig = window.OCTO_CONFIG || {};
   const config = Object.assign({
     functionsUrl: 'https://egamrzyfjjabisybpait.supabase.co/functions/v1',
-  }, window.OCTO_CONFIG);
+  }, deploymentConfig);
+  if (isCodespacesPreview) config.functionsUrl = `${location.origin}/functions/v1`;
+  else if (isLocalPreview) config.functionsUrl = deploymentConfig.functionsUrl === ''
+    ? ''
+    : `${location.origin}/functions/v1`;
   config.siteRoot = siteRoot;
 
   const adminRoutes = [
@@ -21,6 +28,9 @@
 
   // Maps the application's logical /api paths onto the Supabase Edge Function URLs.
   config.apiUrl = (path) => {
+    if (!config.functionsUrl) {
+      throw new Error('Admin and data APIs are disabled in this Codespaces preview. Configure an approved staging functions URL to enable them.');
+    }
     for (const [pattern, target] of adminRoutes) {
       if (pattern.test(path)) return `${config.functionsUrl}${path.replace(pattern, target)}`;
     }

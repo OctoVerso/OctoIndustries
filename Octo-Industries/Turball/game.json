@@ -12,12 +12,12 @@
   "bannerFit": "cover",
   "featured": false,
   "offlineReady": false,
-  "acquisitionStatus": "external-only",
-  "runtimeStatus": "external-required",
+  "acquisitionStatus": "local-payload",
+  "runtimeStatus": "local",
   "networkDependency": "required",
   "saveLevel": 0,
   "saveStatus": "unsupported",
   "testStatus": "not-run",
-  "acquisitionEvidence": ["README.md", "index.html loads the official third-party service"],
+  "acquisitionEvidence": ["Gameplay frontend and assets are served from this repository; api.turball.io is used as the game's backend."],
   "sourceUrl": "https://turball.io/casual"
 }

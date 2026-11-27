@@ -2,7 +2,7 @@
   const noop = () => {};
   const resolved = () => Promise.resolve();
   const sendToGame = (objectName, method, value) => {
-    if (window.unityGame) window.unityGame.SendMessage(objectName, method, value);
+    if (window.unityGame?.SendMessage) window.unityGame.SendMessage(objectName, method, value);
   };
 
   function init() {

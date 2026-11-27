@@ -1,4 +1,4 @@
-import { spawnSync } from 'node:child_process';
+import { isPublicPath } from './publication-policy.mjs';
 import { cp, mkdir, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -9,9 +9,7 @@ const output = join(root, 'dist');
 const maximumFileBytes = 100 * 1024 * 1024;
 const excludedNames = new Set(['node_modules', '.git', '.vscode', '.DS_Store']);
 
-const sync = spawnSync('npm', ['--prefix', 'Octo-Industries/BehindTheScenes', 'run', 'sync'], { cwd: root, stdio: 'inherit' });
-if (sync.status !== 0) throw new Error('Game catalog sync failed.');
-
+// Catalog generation is explicit: packaging must never rewrite the working tree or download games.
 const catalogPath = join(root, 'Octo-Industries/BehindTheScenes/hub/catalog.js');
 const catalogSource = await readFile(catalogPath, 'utf8');
 const catalogMatch = /^window\.OCTO_GAMES = Object\.freeze\(([\s\S]*)\);\s*$/.exec(catalogSource);
@@ -33,7 +31,7 @@ await cp(join(root, 'Octo-Industries'), join(output, 'Octo-Industries'), {
   filter: (source) => {
     const path = relative(root, source).split('\\').join('/');
     const name = path.split('/').pop();
-    return !excludedNames.has(name)
+    return isPublicPath(path) && !excludedNames.has(name)
       && !path.startsWith('Octo-Industries/BehindTheScenes/scripts')
       && path !== 'Octo-Industries/BehindTheScenes/package.json'
       && !/\.zip$/i.test(name);
@@ -50,7 +48,7 @@ if (functionsUrl) {
   if (!/^https:\/\/[a-z0-9.-]+\/functions\/v1$/.test(functionsUrl)) throw new Error('SUPABASE_FUNCTIONS_URL must look like https://<ref>.supabase.co/functions/v1');
   const configPath = join(output, 'Octo-Industries/BehindTheScenes/hub/config.js');
   const config = await readFile(configPath, 'utf8');
-  const updated = config.replace(/functionsUrl: '[^']*'/, `functionsUrl: '${functionsUrl}'`);
+  const updated = config.replace(/functionsUrl:\s*(?:isLocalPreview\s*\?\s*'[^']*'\s*:\s*)?'[^']*'/, `functionsUrl: '${functionsUrl}'`);
   if (updated === config && !config.includes(functionsUrl)) throw new Error('Could not set functionsUrl in config.js.');
   await writeFile(configPath, updated);
 }
@@ -69,6 +67,7 @@ await writeFile(join(output, '404.html'), `<!doctype html><meta charset="utf-8">
 </script>
 `);
 await writeFile(join(output, '.nojekyll'), '');
+await writeFile(join(output, 'robots.txt'), `User-agent: *\nDisallow: ${siteUrl.pathname}admin/\nDisallow: ${siteUrl.pathname}Octo-Industries/BehindTheScenes/admin/\nSitemap: ${siteUrl.href}sitemap.xml\n`);
 const sitemapUrls = [
   siteUrl.href,
   ...games.map((game) => new URL(String(game.launch || '').replace(/^\/+/, ''), siteUrl).href),

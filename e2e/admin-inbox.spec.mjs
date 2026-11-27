@@ -118,13 +118,18 @@ test('admin inquiry filters, analytics, management, and conversation stay in syn
 
   const card = (id) => page.locator(`[data-feedback-card="${id}"]`);
   const analytics = page.locator('#ticket-analytics-metrics .ticket-stat-card');
-  await expect(analytics).toHaveCount(13);
+  await expect(analytics).toHaveCount(4);
   expect(await analytics.evaluateAll((cards) => cards.map((item) => item.dataset.stat))).toEqual([
-    'new', 'under_review', 'awaiting_user', 'planned', 'in_progress', 'awaiting_user_reply',
-    'implemented', 'resolved', 'rejected', 'closed', 'archived', 'critical', 'created-recently',
+    'total', 'new', 'critical', 'created-recently',
   ]);
-  for (const [stat, value] of [['new', '1'], ['awaiting_user_reply', '1'], ['archived', '1'], ['critical', '1'], ['created-recently', '3']]) {
+  for (const [stat, value] of [['total', '4'], ['new', '1'], ['critical', '1'], ['created-recently', '3']]) {
     await expect(page.locator(`#ticket-analytics-metrics [data-stat="${stat}"] strong`)).toHaveText(value);
+  }
+  const statusBreakdown = page.locator('#ticket-status-breakdown');
+  await expect(page.locator('.ticket-status-details')).not.toHaveAttribute('open', '');
+  await page.locator('.ticket-status-details > summary').click();
+  for (const [status, value] of [['awaiting_user_reply', '1'], ['archived', '1']]) {
+    await expect(statusBreakdown.locator(`[data-status="${status}"] strong`)).toHaveText(value);
   }
 
   await page.locator('#feedback-sort').selectOption('oldest');
@@ -164,7 +169,7 @@ test('admin inquiry filters, analytics, management, and conversation stay in syn
   await card('a'.repeat(32)).locator('[data-feedback-status]').selectOption('awaiting_user');
   await expect(card('a'.repeat(32)).locator('.feedback-status-badge')).toHaveText('Awaiting User');
   await expect(page.locator('#ticket-analytics-metrics [data-stat="new"] strong')).toHaveText('0');
-  await expect(page.locator('#ticket-analytics-metrics [data-stat="awaiting_user"] strong')).toHaveText('1');
+  await expect(statusBreakdown.locator('[data-status="awaiting_user"] strong')).toHaveText('1');
   await card('a'.repeat(32)).locator('[data-feedback-priority]').selectOption('high');
   await expect(card('a'.repeat(32)).locator('.feedback-priority-badge')).toHaveText('High');
   await expect(page.locator('#ticket-analytics-metrics [data-stat="critical"] strong')).toHaveText('0');
@@ -173,7 +178,7 @@ test('admin inquiry filters, analytics, management, and conversation stay in syn
   await card('a'.repeat(32)).locator('[data-admin-reply] textarea').fill('Thanks, we are investigating.');
   await card('a'.repeat(32)).locator('[data-admin-reply] button[type="submit"]').click();
   await expect(card('a'.repeat(32)).locator('.feedback-conversation-list')).toContainText('Thanks, we are investigating.');
-  await expect(page.locator('#ticket-analytics-metrics [data-stat="awaiting_user_reply"] strong')).toHaveText('2');
+  await expect(statusBreakdown.locator('[data-status="awaiting_user_reply"] strong')).toHaveText('2');
 
   await card('a'.repeat(32)).locator('.feedback-actions-menu > summary').click();
   await card('a'.repeat(32)).locator('[data-feedback-archive]').click();

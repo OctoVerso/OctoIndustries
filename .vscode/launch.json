@@ -2,14 +2,14 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Run Game Hub",
+      "name": "Run Isolated Admin Preview",
       "type": "node-terminal",
       "request": "launch",
-      "command": "npm --prefix Octo-Industries/BehindTheScenes run sync && python3 -m http.server 8080",
+      "command": "npm run dev:preview",
       "cwd": "${workspaceFolder}",
       "serverReadyAction": {
-        "pattern": "Serving HTTP on .* port (\\d+)",
-        "uriFormat": "http://localhost:%s/",
+        "pattern": "Open the forwarded port-8080 dashboard at /Octo-Industries/BehindTheScenes/admin/\\.",
+        "uriFormat": "http://localhost:8080/Octo-Industries/BehindTheScenes/admin/",
         "action": "openExternally"
       }
     }

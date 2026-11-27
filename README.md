@@ -9,10 +9,10 @@ Octo Industries is a touch-friendly game launcher hosted as a static site on **G
 
 ```sh
 npm --prefix Octo-Industries/BehindTheScenes run sync   # regenerate the fallback catalog
-python3 -m http.server 8080                             # preview at http://localhost:8080/
+npm run dev:preview                                     # isolated, database-backed admin preview on port 8080
 ```
 
-The PvZ iPad game source is kept in the sibling `pvz-ipad/` checkout; the Pages workflow builds its optimized local copy into the site. For local preview, clone it with `git clone https://github.com/fakedummyfortestingthings-web/pvz-ipad.git pvz-ipad`. The preview calls the live Supabase Edge Functions configured in `Octo-Industries/BehindTheScenes/hub/config.js`; production and `http://localhost:8080` are allowed by default. Set the `ALLOWED_ORIGIN` function secret to customize the allowed browser origins. Admin lives at `Octo-Industries/BehindTheScenes/admin/` (`/admin/` on the deployed site). Run the function tests with `npm test`.
+The PvZ iPad game source is kept in the sibling `pvz-ipad/` checkout; the Pages workflow builds its optimized local copy into the site. For local preview, clone it with `git clone https://github.com/fakedummyfortestingthings-web/pvz-ipad.git pvz-ipad`. The admin dashboard lives at `Octo-Industries/BehindTheScenes/admin/` (`/admin/` on the deployed site). The staging preview uses a local database and never falls back to the production Supabase project.
 
 ## Codespaces storage maintenance
 
@@ -33,6 +33,8 @@ Maintenance checklist:
 
 Add a game directory directly beneath `Octo-Industries/` with an `index.html`; the catalog sync automatically creates a title from the directory name, an `Other` category, basic tags, and a description. Every registered game must declare `bannerSource` in `game.json`, pointing to authentic artwork from that game or its logo. The sync rejects missing or invalid banner art before catalog generation. Use `bannerFit: "contain"` for logos; the default cover fit fills the shared 16:9 banner. The hub provides a browsable screenshot gallery when local screenshots are available. Generated `hub-banner.svg` files embed their source art, so they load offline at a consistent aspect ratio.
 
+**Local runtime requirement:** a game launch must run the game and load its gameplay assets from this repository. Redirects, remote gameplay frames, and third-party-hosted game payloads fail this requirement. Network access is allowed only to the game's own servers and backends; external asset/CDN, advertising, analytics, and tracking dependencies are not allowed. Do not re-host copyrighted game payloads without authorization. If no authorized local package is available, show the game as unavailable instead of redirecting to its external host. These rules are also included in `.github/copilot-instructions.md`.
+
 ## Game projects
 
 - `Octo-Industries/Monkey-Mart/` — locally hosted supermarket management game.
@@ -47,7 +49,7 @@ Add a game directory directly beneath `Octo-Industries/` with an `index.html`; t
 - `Octo-Industries/Ragdoll-Archers/` — Unity WebGL archery game.
 - `Octo-Industries/Ragdoll-Drop/` — locally hosted original Unity WebGL physics game.
 - `Octo-Industries/Stickman-Hook/` — browser-based swinging platform game.
-- `Octo-Industries/Tiny-Fishing/` — hub wrapper for the online game at `tiny-fishing.bitbucket.io`; an internet connection is required.
+- `Octo-Industries/Tiny-Fishing/` — local placeholder; the authorized game package is not yet available in the repository.
 - `Octo-Industries/Toss-The-Turtle/` — Flash game launched locally by the bundled Ruffle player.
 - `Octo-Industries/GTA-3/` — locally hosted Grand Theft Auto III WebAssembly port.
 - `Octo-Industries/GTA-Vice-City/` — locally hosted Grand Theft Auto: Vice City WebAssembly port.
@@ -78,6 +80,14 @@ The public hub footer and navigation include a no-account feedback form. Users c
 4. **Pages**: in the repository's **Settings → Pages**, set the source to **GitHub Actions**, and add the Actions variable `SUPABASE_FUNCTIONS_URL` (`https://<ref>.supabase.co/functions/v1`). `.github/workflows/pages.yml` runs `npm run pages:build` and publishes `dist/`.
 
 Limits: GitHub Pages cannot set per-file response headers, so games that require `Content-Encoding` on pre-compressed files (e.g. Unity `.unityweb` builds) may need uncompressed assets, and files over 100 MB are rejected by the build.
+
+## Isolated admin staging preview
+
+Run `npm run dev:preview` with Docker available. It starts Postgres 16, applies the repository migrations to that local database, seeds the current 36-game catalog plus sample inquiries, roadmap items, acquisition requests, jobs, and a pending proposal, then serves the site and real admin function handlers on port 8080. All database records and admin sessions are local. The preview does not read `supabase/.env.local`, contact production Supabase, deploy functions, send emails, or open GitHub pull requests. Missing provider credentials leave AI and GitHub-backed actions unavailable rather than simulating success.
+
+Open `/Octo-Industries/BehindTheScenes/admin/` on the forwarded port 8080. In Codespaces, keep the forwarded port **Private**; the admin uses a same-origin API proxy, while the database and function bridge ports remain loopback-only. Get the local-only test password (and sample ticket access token) with `npm run dev:preview:credentials`; there is no username. Secrets are generated into ignored `supabase/.env.preview.local`, never served to the browser or included in the Pages build. The local database volume persists when the server stops; after stopping the preview with Ctrl+C, `npm run dev:preview:reset` removes only the named local preview database, containers, and ignored config.
+
+For an iPad, sign in to the same GitHub account in Safari, open the private forwarded port-8080 URL, and use the admin path above. Browser-emulated iPad viewport and touch checks do not replace testing on physical iPadOS Safari, external keyboards, trackpads, Split View, or Stage Manager. Run the function tests with `npm test`.
 
 ## Branding assets
 
