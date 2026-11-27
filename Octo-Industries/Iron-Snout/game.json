@@ -1,0 +1,22 @@
+{
+  "id": "iron-snout",
+  "addedAt": "2026-11-25T04:58:18.249Z",
+  "title": "Iron Snout",
+  "description": "Fight waves of wolves as a pig in this locally hosted HTML5 build.",
+  "category": "Action",
+  "tags": ["fighting", "arcade", "punching", "two-player"],
+  "acquisitionStatus": "local-payload",
+  "runtimeStatus": "local",
+  "networkDependency": "not-required",
+  "saveLevel": 0,
+  "saveStatus": "unsupported",
+  "testStatus": "partial",
+  "acquisitionEvidence": [
+    "MIT-licensed HTML5 game package from https://github.com/lpwm/ironsnout",
+    "LICENSE.third-party.txt records the source package license"
+  ],
+  "sourceUrl": "https://github.com/lpwm/ironsnout",
+  "launch": "index.html",
+  "bannerSource": "hub-banner-source.png",
+  "bannerFit": "contain"
+}

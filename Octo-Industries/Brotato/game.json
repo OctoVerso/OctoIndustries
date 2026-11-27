@@ -1,0 +1,22 @@
+{
+  "id": "brotato",
+  "addedAt": "2026-11-25T04:58:18.249Z",
+  "title": "Brotato",
+  "description": "A potato survivor game running from locally hosted Godot assets.",
+  "category": "Action",
+  "tags": ["survival", "roguelike", "action"],
+  "acquisitionStatus": "local-payload",
+  "runtimeStatus": "local",
+  "networkDependency": "optional",
+  "saveLevel": 0,
+  "saveStatus": "unsupported",
+  "testStatus": "partial",
+  "acquisitionEvidence": [
+    "Godot browser port and game data downloaded from the pinned shayderrr/newports commit.",
+    "The cross-origin-isolation helper is hosted locally with its MIT license."
+  ],
+  "sourceUrl": "https://github.com/shayderrr/newports/tree/49e46a50c1dbf11f78c7c9ee2659218d534ace63",
+  "launch": "index.html",
+  "bannerSource": "hub-banner-source.png",
+  "bannerFit": "contain"
+}

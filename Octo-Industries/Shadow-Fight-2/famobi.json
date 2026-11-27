@@ -1,6 +1,6 @@
 {
   "analytics": {
-    "enabled": true
+    "enabled": false
   },
   "auth": {
     "enabled": true,
@@ -13,7 +13,7 @@
     "enforce": true
   },
   "famobiTracking": {
-    "enabled": true
+    "enabled": false
   },
   "iap": {
     "products": [
@@ -691,7 +691,7 @@
     "privacy": true,
     "iap": true,
     "standalone": false,
-    "rewarded": true
+    "rewarded": false
   },
   "ads": {
     "initial": {
@@ -704,7 +704,7 @@
       "timeout": 250,
       "retry": 2000,
       "cooldown": 180000,
-      "enabled": true,
+      "enabled": false,
       "preload": 250,
       "initialCooldown": 120000,
       "eventIds": [
@@ -716,7 +716,7 @@
       ]
     },
     "rewarded": {
-      "enabled": true,
+      "enabled": false,
       "retry": 2000,
       "preload": 500,
       "timeout": 250,

@@ -48,7 +48,6 @@
       if(fallbackFailures.has(key)||fallbackFailures.size>=128)return;fallbackFailures.add(key);
       api.send('game_error',{error_category:category,error_code:token(event.detail?.code),loading_stage:stage,fatal:event.detail?.fatal===true,occurrences:1});
     });
-    const script=doc.createElement('script');script.id='turball-ga4';script.async=true;script.fetchPriority='low';script.src='https://www.googletagmanager.com/gtag/js?id='+measurementId;script.onload=()=>{win.TurballGaLoaded=true;};doc.head.append(script);
     return api;
   }
   return {install,measurementId};

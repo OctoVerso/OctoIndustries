@@ -7,31 +7,22 @@
     <meta name="description" content="Shadow Fight 2 is a nail-biting mix of classical Fighting and RPG. This game lets you equip countless lethal weapons and rare armor sets, and features dozens of lifelike-animated Martial Arts techniques! As the thrilling Fantasy storyline unfolds, you will fight numerous unique enemies and defeat evil demon bosses." />
     <meta name="robots" content="index,follow,max-image-preview:large" />
     <meta name="viewport" content="initial-scale=1, width=device-width, interactive-widget=resizes-content" />
-    <link rel="canonical" href="https://shadowfight2.com/play/" />
+    <link rel="canonical" href="./" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Shadow Fight 2 - Play Online" />
     <meta property="og:description" content="Shadow Fight 2 is a nail-biting mix of classical Fighting and RPG. This game lets you equip countless lethal weapons and rare armor sets, and features dozens of lifelike-animated Martial Arts techniques! As the thrilling Fantasy storyline unfolds, you will fight numerous unique enemies and defeat evil demon bosses." />
-    <meta property="og:url" content="https://shadowfight2.com/play/" />
-    <meta property="og:image" content="https://shadowfight2.com/images/logored.png" />
+    <meta property="og:url" content="./" />
+    <meta property="og:image" content="../branding/primary-logo.png" />
     <meta property="og:image:alt" content="Shadow Fight 2" />
 
-    <link rel="icon" href="https://shadowfight2.com/favicon.ico" sizes="any" />
-    <link rel="icon" type="image/png" href="https://shadowfight2.com/favicon.png" />
-    <link rel="apple-touch-icon" href="https://shadowfight2.com/apple-touch-icon.png" />
+    <link rel="icon" href="../branding/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" href="../branding/favicon.png" />
+    <link rel="apple-touch-icon" href="../branding/apple-touch-icon.png" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Shadow Fight 2 - Play Online" />
     <meta name="twitter:description" content="Shadow Fight 2 is a nail-biting mix of classical Fighting and RPG. This game lets you equip countless lethal weapons and rare armor sets, and features dozens of lifelike-animated Martial Arts techniques! As the thrilling Fantasy storyline unfolds, you will fight numerous unique enemies and defeat evil demon bosses." />
     <script data-measurement-id="G-XWDG5MR6KK" data-page-title="Shadow Fight 2 - Play Online">
 (function () {
-  var currentScript = document.currentScript;
-  var scriptDataset = currentScript ? currentScript.dataset : {};
-  var analyticsConfig = {
-    measurementId: scriptDataset.measurementId || '',
-    config: {
-      page_title: scriptDataset.pageTitle || document.title || 'Play Game',
-      page_path: window.location.pathname || '/play/'
-    }
-  };
   var documentElement = document.documentElement;
   var launchUrl = new URL(window.location.href);
   var fullscreenEvents = ['fullscreenchange', 'webkitfullscreenchange', 'MSFullscreenChange'];
@@ -47,39 +38,6 @@
     var nextUrl = launchUrl.pathname + launchUrl.search + launchUrl.hash;
     window.history.replaceState({}, '', nextUrl);
     hasCleanUrl = true;
-  }
-
-  function resolveMeasurementId() {
-    var measurementId = analyticsConfig.measurementId || '';
-
-    if (!measurementId || measurementId === '__SHF2_GA_MEASUREMENT_ID__') {
-      return '';
-    }
-
-    return measurementId;
-  }
-
-  function initAnalytics() {
-    var measurementId = resolveMeasurementId();
-
-    if (!measurementId) {
-      return;
-    }
-
-    window.dataLayer = window.dataLayer || [];
-    window.gtag = function () {
-      window.dataLayer.push(arguments);
-    };
-
-    window.gtag('js', new Date());
-
-    var gaConfig = analyticsConfig.config || {};
-    window.gtag('config', measurementId, gaConfig);
-
-    var gaScript = document.createElement('script');
-    gaScript.async = true;
-    gaScript.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(measurementId);
-    document.head.appendChild(gaScript);
   }
 
   function isMobileLaunch() {
@@ -201,7 +159,6 @@
     }
   };
 
-  initAnalytics();
   initFullscreenLaunch();
 })();
 
@@ -211,8 +168,8 @@
         "@context": "https://schema.org",
         "@type": "VideoGame",
         "name": "Shadow Fight 2",
-        "url": "https://shadowfight2.com/play/",
-        "image": "https://shadowfight2.com/images/logored.png",
+        "url": "./",
+        "image": "../branding/primary-logo.png",
         "description": "Shadow Fight 2 is a fighting RPG with online play, cinematic battles, martial arts combat, and extensive weapon and armor progression.",
         "genre": [
           "Fighting",
@@ -226,27 +183,6 @@
       }
     </script>
     <!-- microsite-play-head:end -->
-  <script>
-    console.log("A/B Test Snippet Active");
-    if (Math.random() >= 0.5) {
-      console.log("A/B Test: Experiement group (ReklamUp)");
-      window.EOS_SDK_GAM_OVERRIDE = {
-        parentNetworkCode: "90851098",
-        childNetworkCode: "23356687927",
-        interstitialUnit: "interstitial",
-        rewardedUnit: "rewarded",
-        bannerUnit: "banner"
-      }
-    } else {
-      console.log("A/B Test: Control group (Famobi)");
-      window.EOS_SDK_GAM_OVERRIDE = {
-        parentNetworkCode: "37336410",
-        interstitialUnit: "eos/default-h5-game-interstitial",
-        rewardedUnit: "eos/default-h5-game-rewarded",
-        bannerUnit: "eos/default-h5-game-banner"
-      }
-    }
-  </script>  
   <script src="./game-interface.js"></script>
 		<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 		<meta http-equiv="Pragma" content="no-cache">
@@ -265,7 +201,6 @@
 
 		<script>
 			window.GameInterface.init([
-        "bnr-test-inject-261010.js",
 				"fflate.303bdba2.js",
 				"lzstring.4a13d534.js",
 				"imageloader.f1250ad7.js",

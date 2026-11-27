@@ -17,7 +17,7 @@ function createDb(seed = {}) {
     const state = { op: 'select', filters: [], lessThan: [], order: null, range: null, payload: null, count: false, head: false, ignoreDuplicates: false };
     const run = () => {
       const rows = tables[name];
-      const matches = (row) => state.filters.every(([column, values]) => values.includes(row[column]))
+      const matches = (row) => state.filters.every(([column, values]) => values.includes(row[column] ?? null))
         && state.lessThan.every(([column, value]) => row[column] < value);
       if (state.op === 'insert') {
         const added = [state.payload].flat().map((row) => (name === 'activity' ? { id: activityId++, ...row } : { ...row }));
@@ -34,8 +34,9 @@ function createDb(seed = {}) {
         return { data: added, error: null };
       }
       if (state.op === 'update') {
-        rows.filter(matches).forEach((row) => Object.assign(row, state.payload));
-        return { data: null, error: null };
+        const changed = rows.filter(matches);
+        changed.forEach((row) => Object.assign(row, state.payload));
+        return { data: changed.map((row) => ({ ...row })), error: null };
       }
       if (state.op === 'delete') {
         tables[name] = rows.filter((row) => !matches(row));
@@ -56,6 +57,7 @@ function createDb(seed = {}) {
       update(payload) { state.op = 'update'; state.payload = payload; return api; },
       delete() { state.op = 'delete'; return api; },
       eq(column, value) { state.filters.push([column, [value]]); return api; },
+      is(column, value) { state.filters.push([column, [value]]); return api; },
       in(column, values) { state.filters.push([column, values]); return api; },
       lt(column, value) { state.lessThan.push([column, value]); return api; },
       order(column, { ascending = true } = {}) { state.order = [column, ascending]; return api; },
@@ -306,6 +308,7 @@ test('admin catalog sync adds new draft games once and preserves existing record
   const first = await call(admin, 'admin', '/catalog/sync', { method: 'POST', token, body: { games: [addition] } });
   assert.deepEqual(await first.json(), { synced: 1, warning: '' });
   assert.equal(db.tables.games.find((row) => row.id === 'new-game').status, 'draft');
+  assert.equal(db.tables.games.find((row) => row.id === 'new-game').version, '1.0.0');
   assert.equal(db.tables.games.find((row) => row.id === 'new-game').launch, 'Octo-Industries/New-Game/index.html');
   assert.equal(db.tables.games.find((row) => row.id === 'new-game').thumbnail, 'Octo-Industries/New-Game/hub-banner.svg?v=0123456789abcdef');
   const dashboard = await (await call(admin, 'admin', '/dashboard', { token })).json();
@@ -319,7 +322,9 @@ test('admin catalog sync adds new draft games once and preserves existing record
   assert.equal((await call(admin, 'admin', '/catalog/sync', { method: 'POST', body: { games: [addition] } })).status, 401);
 });
 
-test('admin catalog sync registers all 33 generated games when 18 already exist', async () => {
+test('admin catalog sync registers the full generated catalog when 18 already exist', async () => {
+  assert.ok(generatedCatalog.length > 0);
+  assert.ok(generatedCatalog.every((entry) => typeof entry.version === 'string' && entry.version.trim()));
   const existingGames = generatedCatalog.slice(0, 18).map((entry) => ({
     id: entry.id,
     title: entry.title,
@@ -342,10 +347,10 @@ test('admin catalog sync registers all 33 generated games when 18 already exist'
     body: { games: missingGames },
   });
   assert.equal(syncResponse.status, 200);
-  assert.deepEqual(await syncResponse.json(), { synced: 15, warning: '' });
+  assert.deepEqual(await syncResponse.json(), { synced: missingGames.length, warning: '' });
 
   const dashboard = await (await call(admin, 'admin', '/dashboard', { token })).json();
-  assert.equal(dashboard.counts.total, 33);
+  assert.equal(dashboard.counts.total, generatedCatalog.length);
   assert.deepEqual(
     new Set(dashboard.games.map((entry) => entry.id)),
     new Set(generatedCatalog.map((entry) => entry.id)),
@@ -399,7 +404,7 @@ test('catalog sync returns database errors with a useful reason', async () => {
   assert.equal(response.status, 502);
   assert.deepEqual(await response.json(), {
     error: 'The database request failed.',
-    reason: 'Could not sync games from the generated catalog. permission denied for table games',
+    reason: 'Could not sync catalog games: 8 Ball Pool (8-ball-pool-online) permission denied for table games',
   });
   db = database;
 });
@@ -621,4 +626,42 @@ test('password hash secret tolerates line breaks and zero-width characters insid
   const value = `pbkdf2${'$'}120000${'$'}${salt}${'$'}${hash}`;
   assert.ok(parsePasswordHash(`${value.slice(0, 20)}\n${value.slice(20, 60)}\u200b${value.slice(60)}\r\n`));
   assert.equal(parsePasswordHash(`pbkdf2${'$'}120000${'$'}${salt}a${'$'}${hash}`), null);
+});
+
+test('repeated catalog sync never resets published metadata on the conflicting row', async () => {
+  db = createDb(); const { body: { token } } = await signIn();
+  const input = { ...generatedCatalog[0], title: 'Source title' };
+  await call(admin, 'admin', '/catalog/sync', { method: 'POST', token, body: { games: [input] } });
+  Object.assign(db.tables.games[0], { title: 'Curated title', status: 'published', offline_ready: true });
+  await call(admin, 'admin', '/catalog/sync', { method: 'POST', token, body: { games: [input] } });
+  assert.equal(db.tables.games[0].title, 'Curated title'); assert.equal(db.tables.games[0].status, 'published'); assert.equal(db.tables.games[0].offline_ready, true);
+});
+test('feedback bulk reports actual rows and excludes deleted records', async () => {
+  const ids = ['a', 'b', 'c'].map((value) => value.repeat(32));
+  db = createDb({ feedback: [{ id: ids[0], status: 'new' }, { id: ids[1], status: 'new', deleted_at: '2026-01-01' }] });
+  const { body: { token } } = await signIn();
+  const response = await call(admin, 'admin', '/feedback/bulk', { method: 'POST', token, body: { ids, status: 'closed' } });
+  const result = await response.json(); assert.equal(result.updated, 1); assert.deepEqual(result.updatedIds, [ids[0]]); assert.deepEqual(result.failedIds, ids.slice(1));
+  assert.equal(db.tables.feedback[1].status, 'new');
+  assert.equal((await call(admin, 'admin', '/feedback/bulk', { method: 'POST', token, body: { ids, archived: 'false' } })).status, 400);
+});
+test('dashboard reads and ticket diagnostics do not change inquiry states or catalog records', async () => {
+  const id = 'd'.repeat(32); db = createDb({ games: [game('safe')], feedback: [{ id, status: 'new', message: 'Issue', created_at: '2026-01-01' }] });
+  const { body: { token } } = await signIn(); const before = structuredClone(db.tables.feedback);
+  await call(admin, 'admin', '/dashboard', { token }); await call(admin, 'admin', `/feedback/${id}/conversation`, { token });
+  assert.deepEqual(db.tables.feedback, before); assert.equal(db.tables.games.length, 1);
+});
+test('failed secondary ticket audit is disclosed without misreporting a committed archive', async () => {
+  const id = 'e'.repeat(32); db = createDb({ feedback: [{ id, status: 'new' }] }); const { body: { token } } = await signIn();
+  const from = db.from; db.from = (name) => name === 'feedback_activity' ? { insert: async () => ({ data: null, error: { code: '42P01' } }) } : from(name);
+  const response = await call(admin, 'admin', `/feedback/${id}/archive`, { method: 'POST', token });
+  assert.equal(response.status, 200); assert.match((await response.json()).warning, /audit/); assert.ok(db.tables.feedback[0].archived_at);
+});
+
+test('stale metadata edits fail with conflict without overwriting newer data', async () => {
+  db = createDb({ games: [game('alpha')] }); const { body: { token } } = await signIn();
+  const response = await call(admin, 'admin', '/games/alpha', { method: 'PATCH', token, headers: { 'x-record-version': '2025-01-01T00:00:00Z' }, body: { title: 'Stale title' } });
+  assert.equal(response.status, 409); assert.equal(db.tables.games[0].title, 'ALPHA');
+  const current = await call(admin, 'admin', '/games/alpha', { method: 'PATCH', token, headers: { 'x-record-version': db.tables.games[0].updated_at }, body: { title: 'New title' } });
+  assert.equal(current.status, 200); assert.equal(db.tables.games[0].title, 'New title');
 });

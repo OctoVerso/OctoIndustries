@@ -5,6 +5,8 @@ node_modules/
 .env
 .env.*
 !.env.example
+!supabase/.env.local.example
+supabase/.env.preview.local
 dist/
 coverage/
 **/__pycache__/
@@ -18,3 +20,5 @@ feedback.json
 d1-backup.sql
 tables.json
 supabase/.temp/
+Octo-Industries/Iron-Snout/html5game/crash.log
+Octo-Industries/Iron-Snout/html5game/inflate.min.js.map

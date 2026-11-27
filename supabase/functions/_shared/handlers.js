@@ -46,10 +46,14 @@ function catalogGameRow(game) {
     || typeof game.featured !== 'boolean') {
     throw httpError('Each catalog game must include a valid id, title, description, category, tags, and featured flag.', 400);
   }
+  const version = typeof game.version === 'string' && game.version.trim()
+    ? game.version.trim().slice(0, 120)
+    : '1.0.0';
   return {
     id: game.id,
     title: game.title.trim(),
     description: game.description.trim(),
+    version,
     category: game.category.trim(),
     tags: game.tags,
     featured: game.featured,
@@ -58,6 +62,19 @@ function catalogGameRow(game) {
     offline_ready: false,
     status: 'draft',
   };
+}
+
+
+// Conditional writes prevent a stale editor from silently replacing a newer record.
+async function updateRecord(db, table, id, changes, request) {
+  let query = db.from(table).update(changes).eq('id', id);
+  const version = request?.headers.get('x-record-version');
+  if (version) {
+    if (!Number.isFinite(Date.parse(version))) throw httpError('Invalid record version.', 400);
+    query = query.eq('updated_at', version);
+  }
+  const rows = must(await query.select('id'));
+  if (!rows.length) throw httpError('This record changed or is no longer available. Refresh it before saving again.', 409);
 }
 
 async function activityList(db, limit, exposeReason = false) {
@@ -75,7 +92,7 @@ export const catalog = serve('catalog', async ({ db, method }) => {
   return json(rows.map(publicGame), 200, { 'Cache-Control': 'public, max-age=60' });
 });
 
-const closedTicketStatuses = ['closed', 'rejected', 'implemented'];
+const closedTicketStatuses = ['closed', 'rejected', 'implemented', 'resolved'];
 const validInboxFolders = ['inbox', 'starred', 'pinned', 'archived', 'trash', 'team'];
 
 function normalizeInboxFolder(value) {
@@ -103,6 +120,9 @@ function normalizeBooleanFlag(value, fallback = false) {
 
 function buildInboxUpdate(body, updatedAt) {
   const update = {};
+  for (const key of ['archived', 'deleted', 'read', 'pinned', 'starred']) {
+    if (Object.hasOwn(body, key) && typeof body[key] !== 'boolean') throw httpError(`${key} must be a boolean.`, 400);
+  }
   if (Object.prototype.hasOwnProperty.call(body, 'folder')) {
     update.folder = normalizeInboxFolder(body.folder);
   }
@@ -161,9 +181,12 @@ async function ticketMessages(db, id) {
 async function addTicketMessage(db, id, authorType, message, status) {
   const now = new Date().toISOString();
   must(await db.from('feedback_conversations').insert({ feedback_id: id, author_type: authorType, message, created_at: now }));
-  must(await db.from('feedback').update({ status, updated_at: now }).eq('id', id));
-  await recordTicketActivity(db, id, `${authorType}_reply`, authorType);
-  return now;
+  const warnings = [];
+  const result = await db.from('feedback').update({ status, updated_at: now }).eq('id', id);
+  if (result.error) warnings.push('Your reply was saved, but the ticket status could not be updated. Refresh before making further changes.');
+  try { await recordTicketActivity(db, id, authorType + '_reply', authorType); }
+  catch { warnings.push('The reply was saved, but its audit entry could not be recorded.'); }
+  return { updatedAt: now, status: result.error ? null : status, warning: warnings.join(' ') };
 }
 
 async function ticketForAccess(db, request, id) {
@@ -197,8 +220,8 @@ export const feedback = serve('feedback', async ({ request, db, method, path }) 
     if (method === 'POST' && messagesPath) {
       if (closedTicketStatuses.includes(ticket.status) || ticket.archived) throw httpError('This ticket is closed to replies.', 409);
       const message = validateConversationMessage((await bodyJson(request)).message);
-      const updatedAt = await addTicketMessage(db, id, 'user', message, 'under_review');
-      return json({ sent: true, status: 'under_review', updatedAt }, 201);
+      const result = await addTicketMessage(db, id, 'user', message, 'under_review');
+      return json({ sent: true, ...result }, 201);
     }
     throw httpError('Method not allowed.', 405);
   }
@@ -228,7 +251,10 @@ export const feedback = serve('feedback', async ({ request, db, method, path }) 
     }, 201);
   }
   // The inquiry_tickets migration has not been applied yet: store the submission without a ticket.
-  console.error('Ticketed feedback insert failed; falling back to the legacy columns.', ticketed.error);
+  if (!['42703', 'PGRST204'].includes(ticketed.error.code)) {
+    must(ticketed, 'Could not store feedback.');
+  }
+  console.warn('Ticket schema unavailable; using legacy submission storage.');
   must(await db.from('feedback').insert(row), 'Could not store feedback.');
   return json({ id: row.id, status: 'new' }, 201);
 });
@@ -287,12 +313,14 @@ export const roadmap = serve('roadmap', async ({ request, env, db, method, path 
     const { status } = validate({ status: body.status }, true);
     if (!status) throw httpError('Choose a supported roadmap status.', 400);
     const ids = [...new Set(body.ids)];
-    const existing = must(await db.from('roadmap').select('id, title').in('id', ids));
-    if (existing.length) {
-      must(await db.from('roadmap').update({ status, updated_at: now }).in('id', existing.map((item) => item.id)));
-      await logActivity(db, `Updated ${existing.length} roadmap items to ${status}`);
+    const changed = must(await db.from('roadmap').update({ status, updated_at: now }).in('id', ids).select('id'));
+    const updatedIds = changed.map((item) => item.id);
+    let warning = '';
+    if (updatedIds.length) {
+      try { await logActivity(db, 'Updated ' + updatedIds.length + ' roadmap items to ' + status); }
+      catch { warning = 'Roadmap changes saved, but activity logging failed.'; }
     }
-    return json({ updated: existing.length, status });
+    return json({ updated: updatedIds.length, updatedIds, failedIds: ids.filter((id) => !updatedIds.includes(id)), status, warning });
   }
   const match = /^\/([a-z0-9-]{1,80})$/.exec(path);
   if (!match) throw httpError('Roadmap endpoint not found.', 404);
@@ -302,7 +330,7 @@ export const roadmap = serve('roadmap', async ({ request, env, db, method, path 
     const row = validate(await bodyJson(request), true);
     if (!Object.keys(row).length) throw httpError('No roadmap fields to update.', 400);
     row.updated_at = now;
-    must(await db.from('roadmap').update(row).eq('id', existing.id));
+    await updateRecord(db, 'roadmap', existing.id, row, request);
     await logActivity(db, `Updated roadmap item ${existing.title}`);
     return json(roadmapFromRow({ ...existing, ...row }, true));
   }
@@ -470,7 +498,7 @@ async function chat({ request, env, db }) {
   const context = {
     games: games.map(({ id, title, category, status, offlineReady }) => ({ id, title, category, status, offlineReady })),
     recentJobs: (await listJobs(db, 15)).map(({ type, gameId, status, message, createdAt }) => ({ type, gameId, status, message, createdAt })),
-    recentActivity: await activityList(db, 10),
+    // Activity text and private inquiry data are deliberately excluded from provider context.
   };
   let response;
   try {
@@ -486,7 +514,7 @@ async function chat({ request, env, db }) {
       signal: AbortSignal.timeout(35_000),
     });
   } catch (error) {
-    console.error('Gemini request failed:', error);
+    console.warn('Gemini request failed; provider unreachable.');
     throw httpError('Could not reach Google Gemini. Try again in a moment.', 502);
   }
   if (!response.ok) {
@@ -514,7 +542,7 @@ async function healthCheck({ env, db }, game) {
   }
   const checks = [
     { name: 'Launch file exists', passed: reachable },
-    { name: 'Thumbnail available', passed: Boolean(game.thumbnail) },
+    { name: 'Thumbnail path configured (not fetched)', passed: Boolean(game.thumbnail) },
     { name: 'Metadata complete', passed: Boolean(game.title && game.description && game.category) },
   ];
   const result = {
@@ -547,19 +575,35 @@ export const admin = serve('admin', async (context) => {
     if (!Array.isArray(body.games) || body.games.length < 1 || body.games.length > 250) {
       throw httpError('Send between 1 and 250 catalog games to sync.', 400);
     }
-    const rows = body.games.map(catalogGameRow);
+    const rows = body.games.map((game, index) => {
+      try {
+        return catalogGameRow(game);
+      } catch (error) {
+        const name = typeof game?.title === 'string' && game.title.trim()
+          ? game.title.trim()
+          : typeof game?.id === 'string' && game.id
+            ? game.id
+            : `catalog entry ${index + 1}`;
+        throw httpError(`Could not prepare catalog game "${name}": ${error.details || error.message}`, 400);
+      }
+    });
     if (new Set(rows.map((game) => game.id)).size !== rows.length) {
       throw httpError('Catalog sync cannot include duplicate game IDs.', 400);
     }
-    const synced = must(await db.from('games')
-      .upsert(rows, { onConflict: 'id', ignoreDuplicates: true })
-      .select('id'), 'Could not sync games from the generated catalog.', true);
+    let syncResult;
+    try {
+      syncResult = await db.from('games').upsert(rows, { onConflict: 'id', ignoreDuplicates: true }).select('id');
+    } catch (error) {
+      const gameNames = rows.map((game) => `${game.title} (${game.id})`).join(', ');
+      throw httpError(`Could not sync catalog games [${gameNames}]: ${error.message}`, 502);
+    }
+    const synced = must(syncResult, `Could not sync catalog games: ${rows.map((game) => `${game.title} (${game.id})`).join(', ')}`, true);
     let warning = '';
     if (synced.length) {
       try {
         await logActivity(db, `Synced ${synced.length} new game${synced.length === 1 ? '' : 's'} from the generated catalog`);
       } catch (error) {
-        console.error('Games synced, but the catalog sync activity could not be recorded.', error);
+        console.warn('Games synced, but activity recording failed.');
         warning = 'Games were synced, but the activity log could not be updated.';
       }
     }
@@ -597,7 +641,7 @@ export const admin = serve('admin', async (context) => {
         true,
       ).map((row) => roadmapFromRow(row, true)),
       proposals: pending.map(proposalFromRow),
-      capabilities: { changeProposals: Boolean(env.GITHUB_TOKEN) },
+      capabilities: { changeProposals: Boolean(env.GITHUB_TOKEN), aiChat: Boolean(env.GEMINI_API_KEY) },
     });
   }
   if (path === '/feedback' && method === 'GET') {
@@ -605,7 +649,10 @@ export const admin = serve('admin', async (context) => {
     return json(rows.filter((row) => !row.deleted_at).map(normalizeFeedback));
   }
   // Status and note changes keep working before the inquiry_tickets migration; the audit trail is best effort.
-  const noteTicketActivity = (...args) => recordTicketActivity(db, ...args).catch(() => {});
+  const noteTicketActivity = async (...args) => {
+    try { await recordTicketActivity(db, ...args); return ''; }
+    catch { console.warn('Ticket mutation committed; audit recording failed.'); return 'The change was saved, but its audit entry could not be recorded. Contact a maintainer.'; }
+  };
   if (path === '/feedback/bulk' && method === 'POST') {
     const body = await bodyJson(request);
     if (!Array.isArray(body.ids) || !body.ids.length || body.ids.length > 50
@@ -622,13 +669,15 @@ export const admin = serve('admin', async (context) => {
     if (Object.keys(update).length === 0 && !status && !priority) {
       throw httpError('Choose a supported bulk action for the selected inquiries.', 400);
     }
-    must(await db.from('feedback').update({ ...update, updated_at: updatedAt }).in('id', ids));
-    if (status) await noteTicketActivity(ids, `status_${status}`, 'admin');
-    if (priority) await noteTicketActivity(ids, `priority_${priority}`, 'admin');
+    const changed = must(await db.from('feedback').update({ ...update, updated_at: updatedAt }).in('id', ids).is('deleted_at', null).select('id'));
+    const updatedIds = changed.map((row) => row.id);
+    let warning = '';
+    if (status && updatedIds.length) warning = await noteTicketActivity(updatedIds, `status_${status}`, 'admin');
+    if (priority && updatedIds.length) warning = await noteTicketActivity(updatedIds, `priority_${priority}`, 'admin') || warning;
     if (Object.prototype.hasOwnProperty.call(body, 'archived') || Object.prototype.hasOwnProperty.call(body, 'deleted')) {
-      await noteTicketActivity(ids, body.archived ? 'bulk_archive' : body.deleted ? 'bulk_trash' : 'bulk_update', 'admin');
+      if (updatedIds.length) warning = await noteTicketActivity(updatedIds, body.archived ? 'bulk_archive' : body.deleted ? 'bulk_trash' : 'bulk_update', 'admin') || warning;
     }
-    return json({ updated: ids.length, status, priority, folder: update.folder, archived: body.archived, deleted: body.deleted });
+    return json({ updated: updatedIds.length, updatedIds, failedIds: ids.filter((id) => !updatedIds.includes(id)), warning, status, priority, folder: update.folder, archived: body.archived, deleted: body.deleted });
   }
   const ticketAdminRoute = /^\/feedback\/([a-f\d]{32})(?:\/(status|notes|priority|conversation|reply|archive|unarchive|read|unread|pin|unpin|star|unstar|folder|assign|trash|restore))?$/.exec(path);
   if (ticketAdminRoute) {
@@ -648,19 +697,19 @@ export const admin = serve('admin', async (context) => {
     if (method === 'POST' && action === 'reply') {
       if (!row.access_token_hash) throw httpError('This legacy inquiry has no user access token.', 409);
       const message = validateConversationMessage((await bodyJson(request)).message);
-      return json({ sent: true, status: 'awaiting_user_reply', updatedAt: await addTicketMessage(db, id, 'admin', message, 'awaiting_user_reply') }, 201);
+      return json({ sent: true, ...await addTicketMessage(db, id, 'admin', message, 'awaiting_user_reply') }, 201);
     }
     if (method === 'POST' && (action === 'archive' || action === 'unarchive')) {
-      must(await db.from('feedback').update({ archived_at: action === 'archive' ? updatedAt : null, updated_at: updatedAt }).eq('id', id));
-      await recordTicketActivity(db, id, action, 'admin');
-      return json({ id, archived: action === 'archive', updatedAt });
+      await updateRecord(db, 'feedback', id, { archived_at: action === 'archive' ? updatedAt : null, updated_at: updatedAt }, request);
+      const warning = await noteTicketActivity(id, action, 'admin');
+      return json({ id, archived: action === 'archive', updatedAt, warning });
     }
     if (method === 'POST' && (action === 'trash' || action === 'restore')) {
       const deleted = action === 'trash';
       const next = { deleted_at: deleted ? updatedAt : null, updated_at: updatedAt };
       must(await db.from('feedback').update(next).eq('id', id));
-      await recordTicketActivity(db, id, deleted ? 'deleted' : 'restored', 'admin');
-      return json({ id, deleted, updatedAt, folder: row.folder || 'inbox' });
+      const warning = await noteTicketActivity(id, deleted ? 'deleted' : 'restored', 'admin');
+      return json({ id, deleted, updatedAt, folder: row.folder || 'inbox', warning });
     }
     if (method === 'POST' && (action === 'read' || action === 'unread')) {
       const active = action === 'read';
@@ -685,28 +734,28 @@ export const admin = serve('admin', async (context) => {
       return json(await applyInboxAction(db, id, assignedTo ? 'assigned' : 'unassigned', { assignedTo }, { assigned_admin: assignedTo }));
     }
     if (method === 'DELETE' && !action) {
-      must(await db.from('feedback').update({ deleted_at: updatedAt, updated_at: updatedAt }).eq('id', id));
-      await recordTicketActivity(db, id, 'deleted', 'admin');
-      return json({ deleted: true, id, updatedAt });
+      await updateRecord(db, 'feedback', id, { deleted_at: updatedAt, updated_at: updatedAt }, request);
+      const warning = await noteTicketActivity(id, 'deleted', 'admin');
+      return json({ deleted: true, id, updatedAt, warning });
     }
     if (method === 'PATCH' && (!action || ['status', 'notes', 'priority'].includes(action))) {
       const body = await bodyJson(request);
       if (action === 'notes') {
         const adminNotes = validateAdminNotes(body.adminNotes);
-        must(await db.from('feedback').update({ admin_notes: adminNotes, updated_at: updatedAt }).eq('id', id));
-        await noteTicketActivity(id, 'admin_note_updated', 'admin');
-        return json({ id, adminNotes, updatedAt });
+        await updateRecord(db, 'feedback', id, { admin_notes: adminNotes, updated_at: updatedAt }, request);
+        const warning = await noteTicketActivity(id, 'admin_note_updated', 'admin');
+        return json({ id, adminNotes, updatedAt, warning });
       }
       if (action === 'priority') {
         const priority = validateFeedbackPriority(body.priority);
-        must(await db.from('feedback').update({ priority, updated_at: updatedAt }).eq('id', id));
-        await recordTicketActivity(db, id, `priority_${priority}`, 'admin');
-        return json({ id, priority, updatedAt });
+        await updateRecord(db, 'feedback', id, { priority, updated_at: updatedAt }, request);
+        const warning = await noteTicketActivity(id, `priority_${priority}`, 'admin');
+        return json({ id, priority, updatedAt, warning });
       }
       const status = validateFeedbackStatus(body.status);
-      must(await db.from('feedback').update({ status, updated_at: updatedAt }).eq('id', id));
-      await noteTicketActivity(id, `status_${status}`, 'admin');
-      return json({ id, status, updatedAt });
+      await updateRecord(db, 'feedback', id, { status, updated_at: updatedAt }, request);
+      const warning = await noteTicketActivity(id, `status_${status}`, 'admin');
+      return json({ id, status, updatedAt, warning });
     }
     throw httpError('Method not allowed.', 405);
   }
@@ -728,7 +777,7 @@ export const admin = serve('admin', async (context) => {
       const body = await bodyJson(request);
       if (typeof body.published !== 'boolean') throw httpError('published must be a boolean.', 400);
       const status = body.published ? 'published' : 'draft';
-      must(await db.from('games').update({ status, updated_at: now }).eq('id', id));
+      await updateRecord(db, 'games', id, { status, updated_at: now }, request);
       await logActivity(db, `${body.published ? 'Published' : 'Unpublished'} ${game.title}`);
       return json({ ...game, status, updatedAt: now });
     }
@@ -750,7 +799,7 @@ export const admin = serve('admin', async (context) => {
         }
       }
       const update = { ...body, updated_at: now };
-      must(await db.from('games').update(update).eq('id', id));
+      await updateRecord(db, 'games', id, update, request);
       await logActivity(db, `Updated metadata for ${game.title}`);
       return json({ ...game, ...body, updatedAt: now });
     }

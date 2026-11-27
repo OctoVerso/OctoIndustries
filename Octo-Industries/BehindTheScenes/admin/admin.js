@@ -3,16 +3,30 @@ const dashboardView = document.querySelector('#dashboard-view');
 const loginForm = document.querySelector('#login-form');
 const loginMessage = document.querySelector('#login-message');
 const logoutButton = document.querySelector('#logout-button');
+if (!window.OCTO_CONFIG?.functionsUrl) {
+  document.querySelector('#login-title').textContent = 'Admin preview only';
+  document.querySelector('#login-description').textContent = 'The dashboard requires an approved API connection.';
+  loginView.classList.add('is-preview-unavailable');
+  loginForm.hidden = true;
+  document.querySelector('#login-preview-unavailable').hidden = false;
+}
 const dashboardError = document.querySelector('#dashboard-error');
 const dashboardErrorMessage = document.querySelector('#dashboard-error-message');
 const dashboardRetryButton = document.querySelector('#dashboard-retry');
 const toast = document.querySelector('#toast');
-let sessionToken = sessionStorage.getItem('octoAdminToken') || '';
+let sessionToken = '';
+try { sessionToken = sessionStorage.getItem('octoAdminToken') || ''; } catch { /* Session stays in memory. */ }
+let sessionGeneration = 0;
+const pendingMutations = new Set();
+const feedbackDrafts = new Map();
 
 function storeToken(token) {
   sessionToken = token || '';
-  if (sessionToken) sessionStorage.setItem('octoAdminToken', sessionToken);
-  else sessionStorage.removeItem('octoAdminToken');
+  sessionGeneration += 1;
+  try {
+    if (sessionToken) sessionStorage.setItem('octoAdminToken', sessionToken);
+    else sessionStorage.removeItem('octoAdminToken');
+  } catch { /* Continue with the in-memory session. */ }
 }
 let dashboard;
 let roadmapItems = [];
@@ -33,10 +47,10 @@ const roadmapStatusLabels = {
 };
 const roadmapPriorityOrder = { urgent: 0, high: 1, normal: 2, low: 3 };
 const adminViews = {
-  overview: { title: 'Admin Dashboard', description: 'Your compact operations overview.' },
+  overview: { title: 'Overview', description: 'A clear view of your library, community and operations.' },
   games: { title: 'Game Library', description: 'Search, filter, update metadata, publish, and run game health checks.' },
   community: { title: 'Community Inbox', description: 'Review suggestions and issues, update status, and save private notes.' },
-  operations: { title: 'Operations', description: 'Inspect source pages, review background jobs, and monitor admin activity.' },
+  operations: { title: 'Operations Center', description: 'Inspect source pages, review background jobs, and monitor admin activity.' },
   ai: { title: 'AI Center', description: 'Ask about the library and review proposed changes before approval.' },
   roadmap: { title: 'Roadmap', description: 'Track, prioritize, and publish platform development updates from one source of truth.' },
 };
@@ -170,15 +184,33 @@ function renderChatMarkdown(text) {
 }
 
 async function api(path, options = {}) {
+  const writing = !['GET', 'HEAD'].includes((options.method || 'GET').toUpperCase());
+  const key = path.split('/').slice(0, 4).join('/');
+  if (writing && pendingMutations.has(key)) throw new Error('An action is already running here. Wait for its result before trying again.');
+  if (writing) pendingMutations.add(key);
+  try { return await requestApi(path, options); }
+  finally { if (writing) pendingMutations.delete(key); }
+}
+
+async function requestApi(path, options = {}) {
   const headers = new Headers(options.headers || {});
   if (options.body !== undefined) headers.set('Content-Type', 'application/json');
   if (sessionToken) headers.set('Authorization', `Bearer ${sessionToken}`);
   const method = (options.method || 'GET').toUpperCase();
+  const record = /^\/api\/admin\/(games|feedback|roadmap)\/([^/]+)(?:\/(publish|status|notes|priority|archive|unarchive))?$/.exec(path);
+  if (record && method !== 'GET') {
+    const entries = record[1] === 'games' ? dashboard?.games : record[1] === 'feedback' ? feedbackEntries : roadmapItems;
+    const current = entries?.find((item) => item.id === decodeURIComponent(record[2]));
+    const editorVersion = record[1] === 'games' && method === 'PATCH' ? document.querySelector('#edit-form').dataset.version : record[1] === 'roadmap' && method === 'PATCH' && document.querySelector('#roadmap-dialog').open ? document.querySelector('#roadmap-form').dataset.version : null;
+    if (editorVersion || current?.updatedAt) headers.set('x-record-version', editorVersion || current.updatedAt);
+  }
   let response;
+  const generation = sessionGeneration;
   try {
-    response = await fetch(window.OCTO_CONFIG.apiUrl(path), { ...options, headers });
+    response = await fetch(window.OCTO_CONFIG.apiUrl(path), { ...options, headers, signal: options.signal || AbortSignal.timeout(45000) });
+    if (generation !== sessionGeneration) throw new Error('Session changed. Discarded an outdated response.');
   } catch (cause) {
-    const error = new Error(cause.message || 'Network request failed.');
+    const error = new Error(cause.name === 'TimeoutError' ? 'The request timed out. Refresh to check its outcome before retrying a change.' : cause.message || 'Network request failed.');
     error.endpoint = `${method} ${path}`;
     throw error;
   }
@@ -199,6 +231,8 @@ async function api(path, options = {}) {
     error.details = body?.details || body?.reason || '';
     throw error;
   }
+  if (!body || typeof body !== 'object') throw responseShapeError(path, 'expected a JSON response; refresh before retrying changes');
+  if (body.warning) showToast(body.warning);
   return body;
 }
 
@@ -206,9 +240,15 @@ async function syncCatalogGames(games) {
   let synced = 0;
   const warnings = [];
   for (let index = 0; index < games.length; index += 25) {
+    const batch = games.slice(index, index + 25).map((game) => ({
+      ...game,
+      version: typeof game?.version === 'string' && game.version.trim()
+        ? game.version.trim().slice(0, 120)
+        : '1.0.0',
+    }));
     const result = await api('/api/admin/catalog/sync', {
       method: 'POST',
-      body: JSON.stringify({ games: games.slice(index, index + 25) }),
+      body: JSON.stringify({ games: batch }),
     });
     if (!Number.isInteger(result?.synced) || result.synced < 0) {
       throw responseShapeError('/api/admin/catalog/sync', 'expected a synced game count');
@@ -249,10 +289,25 @@ function showToast(message) {
   toastTimer = setTimeout(() => toast.classList.remove('is-visible'), 3200);
 }
 
+function showUndo(message, undo) {
+  showToast(message);
+  clearTimeout(toastTimer);
+  const button = document.createElement('button'); button.className = 'small-button'; button.type = 'button'; button.textContent = 'Undo';
+  button.addEventListener('click', async () => { button.disabled = true; try { await undo(); showToast('Ticket restored.'); } catch (error) { showToast(error.message); } });
+  toast.append(' ', button);
+  toastTimer = setTimeout(() => toast.classList.remove('is-visible'), 15000);
+}
+
 function showLogin(message = '') {
   clearInterval(refreshTimer);
   refreshInterval = null;
   storeToken('');
+  dashboard = undefined; roadmapItems = []; feedbackEntries = []; chatHistory.length = 0;
+  selectedFeedback.clear(); selectedRoadmap.clear(); openedFeedback.clear(); openedConversations.clear(); feedbackDrafts.clear();
+  document.querySelectorAll('dialog[open]').forEach((dialog) => dialog.close());
+  for (const id of ['#feedback-list', '#game-list', '#roadmap-list', '#job-list', '#activity-list', '#proposal-list', '#chat-transcript', '#global-search-results']) document.querySelector(id)?.replaceChildren();
+  document.querySelectorAll('dialog textarea, dialog input:not([type=checkbox]), #chat-input').forEach((input) => { input.value = ''; });
+  document.dispatchEvent(new Event('octo:signout'));
   dashboardError.hidden = true;
   setDrawerOpen(false);
   dashboardView.hidden = true;
@@ -286,13 +341,20 @@ function safeStorageSet(key, value) {
 }
 
 function syncSidebarMode() {
-  const savedCollapse = safeStorageGet('octo-admin.sidebar-collapsed');
-  const collapsed = window.innerWidth > 760 && (savedCollapse === null ? window.innerWidth <= 1399 : savedCollapse === 'true');
-  dashboardView.classList.toggle('sidebar-collapsed', collapsed);
+  dashboardView.classList.remove('sidebar-collapsed');
+  const collapsed = safeStorageGet('octo-admin.groups-collapsed') === 'true';
+  document.querySelectorAll('#admin-sidebar .nav-group').forEach((group) => { group.open = !collapsed; });
+  document.querySelector('#sidebar-collapse').setAttribute('aria-expanded', String(!collapsed));
+  document.querySelector('.collapse-label').textContent = collapsed ? 'Expand groups' : 'Collapse groups';
+  if (window.innerWidth > 760) setDrawerOpen(false);
+  else document.querySelector('#admin-sidebar').inert = !dashboardView.classList.contains('drawer-open');
 }
 
 function setDrawerOpen(open) {
   dashboardView.classList.toggle('drawer-open', open);
+  document.querySelector('#admin-sidebar').inert = window.innerWidth <= 760 && !open;
+  document.querySelector('.admin-main').inert = window.innerWidth <= 760 && open;
+  if (open) document.querySelector('#admin-sidebar button')?.focus();
   const toggle = document.querySelector('#sidebar-drawer-toggle');
   if (toggle) {
     toggle.setAttribute('aria-expanded', String(open));
@@ -313,8 +375,10 @@ function setAdminView(name, focusTarget = '') {
   document.querySelector('#admin-view-title').textContent = meta.title;
   document.querySelector('#admin-view-description').textContent = meta.description;
   document.title = `${meta.title} | Octo Industries`;
+  document.dispatchEvent(new CustomEvent('octo:view', { detail: view }));
   setDrawerOpen(false);
   if (focusTarget) window.setTimeout(() => document.querySelector(focusTarget)?.focus({ preventScroll: true }), 40);
+  else document.querySelector('#admin-views').focus({ preventScroll: true });
 }
 
 function formatDate(value) {
@@ -455,8 +519,9 @@ function routeMapHasId(id) {
 }
 
 function searchAdmin(query) {
-  if (!query) return [];
   const normalized = query.toLocaleLowerCase();
+  const commands = Object.entries(adminViews).map(([type, meta]) => ({ type, id: '', title: meta.title, detail: 'Navigate to section' })).filter((item) => item.title.toLocaleLowerCase().includes(normalized));
+  if (!query) return commands;
   const gameResults = (dashboard?.games || []).filter((game) => [game.title, game.category, game.description, ...(game.tags || [])]
     .join(' ').toLocaleLowerCase().includes(normalized))
     .map((game) => ({ type: 'games', id: game.id, title: game.title, detail: `Game · ${game.category}` }));
@@ -469,21 +534,23 @@ function searchAdmin(query) {
   const jobResults = (dashboard?.jobs || []).filter((job) => [job.type, job.gameId, job.status, job.message]
     .join(' ').toLocaleLowerCase().includes(normalized))
     .map((job) => ({ type: 'operations', id: job.id, title: job.message, detail: `Job · ${job.status}` }));
-  return [...gameResults, ...feedbackResults, ...roadmapResults, ...jobResults].slice(0, 8);
+  return [...commands, ...gameResults, ...feedbackResults, ...roadmapResults, ...jobResults].slice(0, 24);
 }
 
 function renderGlobalSearch() {
   const input = document.querySelector('#global-admin-search');
   const results = document.querySelector('#global-search-results');
   const matches = searchAdmin(input.value.trim());
-  results.innerHTML = matches.length ? matches.map((item) => `<button class="global-search-result" type="button" role="option" data-search-view="${item.type}" data-search-id="${escapeHtml(item.id)}" data-search-title="${escapeHtml(item.title)}">
+  results.innerHTML = matches.length ? matches.map((item, index) => `<button id="search-option-${index}" aria-selected="false" class="global-search-result" type="button" role="option" data-search-view="${item.type}" data-search-id="${escapeHtml(item.id)}" data-search-title="${escapeHtml(item.title)}">
     <span>${escapeHtml(item.title)}</span><small>${escapeHtml(item.detail)}</small>
   </button>`).join('') : input.value.trim() ? '<p class="global-search-empty">No matching games, feedback, roadmap items, or jobs.</p>' : '';
   results.hidden = !matches.length && !input.value.trim();
   input.setAttribute('aria-expanded', String(!results.hidden));
+  input.removeAttribute('aria-activedescendant');
 }
 
 function renderGames() {
+  if (!dashboard) return;
   const container = document.querySelector('#game-list');
   const query = document.querySelector('#game-filter').value.trim().toLocaleLowerCase();
   const status = document.querySelector('#status-filter').value;
@@ -523,6 +590,7 @@ function renderGames() {
 }
 
 function renderJobs() {
+  if (!dashboard) return;
   const container = document.querySelector('#job-list');
   const query = document.querySelector('#job-search').value.trim().toLocaleLowerCase();
   const jobs = [...dashboard.jobs].filter((job) => [job.type, job.gameId, job.status, job.message].join(' ').toLocaleLowerCase().includes(query));
@@ -644,6 +712,10 @@ function bahrainDateKey(value) {
 }
 
 function renderFeedback() {
+  for (const control of document.querySelectorAll('#feedback-list textarea')) {
+    const id = control.dataset.feedbackNotes || control.closest('[data-admin-reply]')?.dataset.adminReply;
+    if (id) feedbackDrafts.set((control.dataset.feedbackNotes ? 'notes:' : 'reply:') + id, control.value);
+  }
   if (feedbackLoadError) {
     const container = document.querySelector('#feedback-list');
     container.replaceChildren();
@@ -680,10 +752,8 @@ function renderFeedback() {
   const activeTickets = feedbackEntries.filter((entry) => !entry.archived);
   const totalTickets = feedbackEntries.length;
   const metrics = [
-    ...Object.entries(feedbackStatusLabels).map(([key, label]) => ({
-      key, label, count: activeTickets.filter((entry) => entry.status === key).length,
-    })),
-    { key: 'archived', label: 'Archived', count: feedbackEntries.filter((entry) => entry.archived).length },
+    { key: 'total', label: 'Total tickets', count: totalTickets },
+    { key: 'new', label: 'New', count: activeTickets.filter((entry) => entry.status === 'new').length },
     { key: 'critical', label: 'Critical', count: activeTickets.filter((entry) => entry.priority === 'critical').length },
     { key: 'created-recently', label: 'Created in 30 days', count: feedbackEntries.filter((entry) => {
       const createdAt = Date.parse(entry.createdAt);
@@ -693,9 +763,6 @@ function renderFeedback() {
   document.querySelector('#ticket-analytics-metrics').innerHTML = metrics.map((metric) => `
     <article class="ticket-stat-card" data-stat="${metric.key}" aria-label="${escapeHtml(metric.label)}: ${metric.count}">
       <span>${escapeHtml(metric.label)}</span><strong>${metric.count}</strong>
-      <i role="meter" aria-valuemin="0" aria-valuemax="${Math.max(1, totalTickets)}" aria-valuenow="${metric.count}"
-        aria-label="${escapeHtml(metric.label)} share of tickets"
-        style="--ticket-stat-share:${totalTickets ? Math.round(metric.count / totalTickets * 100) : 0}%"></i>
     </article>`).join('');
   const breakdown = [...Object.entries(feedbackStatusLabels).map(([key, label]) => ({
     key, label, count: activeTickets.filter((entry) => entry.status === key).length,
@@ -831,6 +898,12 @@ function renderFeedback() {
   }).join('') : '<p class="muted feedback-empty">No feedback matches these filters.</p>';
   document.querySelector('#feedback-selection-count').textContent = `${selectedFeedback.size} selected`;
   document.querySelector('#feedback-select-all').checked = visibleIds.size > 0 && [...visibleIds].every((id) => selectedFeedback.has(id));
+  for (const control of document.querySelectorAll('#feedback-list textarea')) {
+    const id = control.dataset.feedbackNotes || control.closest('[data-admin-reply]')?.dataset.adminReply;
+    const key = (control.dataset.feedbackNotes ? 'notes:' : 'reply:') + id;
+    if (feedbackDrafts.has(key)) control.value = feedbackDrafts.get(key);
+  }
+
 }
 
 async function updateFeedbackStatus(id, status) {
@@ -894,6 +967,7 @@ function setText(selector, value) {
 }
 
 function showDashboardError(error) {
+  document.dispatchEvent(new Event('octo:data-error'));
   const endpoint = error.endpoint || 'GET /api/admin/dashboard';
   const status = error.displayStatus || (error.status ? `HTTP ${error.status}` : 'Network error');
   if (dashboardErrorMessage) {
@@ -949,6 +1023,7 @@ function refreshDashboard() {
 }
 
 async function refreshDashboardData() {
+  const generation = sessionGeneration;
   if (!dashboard) {
     for (const selector of ['#overview-jobs', '#overview-activity', '#overview-feedback']) {
       const content = document.querySelector(selector);
@@ -959,7 +1034,8 @@ async function refreshDashboardData() {
     api('/api/admin/dashboard'),
     api('/api/admin/feedback'),
   ]);
-  if (dashboardResult.status === 'rejected' && dashboardResult.reason?.status === 401) {
+  if (generation !== sessionGeneration) return;
+  if ((dashboardResult.status === 'rejected' && dashboardResult.reason?.status === 401) || (feedbackResult.status === 'rejected' && feedbackResult.reason?.status === 401)) {
     showLogin('Your admin session expired. Sign in again to continue.');
     return;
   }
@@ -984,24 +1060,9 @@ async function refreshDashboardData() {
     return;
   }
   try {
-    let payload = validateDashboardPayload(dashboardResult.value);
+    const payload = validateDashboardPayload(dashboardResult.value);
     if (!Array.isArray(window.OCTO_GAMES) || !window.OCTO_GAMES.length) {
       throw responseShapeError('/catalog.js', 'the generated game catalog is missing or empty');
-    }
-    const knownIds = new Set(payload.games.map((game) => game.id));
-    const missingGames = window.OCTO_GAMES.filter((game) => !knownIds.has(game.id));
-    if (missingGames.length) {
-      try {
-        const synced = await syncCatalogGames(missingGames);
-        payload = validateDashboardPayload(await api('/api/admin/dashboard'));
-        if (synced.warnings.length) showToast(synced.warnings.join(' '));
-        else if (synced.synced) {
-          showToast(`Catalog sync complete: ${synced.synced} new ${synced.synced === 1 ? 'game' : 'games'} added.`);
-        }
-      } catch (error) {
-        if (error.status === 401) throw error;
-        showToast(`Automatic catalog sync failed: ${error.details || error.message}`);
-      }
     }
     dashboard = payload;
     dashboardError.hidden = true;
@@ -1014,6 +1075,7 @@ async function refreshDashboardData() {
     renderFeedback();
     renderRoadmap();
     renderOverview();
+    document.dispatchEvent(new Event('octo:snapshot'));
   } catch (error) {
     const failure = error instanceof Error ? error : new Error(String(error));
     dashboard = undefined;
@@ -1030,7 +1092,7 @@ async function refreshDashboardData() {
   if (refreshInterval !== pollEvery) {
     clearInterval(refreshTimer);
     refreshInterval = pollEvery;
-    refreshTimer = setInterval(() => refreshDashboard().catch((error) => showToast(error.message)), pollEvery);
+    refreshTimer = setInterval(() => { if (!document.hidden && !pendingMutations.size && !document.querySelector('dialog[open]') && !document.activeElement?.matches('input,textarea,select')) refreshDashboard().catch((error) => showToast(error.message)); }, pollEvery);
   }
 }
 
@@ -1094,7 +1156,7 @@ document.querySelector('#analyze-form').addEventListener('submit', async (event)
       method: 'POST',
       body: JSON.stringify({ url: document.querySelector('#game-url').value.trim() }),
     });
-    showMessage(message, `Job ${job.id} queued. Watch Recent jobs for progress.`);
+    showMessage(message, `Source scan completed. Review job ${job.id} in the job center.`);
     await refreshDashboard();
   } catch (error) {
     showMessage(message, error.message);
@@ -1143,6 +1205,7 @@ document.querySelector('#chat-form').addEventListener('submit', async (event) =>
       method: 'POST',
       body: JSON.stringify({ messages: chatHistory.slice(-20) }),
     });
+    if (typeof result.answer !== 'string' || !result.answer.trim()) throw new Error('The assistant returned no answer. Your question was not applied as an action.');
     chatHistory.push({ role: 'assistant', content: result.answer });
     if (result.proposal) {
       dashboard.proposals.unshift(result.proposal);
@@ -1186,14 +1249,6 @@ feedbackList.addEventListener('toggle', async (event) => {
     const id = conversation.dataset.ticketConversation;
     if (conversation.open) {
       openedConversations.add(id);
-      const entry = feedbackEntries.find((feedback) => feedback.id === id);
-      if (entry?.status === 'new') {
-        try {
-          await updateFeedbackStatus(id, 'under_review');
-        } catch (error) {
-          showToast(error.message);
-        }
-      }
       await loadFeedbackConversation(id);
     } else {
       openedConversations.delete(id);
@@ -1205,14 +1260,6 @@ feedbackList.addEventListener('toggle', async (event) => {
   const id = details.dataset.feedbackDetails;
   if (details.open) {
     openedFeedback.add(id);
-    const entry = feedbackEntries.find((feedback) => feedback.id === id);
-    if (entry?.status === 'new') {
-      try {
-        await updateFeedbackStatus(id, 'under_review');
-      } catch (error) {
-        showToast(error.message);
-      }
-    }
   } else {
     openedFeedback.delete(id);
   }
@@ -1283,6 +1330,7 @@ feedbackList.addEventListener('click', async (event) => {
     try {
       await api(`/api/admin/feedback/${encodeURIComponent(id)}`, { method: 'DELETE' });
       feedbackEntries = feedbackEntries.filter((entry) => entry.id !== id);
+      showUndo('Ticket deleted; user access revoked.', async () => { await api(`/api/admin/feedback/${encodeURIComponent(id)}/restore`, { method: 'POST', body: '{}' }); await refreshDashboard(); });
       selectedFeedback.delete(id);
       updateMetrics(dashboard.counts, dashboard.games, dashboard.activity);
       renderFeedback();
@@ -1330,6 +1378,8 @@ feedbackList.addEventListener('submit', async (event) => {
     await api(`/api/admin/feedback/${encodeURIComponent(id)}/reply`, {
       method: 'POST', body: JSON.stringify({ message: form.elements.message.value }),
     });
+    form.elements.message.value = '';
+    feedbackDrafts.delete('reply:' + id);
     status.textContent = 'Reply sent. Refreshing conversation…';
     openedConversations.add(id);
     await refreshDashboard();
@@ -1391,68 +1441,28 @@ document.querySelector('#feedback-select-all').addEventListener('change', (event
   if (selectedFeedback.size === 50 && !allVisibleSelected) showToast('Select up to 50 submissions per bulk action.');
   document.querySelector('#feedback-selection-count').textContent = `${selectedFeedback.size} selected`;
 });
-document.querySelector('#feedback-bulk-apply').addEventListener('click', async (event) => {
+async function runFeedbackBulk(action) {
   const ids = [...selectedFeedback];
   const status = document.querySelector('#feedback-bulk-status').value;
-  if (!ids.length || !status) {
-    showToast('Select feedback and choose a status first.');
-    return;
-  }
-  const statusLabel = feedbackStatusLabels[status] || status.replaceAll('_', ' ');
-  if (!window.confirm(`Change the status of ${ids.length} selected ticket${ids.length === 1 ? '' : 's'} to ${statusLabel}?`)) return;
-  const button = event.currentTarget;
-  button.disabled = true;
+  if (!ids.length || (action === 'status' && !status)) { showToast('Select inquiries and choose an action first.'); return; }
+  const description = action === 'status' ? 'Change the status of' : action === 'archive' ? 'Archive' : action === 'restore' ? 'Restore' : 'Delete';
+  if (!window.confirm(description + ' ' + ids.length + ' selected tickets' + (action === 'status' ? ' to ' + feedbackStatusLabels[status] : '') + '?' + (action === 'delete' ? ' User ticket access will be revoked. Records are soft-deleted.' : ''))) return;
+  const controls = [...document.querySelectorAll('.feedback-bulk button, .feedback-bulk select')];
+  controls.forEach((control) => { control.disabled = true; });
   try {
-    const result = await api('/api/admin/feedback/bulk', { method: 'POST', body: JSON.stringify({ ids, status }) });
-    showToast(`Updated ${result.updated} submission${result.updated === 1 ? '' : 's'}.`);
-    if (status === 'new') ids.forEach((id) => openedFeedback.delete(id));
-    selectedFeedback.clear();
+    const body = action === 'status' ? { ids, status } : action === 'delete' ? { ids, deleted: true } : { ids, archived: action === 'archive' };
+    const result = await api('/api/admin/feedback/bulk', { method: 'POST', body: JSON.stringify(body) });
+    const summary = OctoAdminCore.summarizeBulk(result, ids);
+    selectedFeedback.clear(); summary.remaining.forEach((id) => selectedFeedback.add(id));
     document.querySelector('#feedback-select-all').checked = false;
     await refreshDashboard();
-  } catch (error) {
-    showToast(error.message);
-  } finally {
-    button.disabled = false;
-  }
-});
-
-document.querySelector('#feedback-bulk-archive').addEventListener('click', async (event) => {
-  const ids = [...selectedFeedback];
-  if (!ids.length || !window.confirm(`Archive ${ids.length} selected ticket${ids.length === 1 ? '' : 's'}?`)) return;
-  const button = event.currentTarget;
-  button.disabled = true;
-  try {
-    await api('/api/admin/feedback/bulk', {
-      method: 'POST',
-      body: JSON.stringify({ ids, archived: true }),
-    });
-    selectedFeedback.clear();
-    await refreshDashboard();
-  } catch (error) {
-    showToast(error.message);
-  } finally {
-    button.disabled = false;
-  }
-});
-
-document.querySelector('#feedback-bulk-delete').addEventListener('click', async (event) => {
-  const ids = [...selectedFeedback];
-  if (!ids.length || !window.confirm(`Delete ${ids.length} selected ticket${ids.length === 1 ? '' : 's'} and revoke user access?`)) return;
-  const button = event.currentTarget;
-  button.disabled = true;
-  try {
-    await api('/api/admin/feedback/bulk', {
-      method: 'POST',
-      body: JSON.stringify({ ids, deleted: true }),
-    });
-    selectedFeedback.clear();
-    await refreshDashboard();
-  } catch (error) {
-    showToast(error.message);
-  } finally {
-    button.disabled = false;
-  }
-});
+    showToast(summary.updated + ' of ' + ids.length + ' tickets updated.' + (summary.failed ? ' ' + summary.failed + ' could not be confirmed; remaining selections retained.' : '') + (result.warning ? ' ' + result.warning : ''));
+  } catch (error) { showToast(error.message); }
+  finally { controls.forEach((control) => { control.disabled = false; }); }
+}
+for (const [id, action] of [['apply', 'status'], ['archive', 'archive'], ['restore', 'restore'], ['delete', 'delete']]) {
+  document.querySelector('#feedback-bulk-' + id).addEventListener('click', () => runFeedbackBulk(action));
+}
 
 document.querySelector('#roadmap-select-all').addEventListener('change', (event) => {
   const visible = [...document.querySelectorAll('#roadmap-list [data-roadmap-select]')].map((checkbox) => checkbox.dataset.roadmapSelect);
@@ -1507,8 +1517,9 @@ document.querySelector('#roadmap-bulk-apply').addEventListener('click', async (e
   button.disabled = true;
   try {
     const result = await api('/api/admin/roadmap/bulk', { method: 'POST', body: JSON.stringify({ ids, status }) });
-    showToast(`Updated ${result.updated} roadmap item${result.updated === 1 ? '' : 's'}.`);
-    selectedRoadmap.clear();
+    const summary = OctoAdminCore.summarizeBulk(result, ids);
+    showToast(`${summary.updated} of ${ids.length} roadmap items updated.${summary.failed ? ' Unconfirmed selections retained.' : ''}`);
+    selectedRoadmap.clear(); summary.remaining.forEach((id) => selectedRoadmap.add(id));
     document.querySelector('#roadmap-bulk-status').value = '';
     await refreshDashboard();
   } catch (error) {
@@ -1539,7 +1550,8 @@ document.querySelector('#game-list').addEventListener('click', async (event) => 
   button.disabled = true;
   try {
     if (button.dataset.action === 'edit') {
-      document.querySelector('#edit-id').value = game.id;
+      document.querySelector('#edit-form').dataset.version = game.updatedAt || '';
+    document.querySelector('#edit-id').value = game.id;
       document.querySelector('#edit-title').value = game.title || '';
       document.querySelector('#edit-category').value = game.category || '';
       document.querySelector('#edit-tags').value = (game.tags || []).join(', ');
@@ -1709,10 +1721,9 @@ document.querySelector('#sidebar-drawer-toggle').addEventListener('click', () =>
 });
 document.querySelector('#sidebar-scrim').addEventListener('click', () => setDrawerOpen(false));
 document.querySelector('#sidebar-collapse').addEventListener('click', () => {
-  const collapsed = !dashboardView.classList.contains('sidebar-collapsed');
-  dashboardView.classList.toggle('sidebar-collapsed', collapsed);
-  safeStorageSet('octo-admin.sidebar-collapsed', String(collapsed));
-  document.querySelector('#sidebar-collapse').setAttribute('aria-label', collapsed ? 'Expand navigation' : 'Collapse navigation');
+  const collapsed = safeStorageGet('octo-admin.groups-collapsed') !== 'true';
+  safeStorageSet('octo-admin.groups-collapsed', String(collapsed));
+  syncSidebarMode();
 });
 window.addEventListener('resize', () => {
   if (!dashboardView.hidden) syncSidebarMode();
@@ -1722,6 +1733,7 @@ document.querySelector('#job-search').addEventListener('input', renderJobs);
 function openRoadmapEditor(item = null) {
   const form = document.querySelector('#roadmap-form');
   form.reset();
+  form.dataset.version = item?.updatedAt || '';
   document.querySelector('#roadmap-id').value = item?.id || '';
   document.querySelector('#roadmap-title-input').value = item?.title || '';
   document.querySelector('#roadmap-description').value = item?.description || '';
@@ -1824,17 +1836,20 @@ globalSearch.addEventListener('input', renderGlobalSearch);
 globalSearch.addEventListener('keydown', (event) => {
   if (event.key === 'Escape') {
     globalSearch.value = '';
+    document.querySelector('#command-dialog').close();
     renderGlobalSearch();
   } else if (event.key === 'Enter') {
     event.preventDefault();
-    globalSearchResults.querySelector('.global-search-result')?.click();
+    (globalSearchResults.querySelector('[aria-selected="true"]') || globalSearchResults.querySelector('.global-search-result'))?.click();
   }
 });
 globalSearchResults.addEventListener('click', (event) => {
   const result = event.target.closest('[data-search-view]');
   if (!result) return;
   const { searchView: view, searchId: id, searchTitle: title } = result.dataset;
+  document.querySelector('#command-dialog').close();
   setAdminView(view);
+  if (!id) { globalSearch.value = ''; renderGlobalSearch(); return; }
   if (view === 'games') {
     document.querySelector('#game-filter').value = title;
     renderGames();

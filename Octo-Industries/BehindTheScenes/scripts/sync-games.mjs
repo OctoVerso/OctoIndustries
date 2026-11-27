@@ -3,6 +3,7 @@ import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from '
 import { basename, dirname, extname, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ensureGameBranding } from './branding-injection.mjs';
+import { assertNoExternalRuntimeAssets } from './local-runtime-policy.mjs';
 import { assertCatalogPreservesPreviousEntries } from '../hub/registry-integrity.mjs';
 import { normalizeRegistryMetadata } from '../hub/registry-metadata.mjs';
 
@@ -39,6 +40,14 @@ function walk(directory) {
     }
     walk(gameDirectory);
   }
+}
+
+function gameRuntimeFiles(directory) {
+  return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const file = resolve(directory, entry.name);
+    if (entry.isDirectory()) return excludedDirectories.has(entry.name) ? [] : gameRuntimeFiles(file);
+    return entry.isFile() && /\.(?:css|html?)$/i.test(entry.name) ? [file] : [];
+  });
 }
 
 function inferGameMetadata(gameDirectory) {
@@ -241,6 +250,9 @@ const games = gamesToRegister.map(({ gameDirectory, manifest }) => {
   const launch = resolveGameFile(gameDirectory, game.launch);
   if (!launch) throw new Error(`${game.title} has no valid launch file: ${game.launch}`);
   const launchFile = resolve(root, ...launch.split('/').map(decodeURIComponent));
+  for (const runtimeFile of gameRuntimeFiles(gameDirectory)) {
+    assertNoExternalRuntimeAssets(readFileSync(runtimeFile, 'utf8'), relative(root, runtimeFile));
+  }
   if (/\.html?$/i.test(launchFile)) {
     const launchHtml = readFileSync(launchFile, 'utf8');
     const brandedHtml = ensureGameBranding(launchHtml, launchFile, root);
@@ -267,6 +279,9 @@ const games = gamesToRegister.map(({ gameDirectory, manifest }) => {
 
   return {
     ...metadata,
+    version: typeof metadata.version === 'string' && metadata.version.trim()
+      ? metadata.version.trim().slice(0, 120)
+      : '1.0.0',
     ...registryMetadata,
     sourceFile,
     banner,
@@ -288,7 +303,7 @@ assertCatalogPreservesPreviousEntries(previousCatalog, games);
 const gameIds = new Set();
 for (const game of games) {
   if (gameIds.has(game.id)) throw new Error(`Duplicate game id: ${game.id}`);
-  for (const field of ['id', 'title', 'description', 'category', 'launch', 'thumbnail', 'banner', 'sourceFile']) {
+  for (const field of ['id', 'title', 'description', 'category', 'launch', 'thumbnail', 'banner', 'sourceFile', 'version']) {
     if (typeof game[field] !== 'string' || !game[field].trim()) {
       throw new Error(`Registration failed for ${game.title || game.id || 'unknown game'}: ${field} is missing.`);
     }

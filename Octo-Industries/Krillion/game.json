@@ -1,0 +1,22 @@
+{
+  "id": "krillion",
+  "addedAt": "2026-11-25T04:58:18.249Z",
+  "title": "Krillion",
+  "description": "A daily rare-answer trivia and word game. The authorized game package is not yet available locally.",
+  "category": "Puzzle",
+  "tags": ["trivia", "word", "daily", "puzzle", "external"],
+  "acquisitionStatus": "external-only",
+  "runtimeStatus": "external-required",
+  "networkDependency": "required",
+  "saveLevel": 0,
+  "saveStatus": "unsupported",
+  "testStatus": "not-run",
+  "acquisitionEvidence": [
+    "No authorized local gameplay package is available; the launch page intentionally remains unavailable without redirecting.",
+    "The live game API does not provide CORS access for a locally hosted client."
+  ],
+  "sourceUrl": "https://krillion.io/",
+  "launch": "index.html",
+  "bannerSource": "hub-banner-source.png",
+  "bannerFit": "contain"
+}

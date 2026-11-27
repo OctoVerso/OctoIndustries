@@ -108,7 +108,7 @@ export function roadmapFromRow(row, includeInternal) {
 
 export function must({ data, error }, message = 'Database request failed.', exposeReason = false) {
   if (error) {
-    console.error(message, error);
+    console.error(JSON.stringify({ event: 'database_request_failed', code: /^[A-Z0-9_]{1,30}$/.test(error.code || '') ? error.code : 'DATABASE' }));
     const failure = httpError('The database request failed.', 502);
     if (exposeReason) failure.reason = `${message} ${error.message || 'Unknown database error.'}`;
     throw failure;

@@ -132,6 +132,7 @@ window.OCTO_GAMES = Object.freeze([
     "launch": "/Octo-Industries/Baggio-Magical-Kicks/index.html",
     "thumbnail": "/Octo-Industries/Baggio-Magical-Kicks/hub-banner.svg?v=a7825f63136b28ca",
     "accent": "#46a8e6",
+    "version": "1.0.0",
     "acquisitionStatus": "unverified",
     "runtimeStatus": "unverified",
     "networkDependency": "unverified",
@@ -221,6 +222,7 @@ window.OCTO_GAMES = Object.freeze([
     "launch": "/Octo-Industries/Bloons-TD-5/index.html",
     "thumbnail": "/Octo-Industries/Bloons-TD-5/hub-banner.svg?v=a6ab19477b886db1",
     "featured": false,
+    "version": "1.0.0",
     "acquisitionStatus": "unverified",
     "runtimeStatus": "unverified",
     "networkDependency": "unverified",
@@ -231,6 +233,36 @@ window.OCTO_GAMES = Object.freeze([
     "sourceFile": "Octo-Industries/Bloons-TD-5/game.json",
     "banner": "/Octo-Industries/Bloons-TD-5/hub-banner.svg?v=a6ab19477b886db1",
     "screenshots": []
+  },
+  {
+    "id": "brotato",
+    "addedAt": "2026-11-25T04:58:18.249Z",
+    "title": "Brotato",
+    "description": "A potato survivor game running from locally hosted Godot assets.",
+    "category": "Action",
+    "tags": [
+      "survival",
+      "roguelike",
+      "action"
+    ],
+    "acquisitionStatus": "local-payload",
+    "runtimeStatus": "local",
+    "networkDependency": "optional",
+    "saveLevel": 0,
+    "saveStatus": "unsupported",
+    "testStatus": "partial",
+    "acquisitionEvidence": [
+      "Godot browser port and game data downloaded from the pinned shayderrr/newports commit.",
+      "The cross-origin-isolation helper is hosted locally with its MIT license."
+    ],
+    "sourceUrl": "https://github.com/shayderrr/newports/tree/49e46a50c1dbf11f78c7c9ee2659218d534ace63",
+    "launch": "/Octo-Industries/Brotato/index.html",
+    "version": "1.0.0",
+    "sourceFile": "Octo-Industries/Brotato/game.json",
+    "banner": "/Octo-Industries/Brotato/hub-banner.svg?v=48d3ed364c0a09f5",
+    "thumbnail": "/Octo-Industries/Brotato/hub-banner.svg?v=48d3ed364c0a09f5",
+    "screenshots": [],
+    "featured": false
   },
   {
     "id": "cookie-clicker",
@@ -563,6 +595,69 @@ window.OCTO_GAMES = Object.freeze([
     "featured": false
   },
   {
+    "id": "iron-snout",
+    "addedAt": "2026-11-25T04:58:18.249Z",
+    "title": "Iron Snout",
+    "description": "Fight waves of wolves as a pig in this locally hosted HTML5 build.",
+    "category": "Action",
+    "tags": [
+      "fighting",
+      "arcade",
+      "punching",
+      "two-player"
+    ],
+    "acquisitionStatus": "local-payload",
+    "runtimeStatus": "local",
+    "networkDependency": "not-required",
+    "saveLevel": 0,
+    "saveStatus": "unsupported",
+    "testStatus": "partial",
+    "acquisitionEvidence": [
+      "MIT-licensed HTML5 game package from https://github.com/lpwm/ironsnout",
+      "LICENSE.third-party.txt records the source package license"
+    ],
+    "sourceUrl": "https://github.com/lpwm/ironsnout",
+    "launch": "/Octo-Industries/Iron-Snout/index.html",
+    "version": "1.0.0",
+    "sourceFile": "Octo-Industries/Iron-Snout/game.json",
+    "banner": "/Octo-Industries/Iron-Snout/hub-banner.svg?v=b75bed40968c953c",
+    "thumbnail": "/Octo-Industries/Iron-Snout/hub-banner.svg?v=b75bed40968c953c",
+    "screenshots": [],
+    "featured": false
+  },
+  {
+    "id": "krillion",
+    "addedAt": "2026-11-25T04:58:18.249Z",
+    "title": "Krillion",
+    "description": "A daily rare-answer trivia and word game. The authorized game package is not yet available locally.",
+    "category": "Puzzle",
+    "tags": [
+      "trivia",
+      "word",
+      "daily",
+      "puzzle",
+      "external"
+    ],
+    "acquisitionStatus": "external-only",
+    "runtimeStatus": "external-required",
+    "networkDependency": "required",
+    "saveLevel": 0,
+    "saveStatus": "unsupported",
+    "testStatus": "not-run",
+    "acquisitionEvidence": [
+      "No authorized local gameplay package is available; the launch page intentionally remains unavailable without redirecting.",
+      "The live game API does not provide CORS access for a locally hosted client."
+    ],
+    "sourceUrl": "https://krillion.io/",
+    "launch": "/Octo-Industries/Krillion/index.html",
+    "version": "1.0.0",
+    "sourceFile": "Octo-Industries/Krillion/game.json",
+    "banner": "/Octo-Industries/Krillion/hub-banner.svg?v=f5e8460496e40edf",
+    "thumbnail": "/Octo-Industries/Krillion/hub-banner.svg?v=f5e8460496e40edf",
+    "screenshots": [],
+    "featured": false
+  },
+  {
     "id": "miragine-war",
     "addedAt": "2026-10-07T12:00:00.000Z",
     "title": "Miragine War",
@@ -729,6 +824,7 @@ window.OCTO_GAMES = Object.freeze([
     "launch": "/Octo-Industries/Ragdoll-Hit/index.html",
     "thumbnail": "/Octo-Industries/Ragdoll-Hit/hub-banner.svg?v=fc17022a3c1c100d",
     "accent": "#4d4d4d",
+    "version": "1.0.0",
     "acquisitionStatus": "unverified",
     "runtimeStatus": "unverified",
     "networkDependency": "unverified",
@@ -848,6 +944,7 @@ window.OCTO_GAMES = Object.freeze([
     "launch": "/Octo-Industries/Subway-Surfers/index.html",
     "thumbnail": "/Octo-Industries/Subway-Surfers/hub-banner.svg?v=ebfd0f32d0347a7b",
     "accent": "#ffb3d0",
+    "version": "1.0.0",
     "acquisitionStatus": "unverified",
     "runtimeStatus": "unverified",
     "networkDependency": "unverified",
@@ -895,24 +992,27 @@ window.OCTO_GAMES = Object.freeze([
     "id": "tiny-fishing",
     "addedAt": "2026-10-06T12:00:00.000Z",
     "title": "Tiny Fishing",
-    "description": "Cast your line, catch fish, and upgrade your gear. The game loads from its live online host.",
+    "description": "Cast your line, catch fish, and upgrade your gear. The game and required assets are hosted locally.",
     "category": "Arcade",
     "tags": [
       "fishing",
       "casual",
       "idle"
     ],
-    "acquisitionStatus": "external-only",
-    "runtimeStatus": "external-required",
-    "networkDependency": "required",
+    "acquisitionStatus": "local-payload",
+    "runtimeStatus": "local",
+    "networkDependency": "not-required",
     "saveLevel": 0,
     "saveStatus": "unsupported",
-    "testStatus": "not-run",
+    "testStatus": "partial",
     "acquisitionEvidence": [
-      "index.html loads a third-party URL"
+      "Local HTML5 game payload captured from the Tiny Fishing game page supplied by the user.",
+      "Poki SDK, ads, and GameAnalytics telemetry are replaced with local no-network compatibility code."
     ],
+    "sourceUrl": "https://poki.com/en/g/tiny-fishing",
     "launch": "/Octo-Industries/Tiny-Fishing/index.html",
     "thumbnail": "/Octo-Industries/Tiny-Fishing/hub-banner.svg?v=1b4d0c697e26b6d8",
+    "version": "1.0.0",
     "sourceFile": "Octo-Industries/Tiny-Fishing/game.json",
     "banner": "/Octo-Industries/Tiny-Fishing/hub-banner.svg?v=1b4d0c697e26b6d8",
     "screenshots": [],
@@ -963,15 +1063,14 @@ window.OCTO_GAMES = Object.freeze([
     "thumbnail": "/Octo-Industries/Turball/hub-banner.svg?v=94c9690193a82022",
     "featured": false,
     "offlineReady": false,
-    "acquisitionStatus": "external-only",
-    "runtimeStatus": "external-required",
+    "acquisitionStatus": "local-payload",
+    "runtimeStatus": "local",
     "networkDependency": "required",
     "saveLevel": 0,
     "saveStatus": "unsupported",
     "testStatus": "not-run",
     "acquisitionEvidence": [
-      "README.md",
-      "index.html loads the official third-party service"
+      "Gameplay frontend and assets are served from this repository; api.turball.io is used as the game's backend."
     ],
     "sourceUrl": "https://turball.io/casual",
     "sourceFile": "Octo-Industries/Turball/game.json",
