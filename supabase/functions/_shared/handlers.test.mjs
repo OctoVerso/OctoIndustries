@@ -119,6 +119,7 @@ test('catalog returns only published games without internal fields and with CORS
   const response = await call(catalog, 'catalog', '');
   assert.equal(response.status, 200);
   assert.equal(response.headers.get('access-control-allow-origin'), 'https://octoverso.github.io');
+  assert.equal(response.headers.get('cache-control'), 'no-store');
   const body = await response.json();
   assert.deepEqual(body.map((entry) => entry.id), ['alpha']);
   assert.equal('status' in body[0], false);
@@ -274,6 +275,39 @@ test('admin dashboard, game edits, publishing, jobs, and activity logging use Su
   const listed = await (await call(jobs, 'jobs', '', { token })).json();
   assert.equal(listed.some((job) => job.type === 'standalone'), true);
   assert.ok(db.tables.activity.some((row) => row.message === 'Published BETA'));
+});
+
+test('game publication remains successful when secondary activity logging fails', async () => {
+  db = createDb({ games: [game('alpha')] });
+  const { body: { token } } = await signIn();
+  const database = db;
+  db = new Proxy(database, {
+    get(target, property) {
+      if (property !== 'from') return Reflect.get(target, property);
+      return (table) => {
+        const query = target.from(table);
+        if (table !== 'activity') return query;
+        return new Proxy(query, {
+          get(builder, method) {
+            if (method !== 'insert') return Reflect.get(builder, method);
+            return () => ({
+              then(resolve, reject) {
+                return Promise.resolve({ data: null, error: { message: 'activity table unavailable' } })
+                  .then(resolve, reject);
+              },
+            });
+          },
+        });
+      };
+    },
+  });
+  const response = await call(admin, 'admin', '/games/alpha/publish', {
+    method: 'POST', token, body: { published: false },
+  });
+  assert.equal(response.status, 200);
+  assert.equal((await response.json()).warning, 'The game status was updated, but its activity log could not be updated.');
+  assert.equal(database.tables.games[0].status, 'draft');
+  db = database;
 });
 
 test('admin dashboard does not require the optional acquisition queue migration', async () => {

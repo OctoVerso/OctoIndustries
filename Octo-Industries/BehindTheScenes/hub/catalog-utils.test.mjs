@@ -12,9 +12,9 @@ test('game categories include every unique category from the main registry', () 
   ]), ['Other', 'Puzzle']);
 });
 
-test('public catalog updates generated entries without dropping locally deployed games', () => {
+test('public catalog is limited to published entries while retaining generated metadata', () => {
   const generated = [
-    { id: 'local-only', title: 'Local game', launch: '/local.html' },
+    { id: 'draft-only', title: 'Draft game', launch: '/draft.html' },
     { id: 'shared', title: 'Generated title', launch: '/shared.html' },
   ];
   const publicGames = [
@@ -23,10 +23,10 @@ test('public catalog updates generated entries without dropping locally deployed
   ];
 
   assert.deepEqual(mergeGameCatalog(generated, publicGames), [
-    { id: 'local-only', title: 'Local game', launch: '/local.html' },
     { id: 'shared', title: 'Updated title', launch: '/shared.html' },
     { id: 'remote-only', title: 'Remote game' },
   ]);
+  assert.deepEqual(mergeGameCatalog(generated, []), []);
 });
 
 test('trending ranks recorded plays descending and excludes zero and missing IDs', () => {

@@ -11,10 +11,11 @@ const normalizeGame = (game) => ({
 });
 
 const generatedCatalog = Array.isArray(window.OCTO_GAMES) ? window.OCTO_GAMES : [];
-let games = generatedCatalog.map(normalizeGame);
+let games = [];
+let publicCatalogState = 'loading';
 const hubPersistence = createPersistence({ windowRef: window });
-console.info('[Octo Industries] Generated catalog loaded.', { totalGames: games.length });
-if (!games.length) console.error('[Octo Industries] The generated catalog is missing or empty.');
+console.info('[Octo Industries] Generated catalog metadata loaded.', { totalGames: generatedCatalog.length });
+if (!generatedCatalog.length) console.error('[Octo Industries] The generated catalog is missing or empty.');
 let byId = new Map(games.map((game) => [game.id, game]));
 const grid = document.querySelector('#game-grid');
 const searchInput = document.querySelector('#game-search');
@@ -214,9 +215,15 @@ function renderGameCollection() {
   if (!games.length) {
     grid.hidden = true;
     emptyState.hidden = false;
-    emptyState.querySelector('h3').textContent = 'The collection is offline.';
-    emptyState.querySelector('p').textContent = 'Run npm --prefix Octo-Industries/BehindTheScenes run sync to discover games and build the local catalog.';
-    resultSummary.textContent = 'No game catalog found';
+    emptyState.querySelector('h3').textContent = publicCatalogState === 'loading'
+      ? 'Loading published games…'
+      : publicCatalogState === 'loaded' ? 'No games are currently published.' : 'Public catalog unavailable.';
+    emptyState.querySelector('p').textContent = publicCatalogState === 'loading'
+      ? 'Checking the current public game library.'
+      : publicCatalogState === 'loaded'
+        ? 'Check back later for newly published games.'
+        : 'We could not verify which games are published. Please try again later.';
+    resultSummary.textContent = publicCatalogState === 'loaded' ? 'No published games' : 'Public catalog unavailable';
     return;
   }
 
@@ -1331,7 +1338,6 @@ async function loadPublicCatalog() {
   if (!response.ok) throw new Error(`Catalog request failed (${response.status}).`);
   const catalog = await response.json();
   if (!Array.isArray(catalog)) throw new Error('The server returned an invalid game catalog.');
-  if (!catalog.length) throw new Error('The server returned an empty game catalog.');
   const publicIds = new Set(catalog.map((game) => game.id));
   const generatedOnly = generatedCatalog.filter((game) => !publicIds.has(game.id)).map((game) => game.id);
   const mergedCatalog = mergeGameCatalog(generatedCatalog, catalog);
@@ -1341,6 +1347,7 @@ async function loadPublicCatalog() {
     totalGames: mergedCatalog.length,
     gamesMissingFromPublicCatalog: generatedOnly,
   });
+  publicCatalogState = 'loaded';
   games = mergedCatalog.map(normalizeGame);
   byId = new Map(games.map((game) => [game.id, game]));
   featuredGames = games.filter((game) => game.featured);
@@ -1367,4 +1374,14 @@ async function loadRoadmap() {
 
 void loadRoadmap();
 start();
-loadPublicCatalog().catch((error) => console.error('[Octo Industries] Unable to load the public game catalog; keeping the generated catalog.', error));
+loadPublicCatalog().catch((error) => {
+  console.error('[Octo Industries] Unable to load the public game catalog.', error);
+  publicCatalogState = 'error';
+  games = [];
+  byId = new Map();
+  featuredGames = [];
+  slides = [];
+  renderDashboardOverview();
+  renderGameCollection();
+  updateFeedbackGameOptions();
+});

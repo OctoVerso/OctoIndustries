@@ -6,11 +6,8 @@ export function gameCategories(games) {
 }
 
 export function mergeGameCatalog(generatedGames, publicGames) {
-  const gamesById = new Map(generatedGames.map((game) => [game.id, game]));
-  for (const game of publicGames) {
-    gamesById.set(game.id, { ...gamesById.get(game.id), ...game });
-  }
-  return [...gamesById.values()];
+  const generatedById = new Map(generatedGames.map((game) => [game.id, game]));
+  return publicGames.map((game) => ({ ...generatedById.get(game.id), ...game }));
 }
 
 export function normalizePlayCounts(playCounts) {

@@ -4,7 +4,7 @@ const path = '/Octo-Industries/BehindTheScenes/admin/';
 async function setup(page, options = {}) {
   const writes = [], errors = [];
   const now = new Date().toISOString();
-  const games = [{ id: 'alpha', title: 'Alpha', description: 'Test game description', category: 'Action', tags: [], status: 'published', offlineReady: false }];
+  const games = options.games || [{ id: 'alpha', title: 'Alpha', description: 'Test game description', category: 'Action', tags: [], status: 'published', offlineReady: false, createdAt: now, updatedAt: now }];
   const tickets = [{ id: 'a'.repeat(32), ticketNumber: 42, type: 'issue', gameId: 'alpha', message: '<img src=x onerror=alert(1)> Test inquiry', status: 'new', priority: 'critical', createdAt: now, updatedAt: now, archived: false, userAccessEnabled: true, adminNotes: '' }, { id: 'b'.repeat(32), ticketNumber: 43, type: 'suggestion', message: 'Second inquiry', status: 'new', priority: 'medium', createdAt: now, updatedAt: now, archived: false }];
   const roadmap = [{ id: 'feature-a', title: 'Keyboard controls', description: 'Improve controls', status: 'planned', category: 'games', priority: 'normal', internalNotes: '', createdAt: now, updatedAt: now }];
   let expired = false;
@@ -13,7 +13,7 @@ async function setup(page, options = {}) {
   await page.route('**/functions/v1/**', async (route) => {
     const request = route.request(), url = new URL(request.url()), body = request.postData() ? request.postDataJSON() : {};
     const endpoint = url.pathname.replace(/^.*\/functions\/v1/, '');
-    if (request.method() !== 'GET') writes.push({ endpoint, body });
+    if (request.method() !== 'GET') writes.push({ endpoint, body, headers: request.headers() });
     if (expired) return route.fulfill({ status: 401, json: { error: 'Session expired.' } });
     if (endpoint === '/admin/session') return route.fulfill({ json: { authenticated: true, expiresAt: '2027-01-01' } });
     if (endpoint === '/admin/dashboard') {
@@ -33,7 +33,12 @@ async function setup(page, options = {}) {
     if (endpoint.startsWith('/admin/games/')) {
       if (endpoint.endsWith('/publish')) games[0].status = body.published ? 'published' : 'draft';
       else Object.assign(games[0], body);
-      return route.fulfill({ json: games[0] });
+      return route.fulfill({ json: {
+        ...games[0],
+        ...(options.publicationWarning && endpoint.endsWith('/publish')
+          ? { warning: 'The game status was updated, but its activity log could not be updated.' }
+          : {}),
+      } });
     }
     if (endpoint.startsWith('/roadmap')) {
       if (request.method() === 'DELETE') roadmap.splice(0,1);
@@ -46,7 +51,7 @@ async function setup(page, options = {}) {
   });
   await page.goto(path);
   await expect(page.locator('#dashboard-view')).toBeVisible();
-  if (!options.malformed && !options.unavailable) await expect(page.locator('#metric-total')).toHaveText('1');
+  if (!options.malformed && !options.unavailable) await expect(page.locator('#metric-total')).toHaveText(String(games.length));
   return { writes, errors, expire: () => { expired = true; } };
 }
 async function navigate(page, view) {
@@ -119,16 +124,34 @@ test('partial bulk changes preserve failed selections and identify unconfirmed r
   expect(state.writes.filter((write) => write.endpoint.endsWith('/bulk'))).toHaveLength(1);
 });
 test('game editing, publication and roadmap editing use existing APIs', async ({ page }) => {
-  const state = await setup(page); await navigate(page, 'games');
+  const state = await setup(page, { publicationWarning: true }); await navigate(page, 'games');
   await page.locator('[data-action="edit"]').click(); await page.locator('#edit-title').fill('Updated Alpha');
   await page.locator('#edit-form button[type="submit"]').click(); await expect(page.locator('#game-list')).toContainText('Updated Alpha');
   page.on('dialog', (dialog) => dialog.accept()); await page.locator('[data-action="publish"]').click();
   await expect(page.locator('.game-status')).toHaveText('draft');
+  await expect(page.locator('#toast')).toContainText('activity log could not be updated');
+  await page.locator('[data-action="publish"]').click();
+  await expect(page.locator('.game-status')).toHaveText('published');
+  await expect(page.locator('#toast')).toContainText('activity log could not be updated');
+  const publicationRequests = state.writes.filter((write) => write.endpoint.endsWith('/publish'));
+  expect(publicationRequests.map((write) => write.body.published)).toEqual([false, true]);
+  expect(publicationRequests.every((write) => !write.headers['x-record-version'])).toBe(true);
   await navigate(page, 'roadmap'); await page.locator('[data-roadmap-action="edit"]').click();
   await page.locator('#roadmap-title-input').fill('Accessible controls'); await page.locator('#roadmap-save').click();
   await expect(page.locator('#roadmap-list')).toContainText('Accessible controls');
   await page.locator('[data-roadmap-action="archive"]').click(); await expect(page.locator('.roadmap-table .roadmap-status')).toHaveText('Archived');
   expect(state.errors).toEqual([]);
+});
+test('game library sorts by date added, newest first', async ({ page }) => {
+  await setup(page, {
+    games: [
+      { id: 'older', title: 'Older game', description: 'Older', category: 'Action', tags: [], status: 'published', createdAt: '2026-01-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z' },
+      { id: 'newer', title: 'Newer game', description: 'Newer', category: 'Action', tags: [], status: 'draft', createdAt: '2026-02-01T00:00:00.000Z', updatedAt: '2026-02-01T00:00:00.000Z' },
+    ],
+  });
+  await navigate(page, 'games');
+  await page.locator('#game-sort').selectOption('date-added');
+  await expect(page.locator('.game-title')).toHaveText(['Newer game', 'Older game']);
 });
 test('AI response is rendered safely and session expiry clears private state', async ({ page }) => {
   const state = await setup(page); await navigate(page, 'ai');

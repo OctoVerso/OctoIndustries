@@ -33,6 +33,35 @@ test('homepage loads with catalog content and no loading placeholders', async ({
   expect(failedRequests).toEqual([]);
 });
 
+test('public hub only renders games returned by the published catalog', async ({ page }) => {
+  const publishedGames = generatedCatalog.slice(0, 2);
+  await page.route('**/functions/v1/catalog', (route) => route.fulfill({ json: publishedGames }));
+  await page.route('**/functions/v1/roadmap', (route) => route.fulfill({ json: [] }));
+
+  await page.goto('/');
+  await expect(page.locator('#game-grid .game-card')).toHaveCount(publishedGames.length);
+  expect(await page.locator('#game-grid .game-card h3').allTextContents())
+    .toEqual(publishedGames.map((game) => game.title));
+});
+
+test('an empty published catalog does not fall back to generated games', async ({ page }) => {
+  await page.route('**/functions/v1/catalog', (route) => route.fulfill({ json: [] }));
+  await page.route('**/functions/v1/roadmap', (route) => route.fulfill({ json: [] }));
+
+  await page.goto('/');
+  await expect(page.locator('#empty-state h3')).toHaveText('No games are currently published.');
+  await expect(page.locator('#game-grid .game-card')).toHaveCount(0);
+});
+
+test('an unavailable public catalog does not expose generated games', async ({ page }) => {
+  await page.route('**/functions/v1/catalog', (route) => route.abort());
+  await page.route('**/functions/v1/roadmap', (route) => route.fulfill({ json: [] }));
+
+  await page.goto('/');
+  await expect(page.locator('#empty-state h3')).toHaveText('Public catalog unavailable.');
+  await expect(page.locator('#game-grid .game-card')).toHaveCount(0);
+});
+
 test('navigation and direct hash routes work', async ({ page }) => {
   await page.goto('/');
   for (const route of ['/games', '/trending', '/recently-added', '/news', '/coming-soon', '/about', '/contact', '/inquiries']) {

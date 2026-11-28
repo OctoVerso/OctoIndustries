@@ -202,7 +202,9 @@ async function requestApi(path, options = {}) {
     const entries = record[1] === 'games' ? dashboard?.games : record[1] === 'feedback' ? feedbackEntries : roadmapItems;
     const current = entries?.find((item) => item.id === decodeURIComponent(record[2]));
     const editorVersion = record[1] === 'games' && method === 'PATCH' ? document.querySelector('#edit-form').dataset.version : record[1] === 'roadmap' && method === 'PATCH' && document.querySelector('#roadmap-dialog').open ? document.querySelector('#roadmap-form').dataset.version : null;
-    if (editorVersion || current?.updatedAt) headers.set('x-record-version', editorVersion || current.updatedAt);
+    if (record[1] !== 'games' || (method === 'PATCH' && !record[3])) {
+      if (editorVersion || current?.updatedAt) headers.set('x-record-version', editorVersion || current.updatedAt);
+    }
   }
   let response;
   const generation = sessionGeneration;
@@ -571,6 +573,7 @@ function renderGames() {
   games.sort((first, second) => {
     if (sorting === 'category') return (first.category || '').localeCompare(second.category || '') || first.title.localeCompare(second.title);
     if (sorting === 'status') return first.status.localeCompare(second.status) || first.title.localeCompare(second.title);
+    if (sorting === 'date-added') return (Date.parse(second.createdAt || '') || 0) - (Date.parse(first.createdAt || '') || 0) || first.title.localeCompare(second.title);
     return first.title.localeCompare(second.title);
   });
   document.querySelector('#library-count').textContent = `${games.length} of ${dashboard.games.length}`;
@@ -1567,11 +1570,11 @@ document.querySelector('#game-list').addEventListener('click', async (event) => 
       const published = button.dataset.published === 'true';
       const action = published ? 'Publish' : 'Unpublish';
       if (!window.confirm(`${action} ${game.title} ${published ? 'to' : 'from'} the public game hub?`)) return;
-      await api(`/api/admin/games/${encodeURIComponent(game.id)}/publish`, {
+      const result = await api(`/api/admin/games/${encodeURIComponent(game.id)}/publish`, {
         method: 'POST',
         body: JSON.stringify({ published }),
       });
-      showToast(`${game.title} ${published ? 'published' : 'unpublished'}.`);
+      if (!result.warning) showToast(`${game.title} ${published ? 'published' : 'unpublished'}.`);
       await refreshDashboard();
     }
   } catch (error) {

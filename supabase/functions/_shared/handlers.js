@@ -89,7 +89,7 @@ async function activityList(db, limit, exposeReason = false) {
 export const catalog = serve('catalog', async ({ db, method }) => {
   if (method !== 'GET') throw httpError('Method not allowed.', 405);
   const rows = must(await db.from('games').select('*').eq('status', 'published').order('title', { ascending: true }));
-  return json(rows.map(publicGame), 200, { 'Cache-Control': 'public, max-age=60' });
+  return json(rows.map(publicGame));
 });
 
 const closedTicketStatuses = ['closed', 'rejected', 'implemented', 'resolved'];
@@ -778,8 +778,14 @@ export const admin = serve('admin', async (context) => {
       if (typeof body.published !== 'boolean') throw httpError('published must be a boolean.', 400);
       const status = body.published ? 'published' : 'draft';
       await updateRecord(db, 'games', id, { status, updated_at: now }, request);
-      await logActivity(db, `${body.published ? 'Published' : 'Unpublished'} ${game.title}`);
-      return json({ ...game, status, updatedAt: now });
+      let warning = '';
+      try {
+        await logActivity(db, `${body.published ? 'Published' : 'Unpublished'} ${game.title}`);
+      } catch {
+        console.warn('Game publication changed, but activity recording failed.');
+        warning = 'The game status was updated, but its activity log could not be updated.';
+      }
+      return json({ ...game, status, updatedAt: now, warning });
     }
     if (action === 'health' && method === 'POST') return json(await healthCheck(context, game), 202);
     if (!action && method === 'PATCH') {
