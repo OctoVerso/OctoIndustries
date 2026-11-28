@@ -30,8 +30,8 @@ jobs:
         run: npm run check && npm run security:scan
       - name: Run full unit and frontend verification
         run: npm run test:all
-      - name: Install Chromium
-        run: npx playwright install --with-deps chromium
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium firefox webkit
       - name: Build static site
         env:
           # Repository variable (Settings > Secrets and variables > Actions > Variables).
