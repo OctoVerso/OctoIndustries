@@ -1356,6 +1356,7 @@ async function loadPublicCatalog() {
   renderDashboardOverview();
   renderGameCollection();
   updateFeedbackGameOptions();
+  applyRoute(currentRoute());
 }
 
 async function loadRoadmap() {
@@ -1384,4 +1385,5 @@ loadPublicCatalog().catch((error) => {
   renderDashboardOverview();
   renderGameCollection();
   updateFeedbackGameOptions();
+  applyRoute(currentRoute());
 });

@@ -6,9 +6,9 @@ const catalog = JSON.parse(source.match(/Object\.freeze\(([\s\S]*)\);\s*$/)[1]);
 const cube = catalog.find((game) => game.id === 'b-cubed');
 
 test.beforeEach(async ({ page }) => {
-  // Exercise the real static hub with a public catalog subset; no live backend writes.
+  // Treat every generated game as published for these static layout tests.
   await page.route('**/functions/v1/**', (route) => route.fulfill({
-    json: route.request().url().endsWith('/catalog') ? catalog.slice(0, 17) : [],
+    json: route.request().url().endsWith('/catalog') ? catalog : [],
   }));
   await page.emulateMedia({ reducedMotion: 'reduce' });
 });
